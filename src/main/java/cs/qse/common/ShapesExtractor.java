@@ -1000,6 +1000,18 @@ public class ShapesExtractor {
         System.out.println("writeModelToFile " + " - " + TimeUnit.MILLISECONDS.toSeconds(watch.getTime()) + " - " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
         return outputPath;
     }
+
+    public Model getModel(String fileIdentifier, RepositoryConnection conn) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String path = Main.outputFilePath;
+        String outputPath = path + Main.datasetName + "_" + fileIdentifier + ".ttl";
+        System.out.println("::: ShapesExtractor ~ WRITING MODEL TO FILE: " + outputPath);
+
+        GraphQuery query = conn.prepareGraphQuery("CONSTRUCT WHERE { ?s ?p ?o .}");
+        Model model = QueryResults.asModel(query.evaluate());
+        return model;
+    }
     
     public void prettyFormatTurtle(String inputFilePath) {
         StopWatch watch = new StopWatch();

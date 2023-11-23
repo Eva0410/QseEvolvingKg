@@ -28,14 +28,19 @@ public class Main {
     public static boolean qseFromSpecificClasses;
     
     public static void main(String[] args) throws Exception {
-        configPath = args[0];
+        //configPath = args[0];
+        configPath = "C:\\Users\\evapu\\Documents\\GitHub\\qse\\config.properties";
         Logger root = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
+
         qseExactExecutionWithMinimumParams();
         
-        //readConfig();
-        //benchmark();
-        //new PrecisionRecallComputer();
+//        readConfig();
+//        //benchmark();
+//        //new PrecisionRecallComputer();
+//        String typeProperty = Constants.RDF_TYPE;
+//        ReservoirSamplingParser reservoirSamplingParser = new ReservoirSamplingParser(datasetPath, numberOfClasses, numberOfInstances, typeProperty, entitySamplingThreshold);
+//        reservoirSamplingParser.run();
     }
     
     
