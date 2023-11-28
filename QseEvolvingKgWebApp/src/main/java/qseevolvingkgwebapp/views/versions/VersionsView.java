@@ -3,10 +3,10 @@ package qseevolvingkgwebapp.views.versions;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -14,21 +14,16 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import qseevolvingkgwebapp.data.Graph;
-import qseevolvingkgwebapp.data.SamplePerson;
 import qseevolvingkgwebapp.data.Version;
 import qseevolvingkgwebapp.services.GraphService;
-import qseevolvingkgwebapp.services.SamplePersonService;
 import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.newversion.NewVersionView;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @PageTitle("Versions")
 @Route(value = "versions", layout = MainLayout.class)
@@ -44,18 +39,16 @@ public class VersionsView extends Composite<VerticalLayout> {
     public VersionsView() {
         HorizontalLayout layoutRow = new HorizontalLayout();
         Select<ComboBoxItem> comboBox = new Select<>();
-        VerticalLayout layoutColumn2 = new VerticalLayout();
         Button buttonPrimary = new Button();
         basicGrid = new Grid(Version.class);
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
-        layoutRow.addClassName(Gap.MEDIUM);
         layoutRow.setWidth("100%");
         layoutRow.setHeight("min-content");
+        layoutRow.setSpacing(true);
+        layoutRow.setAlignItems(FlexComponent.Alignment.BASELINE);
         comboBox.setLabel("Graph");
         comboBox.setWidth("min-content");
-        layoutColumn2.setWidth("100%");
-        layoutColumn2.getStyle().set("flex-grow", "1");
         basicGrid.setWidth("100%");
         basicGrid.getStyle().set("flex-grow", "0");
         basicGrid.setColumns("versionNumber", "name", "createdAt","path");
@@ -68,8 +61,7 @@ public class VersionsView extends Composite<VerticalLayout> {
         getContent().add(layoutRow);
         layoutRow.add(comboBox);
         layoutRow.add(buttonPrimary);
-        getContent().add(layoutColumn2);
-        layoutColumn2.add(basicGrid);
+        getContent().add(basicGrid);
         comboBox.addValueChangeListener(event -> {
             if(event.getValue() != null) {
                 Long selectedValue = event.getValue().graphId;
