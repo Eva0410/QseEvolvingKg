@@ -12,10 +12,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.Graph;
@@ -28,11 +25,10 @@ import qseevolvingkgwebapp.views.MainLayout;
 import java.io.*;
 import java.time.LocalDateTime;
 
-@PageTitle("New Version")
 @Route(value = "new-version", layout = MainLayout.class)
 @Uses(Icon.class)
 
-public class NewVersionView extends Composite<VerticalLayout> implements HasUrlParameter<Long> {
+public class NewVersionView extends Composite<VerticalLayout> implements HasUrlParameter<Long>, AfterNavigationListener {
     @Autowired()
     private GraphService graphService;
 
@@ -40,20 +36,19 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
     private VersionService versionService;
 
     private Long graphId;
+    private String graphName;
 
     public NewVersionView() {
-        VerticalLayout layoutColumn2 = new VerticalLayout();
         TextField textField = new TextField();
         Button buttonPrimary = new Button();
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
-        layoutColumn2.setWidth("100%");
-        layoutColumn2.getStyle().set("flex-grow", "1");
         buttonPrimary.setText("Upload Graph Version");
         buttonPrimary.setWidth("min-content");
         buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         textField.setLabel("Name");
         textField.setWidth("min-content");
+        textField.setHeight("min-content");
         textField.setRequiredIndicatorVisible(true);
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
@@ -78,10 +73,9 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
         buttonPrimary.setTooltipText("This will copy the file to the project directory");
 
         upload.setAcceptedFileTypes(".nt");
-        getContent().add(layoutColumn2);
-        layoutColumn2.add(textField);
-        layoutColumn2.add(upload);
-        layoutColumn2.add(buttonPrimary);
+        getContent().add(textField);
+        getContent().add(upload);
+        getContent().add(buttonPrimary);
     }
 
     private void saveFile(InputStream inputStream, String versionName) throws IOException {
@@ -107,11 +101,16 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
                 outputStream.write(buffer, 0, bytesRead);
             }
         }
-
     }
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, Long aLong) {
         graphId = aLong;
+        graphName = graphService.get(graphId).get().getName();
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
+        getUI().get().getPage().setTitle("New Version for graph " + graphName);
     }
 }

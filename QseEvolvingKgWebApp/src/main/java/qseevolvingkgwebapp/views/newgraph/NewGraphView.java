@@ -37,21 +37,17 @@ public class NewGraphView extends Composite<VerticalLayout> {
     private VersionService versionService;
 
     public NewGraphView() {
-        VerticalLayout layoutColumn2 = new VerticalLayout();
         TextField textField = new TextField();
+        textField.setHeight("min-content");
         Button buttonPrimary = new Button();
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
-        layoutColumn2.setWidth("100%");
-        layoutColumn2.getStyle().set("flex-grow", "1");
         textField.setLabel("Name");
         textField.setWidth("min-content");
         buttonPrimary.setText("Upload Graph");
         buttonPrimary.setWidth("min-content");
         buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        getContent().add(layoutColumn2);
-        layoutColumn2.add(textField);
-        layoutColumn2.add(buttonPrimary);
+        getContent().add(textField);
 
         textField.setRequiredIndicatorVisible(true);
         MemoryBuffer buffer = new MemoryBuffer();
@@ -79,10 +75,8 @@ public class NewGraphView extends Composite<VerticalLayout> {
         buttonPrimary.setTooltipText("This will copy the file to the project directory");
 
         upload.setAcceptedFileTypes(".nt");
-        getContent().add(layoutColumn2);
-        layoutColumn2.add(textField);
-        layoutColumn2.add(upload);
-        layoutColumn2.add(buttonPrimary);
+        getContent().add(upload);
+        getContent().add(buttonPrimary);
     }
 
     private void saveFile(InputStream inputStream, String fileName, String graphName) throws IOException {
