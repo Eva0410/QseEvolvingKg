@@ -27,8 +27,7 @@ import java.time.LocalDateTime;
 
 @Route(value = "new-version", layout = MainLayout.class)
 @Uses(Icon.class)
-
-public class NewVersionView extends Composite<VerticalLayout> implements HasUrlParameter<Long>, AfterNavigationListener {
+public class NewVersionView extends Composite<VerticalLayout> implements HasUrlParameter<Long>, HasDynamicTitle {
     @Autowired()
     private GraphService graphService;
 
@@ -110,7 +109,7 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
     }
 
     @Override
-    public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
-        getUI().get().getPage().setTitle("New Version for graph " + graphName);
+    public String getPageTitle() {
+        return "New Version for graph " + graphName;
     }
 }

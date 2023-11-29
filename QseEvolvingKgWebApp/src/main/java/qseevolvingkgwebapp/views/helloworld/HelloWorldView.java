@@ -5,20 +5,22 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import qseevolvingkgwebapp.views.MainLayout;
 
-@PageTitle("Hello World")
+//@PageTitle("Hello World")
 @Route(value = "hello", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
-public class HelloWorldView extends HorizontalLayout {
+public class HelloWorldView extends HorizontalLayout implements HasDynamicTitle {
 
     private TextField name;
     private Button sayHello;
 
     public HelloWorldView() {
+
         name = new TextField("Your name");
         sayHello = new Button("Say hello");
         sayHello.addClickListener(e -> {
@@ -30,6 +32,14 @@ public class HelloWorldView extends HorizontalLayout {
         setVerticalComponentAlignment(Alignment.END, name, sayHello);
 
         add(name, sayHello);
+        addAttachListener(event -> {
+            getUI().get().getPage().setTitle("Hello worldsd");
+        });
+
     }
 
+    @Override
+    public String getPageTitle() {
+        return "Hello World";
+    }
 }
