@@ -27,7 +27,7 @@ public abstract class AbstractEntity {
         this.id = id;
     }
 
-    public int getVersion() {
+    public qseevolvingkgwebapp.data.Version getVersion() {
         return version;
     }
 

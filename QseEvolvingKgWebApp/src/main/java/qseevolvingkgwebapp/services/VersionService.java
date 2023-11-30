@@ -10,6 +10,7 @@ import qseevolvingkgwebapp.data.Version;
 import qseevolvingkgwebapp.data.VersionRepository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,13 +45,17 @@ public class VersionService {
     }
 
     public Page<Version> listByGraphId(Pageable pageable, Long graphId) {
-        var filteredItems = repository.findAll().stream().filter(v -> v.getGraph().getId().equals(graphId)).collect(Collectors.toList());
+        var filteredItems = listByGraphId(graphId);
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), filteredItems.size());
 
         List<Version> paginatedList = filteredItems.subList(start, end);
 
         return new PageImpl<>(paginatedList, pageable, filteredItems.size());
+    }
+
+    public List<Version> listByGraphId(Long graphId) {
+       return repository.findAll().stream().filter(v -> v.getGraph().getId().equals(graphId)).collect(Collectors.toList());
     }
 
     public int count() {
@@ -73,4 +78,7 @@ public class VersionService {
         return latestVersionNumber+1;
     }
 
+    public List<Version> listAll() {
+        return repository.findAll();
+    }
 }

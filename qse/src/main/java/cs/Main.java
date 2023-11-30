@@ -29,7 +29,7 @@ public class Main {
     
     public static void main(String[] args) throws Exception {
         //configPath = args[0];
-        configPath = "C:\\Users\\evapu\\Documents\\GitHub\\qse\\config.properties";
+        configPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\qse\\config.properties";
         Logger root = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
 

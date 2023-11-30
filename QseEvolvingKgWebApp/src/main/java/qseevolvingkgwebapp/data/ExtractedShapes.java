@@ -21,4 +21,13 @@ public class ExtractedShapes extends AbstractEntity{
     @ElementCollection
     @CollectionTable(name = "ExtractedShapesClasses")
     List<String> classes;
+
+    @Override
+    public Version getVersion() {
+        return version;
+    }
+
+    public void setVersion(Version version) {
+        this.version = version;
+    }
 }

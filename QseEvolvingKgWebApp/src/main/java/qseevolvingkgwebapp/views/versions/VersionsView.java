@@ -17,7 +17,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import qseevolvingkgwebapp.data.Version;
+import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
 import qseevolvingkgwebapp.services.GraphService;
+import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.newversion.NewVersionView;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
 @PageTitle("Versions")
 @Route(value = "versions", layout = MainLayout.class)
 @Uses(Icon.class)
-public class VersionsView extends Composite<VerticalLayout> implements AfterNavigationListener {
+public class VersionsView extends Composite<VerticalLayout>  {
     @Autowired()
     private VersionService versionService;
     @Autowired()
@@ -56,7 +58,7 @@ public class VersionsView extends Composite<VerticalLayout> implements AfterNavi
         buttonPrimary.setWidth("min-content");
         buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buttonPrimary.addClickListener(event -> {
-            getUI().ifPresent(ui -> ui.navigate(NewVersionView.class,comboBox.getValue().graphId));
+            getUI().ifPresent(ui -> ui.navigate(NewVersionView.class,comboBox.getValue().id));
         });
         getContent().add(layoutRow);
         layoutRow.add(comboBox);
@@ -64,7 +66,7 @@ public class VersionsView extends Composite<VerticalLayout> implements AfterNavi
         getContent().add(basicGrid);
         comboBox.addValueChangeListener(event -> {
             if(event.getValue() != null) {
-                Long selectedValue = event.getValue().graphId;
+                Long selectedValue = event.getValue().id;
                 fillGrid(basicGrid, selectedValue);
             }
         });
@@ -74,18 +76,9 @@ public class VersionsView extends Composite<VerticalLayout> implements AfterNavi
         });
     }
 
-    @Override
-    public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
-        afterNavigation(afterNavigationEvent);
-        UI.getCurrent().getPage().setTitle("sdf");
-    }
-
-    record ComboBoxItem(Long graphId, String label) {
-    }
-
     private void setComboBoxSampleData(Select<ComboBoxItem> comboBox, Grid grid) {
         List<ComboBoxItem> comboBoxItemList = graphService.listAll().stream()
-                .map(graph -> new ComboBoxItem(graph.getId(), graph.getName()))
+                .map(graph -> new ComboBoxItem(graph.getName(),graph.getId()))
                 .collect(Collectors.toList());
         comboBox.setItems(comboBoxItemList);
         comboBox.setItemLabelGenerator(item -> ((ComboBoxItem)item).label);

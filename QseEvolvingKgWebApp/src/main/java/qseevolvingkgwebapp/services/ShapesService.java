@@ -1,0 +1,58 @@
+package qseevolvingkgwebapp.services;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import qseevolvingkgwebapp.data.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class ShapesService {
+    private final ShapeRepository repository;
+
+    public ShapesService(ShapeRepository repository) {
+        this.repository = repository;
+    }
+
+    public Optional<ExtractedShapes> get(Long id) {
+        return repository.findById(id);
+    }
+
+    public ExtractedShapes update(ExtractedShapes entity) {
+        return repository.save(entity);
+    }
+
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+
+    public Page<ExtractedShapes> list(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    public List<ExtractedShapes> listAll() {
+        return repository.findAll();
+    }
+
+    public Page<ExtractedShapes> list(Pageable pageable, Specification<ExtractedShapes> filter) {
+        return repository.findAll(filter, pageable);
+    }
+
+    public int count() {
+        return (int) repository.count();
+    }
+
+    public ExtractedShapes insert(ExtractedShapes extractedShapes) {
+        ExtractedShapes s = repository.save(extractedShapes);
+        repository.flush();
+        return s;
+    }
+
+    public List<ExtractedShapes> listByVersionId(Long versionId) {
+        return repository.findAll().stream().filter(s -> s.getVersion().getId().equals(versionId)).collect(Collectors.toList());
+    }
+}

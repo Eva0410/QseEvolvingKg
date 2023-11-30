@@ -93,6 +93,13 @@
             <artifactId>jena-arq</artifactId>
             <version>4.8.0</version>
         </dependency>
+        <dependency>
+            <groupId>dk.aau.cs.relweb</groupId>
+            <artifactId>dk.aau.cs.relweb</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/qse-1.0-QSE-all.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
