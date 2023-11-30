@@ -1,6 +1,7 @@
 package qseevolvingkgwebapp.views.versions;
 
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
@@ -10,8 +11,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @PageTitle("Versions")
 @Route(value = "versions", layout = MainLayout.class)
 @Uses(Icon.class)
-public class VersionsView extends Composite<VerticalLayout> {
+public class VersionsView extends Composite<VerticalLayout> implements AfterNavigationListener {
     @Autowired()
     private VersionService versionService;
     @Autowired()
@@ -72,6 +72,12 @@ public class VersionsView extends Composite<VerticalLayout> {
         addAttachListener(event -> {
             setComboBoxSampleData(comboBox, basicGrid);
         });
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
+        afterNavigation(afterNavigationEvent);
+        UI.getCurrent().getPage().setTitle("sdf");
     }
 
     record ComboBoxItem(Long graphId, String label) {

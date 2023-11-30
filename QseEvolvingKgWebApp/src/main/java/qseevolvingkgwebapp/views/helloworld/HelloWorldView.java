@@ -1,17 +1,14 @@
 package qseevolvingkgwebapp.views.helloworld;
 
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.HasDynamicTitle;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
 import qseevolvingkgwebapp.views.MainLayout;
 
-//@PageTitle("Hello World")
 @Route(value = "hello", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 public class HelloWorldView extends HorizontalLayout implements HasDynamicTitle {
@@ -32,9 +29,7 @@ public class HelloWorldView extends HorizontalLayout implements HasDynamicTitle 
         setVerticalComponentAlignment(Alignment.END, name, sayHello);
 
         add(name, sayHello);
-        addAttachListener(event -> {
-            getUI().get().getPage().setTitle("Hello worldsd");
-        });
+        UI.getCurrent().getPage().executeJs("document.title = $0", "Your Dynamic Title");
 
     }
 
@@ -42,4 +37,5 @@ public class HelloWorldView extends HorizontalLayout implements HasDynamicTitle 
     public String getPageTitle() {
         return "Hello World";
     }
+
 }
