@@ -135,7 +135,7 @@ public class Utility {
         Utils.logTime("writeSupportToFile() ", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
     
-    public static Map<Integer, Map<Integer, Set<Integer>>> extractShapesForSpecificClasses(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes, Map<Integer, Integer> classEntityCount, StringEncoder stringEncoder) {
+    public static Map<Integer, Map<Integer, Set<Integer>>> extractShapesForSpecificClassesOld(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes, Map<Integer, Integer> classEntityCount, StringEncoder stringEncoder) {
         Map<Integer, Map<Integer, Set<Integer>>> filteredClassToPropWithObjTypes = new HashMap<>();
         String fileAddress = ConfigManager.getProperty("config_dir_path") + "pruning/classes.txt";
         List<String> classes = FilesUtil.readAllLinesFromFile(fileAddress);
@@ -144,6 +144,23 @@ public class Utility {
             Map<Integer, Set<Integer>> value = classToPropWithObjTypes.get(key);
             if (classEntityCount.containsKey(key))
                 filteredClassToPropWithObjTypes.put(key, value);
+        });
+        return filteredClassToPropWithObjTypes;
+    }
+
+    public static Map<Integer, Map<Integer, Set<Integer>>> extractShapesForSpecificClasses(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes, Map<Integer, Integer> classEntityCount, StringEncoder stringEncoder, List<String> classes) {
+        Map<Integer, Map<Integer, Set<Integer>>> filteredClassToPropWithObjTypes = new HashMap();
+        return processClasses(classToPropWithObjTypes, classEntityCount, stringEncoder, filteredClassToPropWithObjTypes, classes);
+    }
+
+    private static Map<Integer, Map<Integer, Set<Integer>>> processClasses(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes, Map<Integer, Integer> classEntityCount, StringEncoder stringEncoder, Map<Integer, Map<Integer, Set<Integer>>> filteredClassToPropWithObjTypes, List<String> classes) {
+        classes.forEach((classIri) -> {
+            int key = stringEncoder.encode(classIri);
+            Map<Integer, Set<Integer>> value = (Map)classToPropWithObjTypes.get(key);
+            if (classEntityCount.containsKey(key)) {
+                filteredClassToPropWithObjTypes.put(key, value);
+            }
+
         });
         return filteredClassToPropWithObjTypes;
     }

@@ -74,7 +74,7 @@ public class ReservoirSamplingParser extends Parser {
         dynamicNbReservoirSampling();
         entityConstraintsExtraction();
         computeSupportConfidence();
-        extractSHACLShapes(true, Main.qseFromSpecificClasses);
+        extractSHACLShapesOld(true, Main.qseFromSpecificClasses);
         Utility.writeClassFrequencyInFile(classEntityCount, stringEncoder);
     }
     
@@ -200,7 +200,7 @@ public class ReservoirSamplingParser extends Parser {
     }
     
     @Override
-    protected void entityConstraintsExtraction() {
+    public void entityConstraintsExtraction() {
         StopWatch watch = new StopWatch();
         watch.start();
         try {
@@ -303,7 +303,7 @@ public class ReservoirSamplingParser extends Parser {
     }
     
     @Override
-    protected void extractSHACLShapes(Boolean performPruning, Boolean qseFromSpecificClasses) {
+    public void extractSHACLShapesOld(Boolean performPruning, Boolean qseFromSpecificClasses) {
         StopWatch watch = new StopWatch();
         watch.start();
         String methodName = "extractSHACLShapes:cs.qse.filebased.sampling.ReservoirSampling: No Pruning";
@@ -311,7 +311,7 @@ public class ReservoirSamplingParser extends Parser {
         se.setPropWithClassesHavingMaxCountOne(statsComputer.getPropWithClassesHavingMaxCountOne());
         //====================== Enable shapes extraction for specific classes ======================
         if (qseFromSpecificClasses)
-            classToPropWithObjTypes = Utility.extractShapesForSpecificClasses(classToPropWithObjTypes, classEntityCount, stringEncoder);
+            classToPropWithObjTypes = Utility.extractShapesForSpecificClassesOld(classToPropWithObjTypes, classEntityCount, stringEncoder);
         se.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
         se.setPropCount(propCount);
         se.setSampledPropCount(sampledPropCount);

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
 public class ExtractedShapes extends AbstractEntity{
 
     @ManyToOne
@@ -22,8 +23,7 @@ public class ExtractedShapes extends AbstractEntity{
     @CollectionTable(name = "ExtractedShapesClasses")
     List<String> classes;
 
-    @Override
-    public Version getVersion() {
+    public Version getVersionObject() {
         return version;
     }
 

@@ -29,16 +29,18 @@ public class Parser {
     StringEncoder stringEncoder;
     StatsComputer statsComputer;
     String typePredicate;
-    
+    public ShapesExtractor shapesExtractor;
+
+
     // In the following the size of each data structure
     // N = number of distinct nodes in the graph
     // T = number of distinct types
     // P = number of distinct predicates
     
-    Map<Node, EntityData> entityDataHashMap; // Size == N For every entity we save a number of summary information
-    Map<Integer, Integer> classEntityCount; // Size == T
-    Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes; // Size O(T*P*T)
-    Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport; // Size O(T*P*T) For every unique <class,property,objectType> tuples, we save their support and confidence
+    public Map<Node, EntityData> entityDataHashMap; // Size == N For every entity we save a number of summary information
+    public Map<Integer, Integer> classEntityCount; // Size == T
+    public Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes; // Size O(T*P*T)
+    public Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport; // Size O(T*P*T) For every unique <class,property,objectType> tuples, we save their support and confidence
     
     public Parser() {}
     
@@ -63,7 +65,7 @@ public class Parser {
         entityExtraction();
         entityConstraintsExtraction();
         computeSupportConfidence();
-        extractSHACLShapes(true, Main.qseFromSpecificClasses);
+        extractSHACLShapesOld(true, Main.qseFromSpecificClasses);
         //assignCardinalityConstraints();
         Utility.writeClassFrequencyInFile(classEntityCount, stringEncoder);
         System.out.println("STATS: \n\t" + "No. of Classes: " + classEntityCount.size());
@@ -74,7 +76,7 @@ public class Parser {
      * Streaming over RDF (NT Format) triples <s,p,o> line by line to extract set of entity types and frequency of each entity.
      * =================================================================================================================
      */
-    protected void entityExtraction() {
+    public void entityExtraction() {
         System.out.println("invoked::firstPass()");
         StopWatch watch = new StopWatch();
         watch.start();
@@ -111,7 +113,7 @@ public class Parser {
      * =================================================================================================================
      */
     
-    protected void entityConstraintsExtraction() {
+    public void entityConstraintsExtraction() {
         StopWatch watch = new StopWatch();
         watch.start();
         try {
@@ -169,18 +171,18 @@ public class Parser {
      * Extracting shapes in SHACL syntax using various values for support and confidence thresholds
      * =================================================================================================================
      */
-    protected void extractSHACLShapes(Boolean performPruning, Boolean qseFromSpecificClasses) {
+    public void extractSHACLShapesOld(Boolean performPruning, Boolean qseFromSpecificClasses) {
         StopWatch watch = new StopWatch();
         watch.start();
         String methodName = "extractSHACLShapes:No Pruning";
-        ShapesExtractor se = new ShapesExtractor(stringEncoder, shapeTripletSupport, classEntityCount, typePredicate);
-        se.setPropWithClassesHavingMaxCountOne(statsComputer.getPropWithClassesHavingMaxCountOne());
+        shapesExtractor = new ShapesExtractor(stringEncoder, shapeTripletSupport, classEntityCount, typePredicate);
+        shapesExtractor.setPropWithClassesHavingMaxCountOne(statsComputer.getPropWithClassesHavingMaxCountOne());
         
         //====================== Enable shapes extraction for specific classes ======================
         if (qseFromSpecificClasses)
-            classToPropWithObjTypes = Utility.extractShapesForSpecificClasses(classToPropWithObjTypes, classEntityCount, stringEncoder);
-        
-        se.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
+            classToPropWithObjTypes = Utility.extractShapesForSpecificClassesOld(classToPropWithObjTypes, classEntityCount, stringEncoder);
+
+        shapesExtractor.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
         if (performPruning) {
             StopWatch watchForPruning = new StopWatch();
             watchForPruning.start();
@@ -188,7 +190,7 @@ public class Parser {
                 supportRange.forEach(supp -> {
                     StopWatch innerWatch = new StopWatch();
                     innerWatch.start();
-                    se.constructPrunedShapes(classToPropWithObjTypes, conf, supp);
+                    shapesExtractor.constructPrunedShapes(classToPropWithObjTypes, conf, supp);
                     innerWatch.stop();
                     Utils.logTime(conf + "_" + supp + "", TimeUnit.MILLISECONDS.toSeconds(innerWatch.getTime()), TimeUnit.MILLISECONDS.toMinutes(innerWatch.getTime()));
                 });
@@ -202,6 +204,42 @@ public class Parser {
         watch.stop();
         
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+    }
+
+    public String extractSHACLShapes(Boolean qseFromSpecificClasses, List<String> classes) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String methodName = "extractSHACLShapes:No Pruning";
+        this.shapesExtractor = new ShapesExtractor(this.stringEncoder, this.shapeTripletSupport, this.classEntityCount, this.typePredicate);
+        this.shapesExtractor.setPropWithClassesHavingMaxCountOne(this.statsComputer.getPropWithClassesHavingMaxCountOne());
+        if (qseFromSpecificClasses) {
+            this.classToPropWithObjTypes = Utility.extractShapesForSpecificClasses(this.classToPropWithObjTypes, this.classEntityCount, this.stringEncoder, classes);
+        }
+
+        this.shapesExtractor.constructDefaultShapes(this.classToPropWithObjTypes);
+        ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
+        watch.stop();
+        Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+        return this.shapesExtractor.getOutputFileAddress();
+    }
+
+    public String extractSHACLShapesWithPruning(Boolean qseFromSpecificClasses, Double conf, Integer supp, List<String> classes) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String methodName = "extractSHACLShapes:WithPruning";
+        if (qseFromSpecificClasses) {
+            this.classToPropWithObjTypes = Utility.extractShapesForSpecificClasses(this.classToPropWithObjTypes, this.classEntityCount, this.stringEncoder, classes);
+        }
+
+        StopWatch watchForPruning = new StopWatch();
+        watchForPruning.start();
+        this.shapesExtractor.constructPrunedShapes(this.classToPropWithObjTypes, conf, supp);
+        watchForPruning.stop();
+        Utils.logTime("" + conf + "_" + supp + " " + methodName + "-Time.For.Pruning.Only", TimeUnit.MILLISECONDS.toSeconds(watchForPruning.getTime()), TimeUnit.MILLISECONDS.toMinutes(watchForPruning.getTime()));
+        ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
+        watch.stop();
+        Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+        return this.shapesExtractor.getOutputFileAddress();
     }
     
     
@@ -304,5 +342,41 @@ public class Parser {
         });
         watch.stop();
         Utils.logTime("assignCardinalityConstraints", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+    }
+
+    public String getRdfFilePath() {
+        return this.rdfFilePath;
+    }
+
+    public Integer getExpectedNumberOfClasses() {
+        return this.expectedNumberOfClasses;
+    }
+
+    public StringEncoder getStringEncoder() {
+        return this.stringEncoder;
+    }
+
+    public StatsComputer getStatsComputer() {
+        return this.statsComputer;
+    }
+
+    public String getTypePredicate() {
+        return this.typePredicate;
+    }
+
+    public Map<Node, EntityData> getEntityDataHashMap() {
+        return this.entityDataHashMap;
+    }
+
+    public Map<Integer, Integer> getClassEntityCount() {
+        return this.classEntityCount;
+    }
+
+    public Map<Integer, Map<Integer, Set<Integer>>> getClassToPropWithObjTypes() {
+        return this.classToPropWithObjTypes;
+    }
+
+    public Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> getShapeTripletSupport() {
+        return this.shapeTripletSupport;
     }
 }

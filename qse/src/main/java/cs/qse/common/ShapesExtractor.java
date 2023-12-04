@@ -49,6 +49,8 @@ public class ShapesExtractor {
     Map<Integer, Set<Integer>> propWithClassesHavingMaxCountOne;
     ValueFactory factory = SimpleValueFactory.getInstance();
     String logfileAddress = Constants.EXPERIMENTS_RESULT;
+    String outputFileAddress;
+
     Boolean isSamplingOn = false;
     Map<Integer, Integer> propCount;
     Map<Integer, Integer> sampledPropCount;
@@ -60,10 +62,13 @@ public class ShapesExtractor {
      * ============================================= Constructor =======================================================
      */
     
-    public ShapesExtractor() {}
+    public ShapesExtractor() {
+        this.outputFileAddress = "";
+    }
     
     public ShapesExtractor(Encoder encoder, Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport, Map<Integer, Integer> classInstanceCount, String typePredicate) {
         this.encoder = encoder;
+        this.outputFileAddress = "";
         this.builder = new ModelBuilder();
         this.shapeTripletSupport = shapeTripletSupport;
         this.classInstanceCount = classInstanceCount;
@@ -1019,6 +1024,7 @@ public class ShapesExtractor {
         Path path = Paths.get(inputFilePath);
         String fileName = FilenameUtils.removeExtension(path.getFileName().toString()) + "_SHACL.ttl";
         String outputPath = Main.outputFilePath + fileName;
+        this.outputFileAddress = outputPath;
         System.out.println("::: ShapesExtractor ~ PRETTY FORMATTING TURTLE FILE: " + outputPath);
         try {
             new TurtlePrettyFormatter(inputFilePath).format(outputPath);
@@ -1064,5 +1070,9 @@ public class ShapesExtractor {
             flag = Boolean.parseBoolean(ConfigManager.getProperty("annotateSupportConfidence"));
         }
         return flag;
+    }
+
+    public String getOutputFileAddress() {
+        return this.outputFileAddress;
     }
 }

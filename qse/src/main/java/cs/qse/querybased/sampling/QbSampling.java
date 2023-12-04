@@ -267,7 +267,7 @@ public class QbSampling {
         //se.setPropWithClassesHavingMaxCountOne(statsComputer.getPropWithClassesHavingMaxCountOne());
         //====================== Enable shapes extraction for specific classes ======================
         if (qseFromSpecificClasses)
-            classToPropWithObjTypes = Utility.extractShapesForSpecificClasses(classToPropWithObjTypes, classEntityCount, stringEncoder);
+            classToPropWithObjTypes = Utility.extractShapesForSpecificClassesOld(classToPropWithObjTypes, classEntityCount, stringEncoder);
         
         se.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
         if (performPruning) {
