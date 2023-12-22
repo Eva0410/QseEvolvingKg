@@ -26,6 +26,9 @@ public class Main {
     public static boolean extractMaxCardConstraints;
     public static boolean isWikiData;
     public static boolean qseFromSpecificClasses;
+    public static String resourcesPath;
+    public static String configDirPath;
+
     
     public static void main(String[] args) throws Exception {
         //configPath = args[0];
@@ -121,4 +124,20 @@ public class Main {
     private static boolean isActivated(String option) {return Boolean.parseBoolean(ConfigManager.getProperty(option));}
     
     private static String paramVal(String prop) {return ConfigManager.getProperty(prop);}
+
+    public static void setResourcesPathForJar(String path) {
+        resourcesPath = path;
+    }
+
+    public static void setOutputFilePathForJar(String path) {
+        outputFilePath = path;
+    }
+
+    public static void setConfigDirPathForJar(String path) {
+        configDirPath = path;
+    }
+
+    public static void setDataSetNameForJar(String name) {
+        datasetName = name;
+    }
 }

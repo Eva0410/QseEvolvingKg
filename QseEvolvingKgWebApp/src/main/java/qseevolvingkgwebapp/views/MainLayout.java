@@ -19,7 +19,6 @@ import qseevolvingkgwebapp.views.comparisiondetails.ComparisionDetailsView;
 import qseevolvingkgwebapp.views.generateshapes.GenerateShapesView;
 import qseevolvingkgwebapp.views.graphs.GraphsView;
 import qseevolvingkgwebapp.views.gridwithfilters.GridwithFiltersView;
-import qseevolvingkgwebapp.views.helloworld.HelloWorldView;
 import qseevolvingkgwebapp.views.newgraph.NewGraphView;
 import qseevolvingkgwebapp.views.shapes.ShapesView;
 import qseevolvingkgwebapp.views.versions.VersionsView;

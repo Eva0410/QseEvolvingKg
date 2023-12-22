@@ -20,25 +20,29 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import cs.Main;
 import cs.qse.common.encoders.StringEncoder;
 import cs.qse.filebased.Parser;
 
 import java.awt.*;
+import java.io.File;
+import java.security.CodeSource;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import qseevolvingkgwebapp.data.QseType;
-import qseevolvingkgwebapp.data.SamplePerson;
-import qseevolvingkgwebapp.data.Version;
+import qseevolvingkgwebapp.data.*;
 import qseevolvingkgwebapp.services.*;
 import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
 import qseevolvingkgwebapp.views.MainLayout;
@@ -73,6 +77,10 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
     IntegerField support;
 
     HashMap<String, String> defaultShapesModelStats;
+    Graph currentGraph;
+    Version currentVersion;
+    RadioButtonGroup radioGroupQseType;
+
 
 
     public GenerateShapesView() {
@@ -83,7 +91,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         layoutRow.setAlignItems(FlexComponent.Alignment.BASELINE);
         comboBoxGraph = new Select<>();
         comboBoxVersion = new Select<>();
-        RadioButtonGroup radioGroup = new RadioButtonGroup();
+        radioGroupQseType = new RadioButtonGroup();
         classesGrid = new Grid(Type.class,false);
         support = new IntegerField();
         confidence = new NumberField();
@@ -99,13 +107,13 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         comboBoxGraph.setWidth("min-content");
         comboBoxVersion.setLabel("Version");
         comboBoxVersion.setWidth("min-content");
-        radioGroup.setLabel("QSE-Type");
-        radioGroup.setWidth("min-content");
-        radioGroup.setItems(Arrays.stream(QseType.values())
+        radioGroupQseType.setLabel("QSE-Type");
+        radioGroupQseType.setWidth("min-content");
+        radioGroupQseType.setItems(Arrays.stream(QseType.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
-        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        radioGroup.setValue(QseType.EXACT.toString());
+        radioGroupQseType.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        radioGroupQseType.setValue(QseType.EXACT.toString());
         classesGrid.setSelectionMode(Grid.SelectionMode.MULTI);
         classesGrid.setWidth("100%");
         classesGrid.getStyle().set("flex-grow", "0");
@@ -118,13 +126,15 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         confidence.setWidth("min-content");
         confidence.setMin(0);
         confidence.setMax(100);
+        support.setEnabled(false);
+        confidence.setEnabled(false);
         buttonPrimary.setText("Generate");
         buttonPrimary.setWidth("min-content");
         buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         getContent().add(layoutRow);
         layoutRow.add(comboBoxGraph);
         layoutRow.add(comboBoxVersion);
-        getContent().add(radioGroup);
+        getContent().add(radioGroupQseType);
         getContent().add(graphInfo);
         getContent().add(searchField);
         getContent().add(classesGrid);
@@ -135,6 +145,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         comboBoxGraph.addValueChangeListener(event -> {
             if(event.getValue() != null) {
                 Long selectedValue = event.getValue().id;
+                currentGraph = graphService.get(event.getValue().id).get();
                 setComboBoxVersionsData(selectedValue);
             }
         });
@@ -142,6 +153,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             if(event.getValue() != null) {
                 currentVersionId = event.getValue().id;
                 setGridSampleData();
+                currentVersion = versionService.get(event.getValue().id).get();
+                Main.setDataSetNameForJar(currentGraph.getName() + "-" + event.getValue().label.replace(" ",""));
             }
         });
         checkbox.addValueChangeListener(event -> {
@@ -151,8 +164,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             }
             else
             {
-                support.setEnabled(false);
-                confidence.setEnabled(false);
+                support.setEnabled(true);
+                confidence.setEnabled(true);
             }
         });
         buttonPrimary.addClickListener(event -> {
@@ -160,12 +173,14 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         });
         addAttachListener(event -> {
             setComboBoxGraphData();
+            setPaths();
         });
     }
 
     private void generateShapeEntity() {
         if(!checkbox.getValue().booleanValue()) {
             prunedFileAddress = parser.extractSHACLShapesWithPruning(!chosenClasses.isEmpty(), confidence.getValue(), support.getValue(), chosenClasses);
+            System.out.println(prunedFileAddress);
         }
     }
 
@@ -202,6 +217,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
 
         buttonPrimary.addClickListener(buttonClickEvent -> {
             completeFileBasedShapesExtraction();
+            getUI().ifPresent(ui -> ui.navigate("shapes"));
         });
     }
 
@@ -216,6 +232,20 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
 //        //Utils.notifyMessage(graphStatsCheckBox.getValue().toString());
 //        computeStats = graphStatsCheckBox.getValue();
 //        completeShapesExtractionButton.getUI().ifPresent(ui -> ui.navigate("extraction-view"));
+        System.out.println(defaultShapesOutputFileAddress);
+
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setVersion(currentVersion);
+        var classes = new ArrayList<String>();
+        for (var i: classesGrid.getSelectedItems()) {
+            classes.add(((Type)i).className);
+        }
+        extractedShapes.setClasses(classes);
+        extractedShapes.setConfidence(!confidence.isEmpty() ? confidence.getValue() : 0.0);
+        extractedShapes.setSupport(!support.isEmpty() ? support.getValue() : 0);
+        extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
+        extractedShapes.setCreatedAt(LocalDate.now());
+        shapeService.insert(extractedShapes);
     }
 
     private static List<Type> getClasses(Map<Integer, Integer> classEntityCountMap, StringEncoder stringEncoder) {
@@ -264,8 +294,35 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             buttonPrimary.setEnabled(selection.getAllSelectedItems().size() > 0);
         });
         searchField.setVisible(true);
+
+        for (var item: classes) {
+            classesGrid.select(item);
+        }
     }
 
-    @Autowired()
-    private SamplePersonService samplePersonService;
+    private static void setPaths() {
+        try {
+            String jarDir = System.getProperty("user.dir");
+            Main.setOutputFilePathForJar(jarDir + "/Output/");
+            Main.setConfigDirPathForJar(jarDir + "/config/");
+            Main.setResourcesPathForJar(jarDir + "/resources/");
+            Main.qseFromSpecificClasses = false;
+            //Clean output directory
+            File[] filesInOutputDir = new File(jarDir + "/Output/").listFiles();
+            assert filesInOutputDir != null;
+            for (File file : filesInOutputDir) {
+                if (!file.getName().equals(".keep")) {
+                    boolean deleted = file.delete();
+                    if (deleted) {
+                        System.out.println("Deleted already existing file: " + file.getPath());
+                    }
+                }
+                if (file.isDirectory()) {
+                    FileUtils.forceDelete(file);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
