@@ -235,7 +235,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         System.out.println(defaultShapesOutputFileAddress);
 
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setVersion(currentVersion);
+        extractedShapes.setVersionEntity(currentVersion);
         var classes = new ArrayList<String>();
         for (var i: classesGrid.getSelectedItems()) {
             classes.add(((Type)i).className);

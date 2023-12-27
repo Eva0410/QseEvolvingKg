@@ -81,3 +81,33 @@ null,firstPass,0,0,0,0,false,null
 test-1-asdf,secondPhase,0,0,0,0,false,null
 test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
 test-1-asdf,extractSHACLShapes:No Pruning,3,0,3,0,false,null
+test-1-asdf,firstPass,0,0,3,0,false,null
+test-1-asdf,firstPass,0,0,3,0,false,null
+test-1-asdf,firstPass,0,0,3,0,false,null
+test-1-asdf,firstPass,0,0,3,0,false,null
+test-1-asdf,firstPass,0,0,3,0,false,null
+test-1-asdf,firstPass,0,0,3,0,false,null
+test-1-asdf,firstPass,0,0,3,0,false,null
+null,firstPass,1,0,1,0,false,null
+test-1-asdf,firstPass,0,0,1,0,false,null
+test-1-asdf,firstPass,0,0,1,0,false,null
+test-1-asdf,secondPhase,1,0,2,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,2,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,8,0,10,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,1,0,1,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,1,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,3,0,4,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,0,0,0,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,4,0,4,0,false,null
+null,firstPass,1,0,1,0,false,null
+test-1-asdf,secondPhase,1,0,2,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,2,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,5,0,7,0,false,null
+test-1-asdf,firstPass,0,0,7,0,false,null
+test-1-asdf,secondPhase,0,0,7,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,7,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,0,0,7,0,false,null
+test-1-asdf,firstPass,0,0,7,0,false,null

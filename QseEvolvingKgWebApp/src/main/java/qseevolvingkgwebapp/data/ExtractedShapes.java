@@ -9,7 +9,7 @@ import java.util.List;
 public class ExtractedShapes extends AbstractEntity{
 
     @ManyToOne
-    Version version;
+    Version versionEntity;
 
     LocalDate createdAt;
 
@@ -24,15 +24,15 @@ public class ExtractedShapes extends AbstractEntity{
     List<String> classes;
 
     public Version getVersionObject() {
-        return version;
+        return versionEntity;
     }
 
-    public void setVersion(Version version) {
-        this.version = version;
+    public void setVersionEntity(Version versionEntity) {
+        this.versionEntity = versionEntity;
     }
 
     public Version getVersionEntity() {
-        return version;
+        return versionEntity;
     }
 
     public LocalDate getCreatedAt() {
