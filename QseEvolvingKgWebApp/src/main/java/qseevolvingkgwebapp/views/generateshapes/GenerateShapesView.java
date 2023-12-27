@@ -28,6 +28,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cs.Main;
 import cs.qse.common.encoders.StringEncoder;
+import cs.qse.common.structure.NS;
 import cs.qse.filebased.Parser;
 
 import java.awt.*;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import qseevolvingkgwebapp.ShactorUtils.PruningUtil;
 import qseevolvingkgwebapp.data.*;
 import qseevolvingkgwebapp.services.*;
 import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
@@ -122,7 +124,9 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         support.setLabel("Support");
         support.setWidth("min-content");
         support.setMin(0);
-        confidence.setLabel("Confidence");
+        support.setValue(10);
+        confidence.setLabel("Confidence (in %)");
+        confidence.setValue(25.0);
         confidence.setWidth("min-content");
         confidence.setMin(0);
         confidence.setMax(100);
@@ -168,9 +172,11 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
                 confidence.setEnabled(true);
             }
         });
-        buttonPrimary.addClickListener(event -> {
-            generateShapeEntity();
+        buttonPrimary.addClickListener(buttonClickEvent -> {
+            completeFileBasedShapesExtraction();
+            getUI().ifPresent(ui -> ui.navigate("shapes"));
         });
+
         addAttachListener(event -> {
             setComboBoxGraphData();
             setPaths();
@@ -214,25 +220,32 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         String info = "No. of entities: " + formatter.format(parser.entityDataHashMap.size()) + " ; " + "No. of classes: " + formatter.format(parser.classEntityCount.size()) + ". Please select the classes from the table below for which you want to extract shapes.";
         graphInfo.setText(info);
         setupGridInMultiSelectionMode(getClasses(parser.classEntityCount, parser.getStringEncoder()), parser.getStringEncoder(), parser.classEntityCount.size());
-
-        buttonPrimary.addClickListener(buttonClickEvent -> {
-            completeFileBasedShapesExtraction();
-            getUI().ifPresent(ui -> ui.navigate("shapes"));
-        });
     }
 
     private void completeFileBasedShapesExtraction() {
         parser.entityConstraintsExtraction();
         parser.computeSupportConfidence();
 
+        //default shapes must be computed first
         System.out.println(chosenClasses);
-        defaultShapesOutputFileAddress = parser.extractSHACLShapes(chosenClasses.size()>0, chosenClasses);
+        String outputAddress = parser.extractSHACLShapes(chosenClasses.size()>0, chosenClasses);
 
-//        defaultShapesModelStats = parser.shapesExtractor.getCurrentShapesModelStats();
-//        //Utils.notifyMessage(graphStatsCheckBox.getValue().toString());
-//        computeStats = graphStatsCheckBox.getValue();
-//        completeShapesExtractionButton.getUI().ifPresent(ui -> ui.navigate("extraction-view"));
-        System.out.println(defaultShapesOutputFileAddress);
+        if(!checkbox.getValue().booleanValue()) {
+            List<NS> nodeShapes = null;
+            int supportValue = support.getValue();
+            double confidenceValue = confidence.getValue()/100;
+
+            outputAddress = parser.extractSHACLShapesWithPruning(!chosenClasses.isEmpty(), confidenceValue, supportValue, chosenClasses); // extract shapes with pruning
+            System.out.println(prunedFileAddress);
+            nodeShapes = parser.shapesExtractor.getNodeShapes();
+            assert nodeShapes != null;
+            PruningUtil pruningUtil = new PruningUtil();
+            pruningUtil.applyPruningFlags(nodeShapes, supportValue, confidenceValue);
+            pruningUtil.getDefaultStats(nodeShapes);
+            pruningUtil.getStatsBySupport(nodeShapes);
+            pruningUtil.getStatsByConfidence(nodeShapes);
+            pruningUtil.getStatsByBoth(nodeShapes);
+        }
 
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.setVersionEntity(currentVersion);

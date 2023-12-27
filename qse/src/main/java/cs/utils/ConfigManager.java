@@ -1,17 +1,22 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.utils;
 
 import cs.Main;
-
-
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
-/**
- * This class is used to configure the input params provided in the config file
- */
 public class ConfigManager {
+    public ConfigManager() {
+    }
+
     public static String getProperty(String property) {
-        java.util.Properties prop = new java.util.Properties();
+        Properties prop = new Properties();
+
         try {
             if (Main.configPath != null) {
                 FileInputStream configFile = new FileInputStream(Main.configPath);
@@ -20,11 +25,11 @@ public class ConfigManager {
             } else {
                 System.out.println("Config Path is not specified in Main Arg");
             }
+
             return prop.getProperty(property);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException var3) {
+            var3.printStackTrace();
             return null;
         }
     }
-    
 }

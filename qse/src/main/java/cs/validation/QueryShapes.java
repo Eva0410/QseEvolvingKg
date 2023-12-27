@@ -1,21 +1,25 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.validation;
 
 import cs.utils.ConfigManager;
 import cs.utils.FilesUtil;
 import cs.utils.graphdb.GraphDBUtils;
-import org.eclipse.rdf4j.query.BindingSet;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+import org.eclipse.rdf4j.query.BindingSet;
 
 public class QueryShapes {
-    private final GraphDBUtils graphDBUtils;
-    
+    private final GraphDBUtils graphDBUtils = new GraphDBUtils();
+
     public QueryShapes() {
-        this.graphDBUtils = new GraphDBUtils();
-        runQueries();
+        this.runQueries();
     }
-    
+
     public void runQueries() {
         //read classes from file
         String support = "100";
@@ -48,6 +52,4 @@ public class QueryShapes {
 //            i.getAndIncrement();
 //        });
     }
-    
-    
 }

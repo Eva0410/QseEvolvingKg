@@ -1,150 +1,166 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.qse.filebased;
 
 import cs.Main;
 import cs.qse.common.EntityData;
 import cs.utils.Tuple2;
 import cs.utils.Utils;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.NumberFormat;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.time.StopWatch;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 import org.semanticweb.yars.nx.parser.ParseException;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.NumberFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 public class RandomSamplingParser extends Parser {
-    public int randomSamplingThreshold; // Random sampling threshold like 10 means: 10%
-    Map<Integer, Integer> sampledClassEntityCount; // Size == T (number of distinct types) having count of entities sampled randomly based on defined threshold
-    
+    public int randomSamplingThreshold;
+    Map<Integer, Integer> sampledClassEntityCount;
+
     public RandomSamplingParser(String filePath, int expNoOfClasses, int expNoOfInstances, String typePredicate, int entitySamplingThreshold) {
         super(filePath, expNoOfClasses, expNoOfInstances, typePredicate);
-        this.sampledClassEntityCount = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
+        this.sampledClassEntityCount = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
         this.randomSamplingThreshold = entitySamplingThreshold;
     }
-    
+
     public void run() {
-        runParser();
+        this.runParser();
     }
-    
+
     private void runParser() {
-        System.out.println("Entity Sampling Threshold : " + randomSamplingThreshold);
-        entityExtraction();
-        entityConstraintsExtraction();
-        computeSupportConfidence();
-        extractSHACLShapesOld(false, Main.qseFromSpecificClasses);
-        //assignCardinalityConstraints();
+        System.out.println("Entity Sampling Threshold : " + this.randomSamplingThreshold);
+        this.entityExtraction();
+        this.entityConstraintsExtraction();
+        this.computeSupportConfidence();
+        this.extractSHACLShapes(false, Main.qseFromSpecificClasses);
     }
-    
-    @Override
+
     public void entityExtraction() {
         StopWatch watch = new StopWatch();
         watch.start();
-        Random random = new Random(100);
+        Random random = new Random(100L);
+
         try {
-            Files.lines(Path.of(rdfFilePath)).forEach(line -> {
+            Files.lines(Path.of(this.rdfFilePath)).forEach((line) -> {
                 try {
-                    // Get [S,P,O] as Node from triple
-                    Node[] nodes = NxParser.parseNodes(line); // how much time is spent parsing?
-                    if (nodes[1].toString().equals(typePredicate)) { // Check if predicate is rdf:type or equivalent
-                        
-                        int randomNumber = random.nextInt(100); //The nextInt(int n) is used to get a random number between 0 (inclusive) and the number passed in this argument(n), exclusive.
-                        int objID = stringEncoder.encode(nodes[2].getLabel());
-                        //If the generated random number is less than randomSamplingThreshold, then we sample the entity
-                        if (randomNumber < randomSamplingThreshold) {
-                            // Track classes per entity
-                            EntityData entityData = entityDataHashMap.get(nodes[0]);
+                    Node[] nodes = NxParser.parseNodes(line);
+                    if (nodes[1].toString().equals(this.typePredicate)) {
+                        int randomNumber = random.nextInt(100);
+                        int objID = this.stringEncoder.encode(nodes[2].getLabel());
+                        if (randomNumber < this.randomSamplingThreshold) {
+                            EntityData entityData = (EntityData)this.entityDataHashMap.get(nodes[0]);
                             if (entityData == null) {
                                 entityData = new EntityData();
                             }
+
                             entityData.getClassTypes().add(objID);
-                            entityDataHashMap.put(nodes[0], entityData);
-                            sampledClassEntityCount.merge(objID, 1, Integer::sum);
+                            this.entityDataHashMap.put(nodes[0], entityData);
+                            this.sampledClassEntityCount.merge(objID, 1, Integer::sum);
                         }
-                        classEntityCount.merge(objID, 1, Integer::sum);
+
+                        this.classEntityCount.merge(objID, 1, Integer::sum);
                     }
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                } catch (ParseException var7) {
+                    var7.printStackTrace();
                 }
+
             });
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception var5) {
+            var5.printStackTrace();
         }
+
         watch.stop();
         Utils.logTime("firstPass:RandomSampling", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
-        //logging some statistics
-        int sum = classEntityCount.values().stream().reduce(0, Integer::sum);
-        int sumSampled = sampledClassEntityCount.values().stream().reduce(0, Integer::sum);
-        System.out.println("No. of Classes: Total: " + NumberFormat.getInstance().format(classEntityCount.size()));
-        System.out.println("No. of Classes Sampled: " + NumberFormat.getInstance().format(sampledClassEntityCount.size()));
-        System.out.println("Sum of Entities: " + NumberFormat.getInstance().format(sum) + " \n Sum of Sampled Entities : " + NumberFormat.getInstance().format(sumSampled));
+        int sum = (Integer)this.classEntityCount.values().stream().reduce(0, Integer::sum);
+        int sumSampled = (Integer)this.sampledClassEntityCount.values().stream().reduce(0, Integer::sum);
+        System.out.println("No. of Classes: Total: " + NumberFormat.getInstance().format((long)this.classEntityCount.size()));
+        System.out.println("No. of Classes Sampled: " + NumberFormat.getInstance().format((long)this.sampledClassEntityCount.size()));
+        PrintStream var10000 = System.out;
+        String var10001 = NumberFormat.getInstance().format((long)sum);
+        var10000.println("Sum of Entities: " + var10001 + " \n Sum of Sampled Entities : " + NumberFormat.getInstance().format((long)sumSampled));
     }
-    
-    @Override
+
     public void entityConstraintsExtraction() {
         StopWatch watch = new StopWatch();
         watch.start();
+
         try {
-            Files.lines(Path.of(rdfFilePath)).filter(line -> !line.contains(typePredicate)).forEach(line -> {
+            Files.lines(Path.of(this.rdfFilePath)).filter((line) -> {
+                return !line.contains(this.typePredicate);
+            }).forEach((line) -> {
                 try {
-                    //Declaring required sets
-                    Set<Integer> objTypes = new HashSet<>(10);
-                    Set<Tuple2<Integer, Integer>> prop2objTypeTuples = new HashSet<>(10);
-                    
-                    Node[] nodes = NxParser.parseNodes(line); // parsing <s,p,o> of triple from each line as node[0], node[1], and node[2]
+                    Set<Integer> objTypes = new HashSet(10);
+                    Set<Tuple2<Integer, Integer>> prop2objTypeTuples = new HashSet(10);
+                    Node[] nodes = NxParser.parseNodes(line);
                     Node subject = nodes[0];
-                    // if the entity is sampled, we go for it
-                    if (entityDataHashMap.get(subject) != null) {
-                        String objectType = extractObjectType(nodes[2].toString());
-                        int propID = stringEncoder.encode(nodes[1].getLabel());
-                        if (objectType.equals("IRI")) { // object is an instance or entity of some class e.g., :Paris is an instance of :City & :Capital
-                            EntityData currEntityData = entityDataHashMap.get(nodes[2]);
-                            if (currEntityData != null) {
-                                objTypes = currEntityData.getClassTypes();
-                                for (Integer node : objTypes) { // get classes of node2
-                                    prop2objTypeTuples.add(new Tuple2<>(propID, node));
+                    if (this.entityDataHashMap.get(subject) != null) {
+                        String objectType = this.extractObjectType(nodes[2].toString());
+                        int propID = this.stringEncoder.encode(nodes[1].getLabel());
+                        EntityData entityData;
+                        Iterator var9;
+                        Integer entityClass;
+                        if (!objectType.equals("IRI")) {
+                            int objID = this.stringEncoder.encode(objectType);
+                            ((Set)objTypes).add(objID);
+                            Set<Tuple2<Integer, Integer>> prop2objTypeTuplesx = Collections.singleton(new Tuple2(propID, objID));
+                            this.addEntityToPropertyConstraints(prop2objTypeTuplesx, subject);
+                        } else {
+                            entityData = (EntityData)this.entityDataHashMap.get(nodes[2]);
+                            if (entityData != null) {
+                                objTypes = entityData.getClassTypes();
+                                var9 = ((Set)objTypes).iterator();
+
+                                while(var9.hasNext()) {
+                                    entityClass = (Integer)var9.next();
+                                    prop2objTypeTuples.add(new Tuple2(propID, entityClass));
                                 }
-                                addEntityToPropertyConstraints(prop2objTypeTuples, subject);
+
+                                this.addEntityToPropertyConstraints(prop2objTypeTuples, subject);
                             }
-                            /*else { // If we do not have data this is an unlabelled IRI objTypes = Collections.emptySet(); }*/
-                            
-                        } else { // Object is of type literal, e.g., xsd:String, xsd:Integer, etc.
-                            int objID = stringEncoder.encode(objectType);
-                            //objTypes = Collections.singleton(objID); Removed because the set throws an UnsupportedOperationException if modification operation (add) is performed on it later in the loop
-                            objTypes.add(objID);
-                            prop2objTypeTuples = Collections.singleton(new Tuple2<>(propID, objID));
-                            addEntityToPropertyConstraints(prop2objTypeTuples, subject);
                         }
-                        
-                        EntityData entityData = entityDataHashMap.get(subject);
+
+                        entityData = (EntityData)this.entityDataHashMap.get(subject);
+                        Object classObjTypes;
                         if (entityData != null) {
-                            for (Integer entityClass : entityData.getClassTypes()) {
-                                Map<Integer, Set<Integer>> propToObjTypes = classToPropWithObjTypes.get(entityClass);
+                            for(var9 = entityData.getClassTypes().iterator(); var9.hasNext(); ((Set)classObjTypes).addAll((Collection)objTypes)) {
+                                entityClass = (Integer)var9.next();
+                                Map<Integer, Set<Integer>> propToObjTypes = (Map)this.classToPropWithObjTypes.get(entityClass);
                                 if (propToObjTypes == null) {
-                                    propToObjTypes = new HashMap<>();
-                                    classToPropWithObjTypes.put(entityClass, propToObjTypes);
+                                    propToObjTypes = new HashMap();
+                                    this.classToPropWithObjTypes.put(entityClass, propToObjTypes);
                                 }
-                                
-                                Set<Integer> classObjTypes = propToObjTypes.get(propID);
+
+                                classObjTypes = (Set)((Map)propToObjTypes).get(propID);
                                 if (classObjTypes == null) {
-                                    classObjTypes = new HashSet<>();
-                                    propToObjTypes.put(propID, classObjTypes);
+                                    classObjTypes = new HashSet();
+                                    ((Map)propToObjTypes).put(propID, classObjTypes);
                                 }
-                                
-                                classObjTypes.addAll(objTypes);
                             }
                         }
-                    } // if condition ends here
-                    
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                    }
+                } catch (ParseException var13) {
+                    var13.printStackTrace();
                 }
+
             });
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception var3) {
+            var3.printStackTrace();
         }
+
         watch.stop();
         Utils.logTime("secondPass:RandomSampling", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }

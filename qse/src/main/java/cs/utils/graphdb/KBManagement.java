@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.utils.graphdb;
 
 import cs.utils.ConfigManager;
@@ -5,32 +10,37 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
-/**
- * This class is used for the management of the Knowledge Base (GraphDB)
- */
 public class KBManagement {
-    
     private Repository repository;
-    
-    /**
-     * Initialisation of the GraphDB repository
-     */
+
+    public KBManagement() {
+    }
+
     public Repository initGraphDBRepository() {
         try {
             RepositoryManager repositoryManager = new RemoteRepositoryManager(ConfigManager.getProperty("graphdb_url"));
-            repository = repositoryManager.getRepository(ConfigManager.getProperty("graphdb_repository"));
-            repository.init();
-            
-        } catch (Exception e) {
-            e.printStackTrace();
+            this.repository = repositoryManager.getRepository(ConfigManager.getProperty("graphdb_repository"));
+            this.repository.init();
+        } catch (Exception var2) {
+            var2.printStackTrace();
         }
-        return repository;
+
+        return this.repository;
     }
-    
-    /**
-     * Shutdown repository and manager
-     */
+
+    public Repository initGraphDBRepository(String graphdbUrl, String graphdbRepository) {
+        try {
+            RepositoryManager repositoryManager = new RemoteRepositoryManager(graphdbUrl);
+            this.repository = repositoryManager.getRepository(graphdbRepository);
+            this.repository.init();
+        } catch (Exception var4) {
+            var4.printStackTrace();
+        }
+
+        return this.repository;
+    }
+
     public void shutDownGraphDB() {
-        repository.shutDown();
+        this.repository.shutDown();
     }
 }

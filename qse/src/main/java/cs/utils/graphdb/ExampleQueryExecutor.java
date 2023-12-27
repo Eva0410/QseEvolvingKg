@@ -1,34 +1,29 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.utils.graphdb;
 
-import cs.utils.FilesUtil;
-import cs.utils.Utils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.eclipse.rdf4j.model.Literal;
-
+import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.time.StopWatch;
 
 public class ExampleQueryExecutor {
-    private final GraphDBUtils graphDBUtils;
-    String sparqlQuery;
-    
+    private final GraphDBUtils graphDBUtils = new GraphDBUtils();
+    String sparqlQuery = "select * where { \n\t?s ?p ?o .\n} ";
+
     public ExampleQueryExecutor() {
-        this.graphDBUtils = new GraphDBUtils();
-        sparqlQuery = "select * where { \n" +
-                "\t?s ?p ?o .\n" +
-                "} ";
     }
-    
+
     public void runQuery() {
         StopWatch watch = new StopWatch();
         watch.start();
-        //This query will return a table having two columns class: IRI of the class, classCount: number of instances of class
-        System.out.println("About to run query: " + sparqlQuery);
+        System.out.println("About to run query: " + this.sparqlQuery);
         System.out.println("Iterating over results:");
-        //graphDBUtils.streamQuery(sparqlQuery);
-        /*graphDBUtils.runSelectQuery(sparqlQuery).forEach(row -> {
-          //do nothing - just iterate
-        });*/
         watch.stop();
-        System.out.println("Time Elapsed runQuery: " + TimeUnit.MILLISECONDS.toSeconds(watch.getTime()) + " : " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+        PrintStream var10000 = System.out;
+        long var10001 = TimeUnit.MILLISECONDS.toSeconds(watch.getTime());
+        var10000.println("Time Elapsed runQuery: " + var10001 + " : " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
 }

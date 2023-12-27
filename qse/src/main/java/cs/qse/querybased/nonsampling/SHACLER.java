@@ -1,11 +1,20 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.qse.querybased.nonsampling;
 
 import cs.Main;
+import cs.qse.common.encoders.StringEncoder;
 import cs.qse.filebased.SupportConfidence;
-import cs.utils.ConfigManager;
 import cs.utils.Constants;
 import cs.utils.Tuple3;
-import cs.qse.common.encoders.StringEncoder;
+import java.io.FileWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.HashSet;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -20,12 +29,6 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.semanticweb.yars.nx.Node;
 
-import java.io.FileWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-
 public class SHACLER {
     String classIRI;
     HashMap<Node, HashSet<String>> propToType = null;
@@ -35,123 +38,98 @@ public class SHACLER {
     StringEncoder stringEncoder;
     HashMap<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport;
     HashMap<Integer, Integer> classInstanceCount;
-    String logfileAddress = Main.outputFilePath + Main.datasetName + ".csv";
-    
+    String logfileAddress;
+
     public SHACLER() {
+        this.logfileAddress = Main.outputFilePath + Main.datasetName + ".csv";
         this.builder = new ModelBuilder();
-        builder.setNamespace("shape", Constants.SHAPES_NAMESPACE);
+        this.builder.setNamespace("shape", Constants.SHAPES_NAMESPACE);
     }
-    
+
     public SHACLER(StringEncoder stringEncoder, HashMap<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport, HashMap<Integer, Integer> classInstanceCount) {
+        this.logfileAddress = Main.outputFilePath + Main.datasetName + ".csv";
         this.stringEncoder = stringEncoder;
         this.builder = new ModelBuilder();
         this.shapeTripletSupport = shapeTripletSupport;
         this.classInstanceCount = classInstanceCount;
-        builder.setNamespace("shape", Constants.SHAPES_NAMESPACE);
+        this.builder.setNamespace("shape", Constants.SHAPES_NAMESPACE);
     }
-    
+
     public void setParams(Node classNode, HashMap<Node, HashSet<String>> propToType) {
         this.classIRI = classNode.getLabel();
         this.propToType = propToType;
     }
-    
+
     public void setParams(String classLabel, HashMap<Node, HashSet<String>> propToType) {
         this.classIRI = classLabel;
         this.propToType = propToType;
     }
-    
+
     public void constructShape() {
         Model m = null;
         ModelBuilder b = new ModelBuilder();
-        IRI subj = factory.createIRI(this.classIRI);
-        
+        IRI subj = this.factory.createIRI(this.classIRI);
         String nodeShape = "shape:" + subj.getLocalName() + "Shape";
-        b.subject(nodeShape)
-                .add(RDF.TYPE, SHACL.NODE_SHAPE)
-                .add(SHACL.TARGET_CLASS, subj)
-                //.add(SHACL.IGNORED_PROPERTIES, RDF.TYPE)
-                .add(SHACL.CLOSED, false);
-        
-        if (propToType != null) {
-            propToType.forEach((prop, propObjectTypes) -> {
-                IRI property = factory.createIRI(prop.getLabel());
-                IRI propShape = factory.createIRI("sh:" + property.getLocalName() + subj.getLocalName() + "ShapeProperty");
-                b.subject(nodeShape)
-                        .add(SHACL.PROPERTY, propShape);
-                b.subject(propShape)
-                        .add(RDF.TYPE, SHACL.PROPERTY_SHAPE)
-                        .add(SHACL.PATH, property)
-                        .add(SHACL.MIN_COUNT, 1);
-                //.add(SHACL.MAX_COUNT, 1);
-                
-                propObjectTypes.forEach(objectType -> {
+        b.subject(nodeShape).add(RDF.TYPE, SHACL.NODE_SHAPE).add(SHACL.TARGET_CLASS, subj).add(SHACL.CLOSED, false);
+        if (this.propToType != null) {
+            this.propToType.forEach((prop, propObjectTypes) -> {
+                IRI property = this.factory.createIRI(prop.getLabel());
+                ValueFactory var10000 = this.factory;
+                String var10001 = property.getLocalName();
+                IRI propShape = var10000.createIRI("sh:" + var10001 + subj.getLocalName() + "ShapeProperty");
+                b.subject(nodeShape).add(SHACL.PROPERTY, propShape);
+                b.subject(propShape).add(RDF.TYPE, SHACL.PROPERTY_SHAPE).add(SHACL.PATH, property).add(SHACL.MIN_COUNT, 1);
+                propObjectTypes.forEach((objectType) -> {
                     if (objectType != null) {
-                        if (objectType.contains(XSD.NAMESPACE) || objectType.contains(RDF.LANGSTRING.toString())) {
-                            if (objectType.contains("<")) {objectType = objectType.replace("<", "").replace(">", "");}
-                            IRI objectTypeIri = factory.createIRI(objectType);
-                            b.subject(propShape).add(SHACL.DATATYPE, objectTypeIri);
-                        } else {
-                            //objectType = objectType.replace("<", "").replace(">", "");
-                            IRI objectTypeIri = factory.createIRI(objectType);
+                        IRI objectTypeIri;
+                        if (!objectType.contains("http://www.w3.org/2001/XMLSchema#") && !objectType.contains(RDF.LANGSTRING.toString())) {
+                            objectTypeIri = this.factory.createIRI(objectType);
                             b.subject(propShape).add(SHACL.CLASS, objectTypeIri);
                             b.subject(propShape).add(SHACL.NODE_KIND, SHACL.IRI);
+                        } else {
+                            if (objectType.contains("<")) {
+                                objectType = objectType.replace("<", "").replace(">", "");
+                            }
+
+                            objectTypeIri = this.factory.createIRI(objectType);
+                            b.subject(propShape).add(SHACL.DATATYPE, objectTypeIri);
                         }
                     } else {
-                        // in case the type is null, we set it default as string
                         b.subject(propShape).add(SHACL.DATATYPE, XSD.STRING);
                     }
+
                 });
             });
         }
-        
+
         m = b.build();
-        //printModel(m);
-        model = builder.build();
-        model.addAll(m);
+        this.model = this.builder.build();
+        this.model.addAll(m);
     }
-    
+
     public Statement createStatement(IRI s, IRI p, IRI o) {
-        return factory.createStatement(s, p, o);
+        return this.factory.createStatement(s, p, o);
     }
-    
+
     public void printModel() {
-        Rio.write(model, System.out, RDFFormat.TURTLE);
+        Rio.write(this.model, System.out, RDFFormat.TURTLE);
     }
-    
+
     public void writeModelToFile() {
         Path path = Paths.get(Main.datasetPath);
-        String fileName = FilenameUtils.removeExtension(path.getFileName().toString()) + "_" + "SHACL.ttl";
+        String fileName = FilenameUtils.removeExtension(path.getFileName().toString()) + "_SHACL.ttl";
         System.out.println("::: SHACLER ~ WRITING MODEL TO FILE: " + fileName);
+
         try {
             FileWriter fileWriter = new FileWriter(Main.outputFilePath + fileName, false);
-            Rio.write(model, fileWriter, RDFFormat.TURTLE);
-        } catch (Exception e) {
-            e.printStackTrace();
+            Rio.write(this.model, fileWriter, RDFFormat.TURTLE);
+        } catch (Exception var4) {
+            var4.printStackTrace();
         }
+
     }
-    
+
     public void printModel(Model m) {
         Rio.write(m, System.out, RDFFormat.TURTLE);
     }
-    
-/*
-    public void loadModelInRepo() {
-        db.init(); // Create a new Repository
-        try (RepositoryConnection conn = db.getConnection()) {
-            conn.add(model);
-            int count = 0;
-            // let's check that our data is actually in the database
-            try (RepositoryResult<Statement> result = conn.getStatements(null, null, null);) {
-                while (result.hasNext()) {
-                    Statement st = result.next();
-                    System.out.println("db contains: " + st);
-                    count++;
-                }
-            }
-            System.out.println("DB COUNT: " + count);
-            System.out.println("Model COUNT: " + model.size());
-        } finally {
-            db.shutDown();
-        }
-    }*/
 }

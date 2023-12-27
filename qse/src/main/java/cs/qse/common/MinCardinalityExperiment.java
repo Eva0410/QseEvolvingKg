@@ -1,15 +1,32 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
 
 package cs.qse.common;
 
 import cs.Main;
+import cs.qse.common.encoders.StringEncoder;
 import cs.qse.filebased.SupportConfidence;
-import cs.utils.ConfigManager;
 import cs.utils.Constants;
 import cs.utils.FilesUtil;
 import cs.utils.Tuple3;
-import cs.qse.common.encoders.StringEncoder;
+import java.io.FileWriter;
+import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -25,14 +42,6 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
-import java.io.FileWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 public class MinCardinalityExperiment {
     Model model = null;
     ModelBuilder builder = null;
@@ -40,275 +49,314 @@ public class MinCardinalityExperiment {
     Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport;
     Map<Integer, Integer> classInstanceCount;
     ValueFactory factory = SimpleValueFactory.getInstance();
-    String logfileAddress = Constants.EXPERIMENTS_RESULT_MIN_CARD;
-    
+    String logfileAddress;
+
     public MinCardinalityExperiment(StringEncoder stringEncoder, Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport, Map<Integer, Integer> classInstanceCount) {
+        this.logfileAddress = Constants.EXPERIMENTS_RESULT_MIN_CARD;
         this.stringEncoder = stringEncoder;
         this.builder = new ModelBuilder();
         this.shapeTripletSupport = shapeTripletSupport;
         this.classInstanceCount = classInstanceCount;
-        builder.setNamespace("shape", Constants.SHAPES_NAMESPACE);
+        this.builder.setNamespace("shape", Constants.SHAPES_NAMESPACE);
     }
-    
+
     public void constructDefaultShapes(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes) {
         this.model = null;
         this.builder = new ModelBuilder();
-        this.model = builder.build();
-        this.model.addAll(constructShapeWithoutPruning(classToPropWithObjTypes));
+        this.model = this.builder.build();
+        this.model.addAll(this.constructShapeWithoutPruning(classToPropWithObjTypes));
         System.out.println("MODEL:: DEFAULT - SIZE: " + this.model.size());
         HashMap<String, String> currentShapesModelStats = this.computeShapeStatistics(this.model);
-        //System.out.println(currentShapesModelStats);
         StringBuilder header = new StringBuilder("DATASET,Confidence,Support,");
-        StringBuilder log = new StringBuilder(Main.datasetName + ", > " + 1.0 + "%, > " + 1.0 + ",");
-        for (Map.Entry<String, String> entry : currentShapesModelStats.entrySet()) {
-            String v = entry.getValue();
-            log = new StringBuilder(log.append(v) + ",");
-            header = new StringBuilder(header.append(entry.getKey()) + ",");
+        StringBuilder log = new StringBuilder(Main.datasetName + ", > 1.0%, > 1.0,");
+
+        StringBuilder var10002;
+        for(Iterator var5 = currentShapesModelStats.entrySet().iterator(); var5.hasNext(); header = new StringBuilder("" + var10002 + ",")) {
+            Map.Entry<String, String> entry = (Map.Entry)var5.next();
+            String v = (String)entry.getValue();
+            var10002 = log.append(v);
+            log = new StringBuilder("" + var10002 + ",");
+            var10002 = header.append((String)entry.getKey());
         }
-        FilesUtil.writeToFileInAppendMode(header.toString(), logfileAddress);
-        FilesUtil.writeToFileInAppendMode(log.toString(), logfileAddress);
-        //this.writeModelToFile("DEFAULT");
+
+        FilesUtil.writeToFileInAppendMode(header.toString(), this.logfileAddress);
+        FilesUtil.writeToFileInAppendMode(log.toString(), this.logfileAddress);
     }
-    
+
     public void constructPrunedShapes(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes, Double confidence, Integer support) {
         this.model = null;
         this.builder = new ModelBuilder();
-        this.model = builder.build();
-        this.model.addAll(constructShapesWithPruning(classToPropWithObjTypes, confidence, support));
-        System.out.println("MODEL:: CUSTOM - SIZE: " + this.model.size() + " | PARAMS: " + confidence * 100 + " - " + support);
-        
+        this.model = this.builder.build();
+        this.model.addAll(this.constructShapesWithPruning(classToPropWithObjTypes, confidence, support));
+        PrintStream var10000 = System.out;
+        int var10001 = this.model.size();
+        var10000.println("MODEL:: CUSTOM - SIZE: " + var10001 + " | PARAMS: " + confidence * 100.0 + " - " + support);
         HashMap<String, String> currentShapesModelStats = this.computeShapeStatistics(this.model);
-        StringBuilder log = new StringBuilder(Main.datasetName + ", > " + confidence * 100 + "%, > " + support + ",");
-        for (Map.Entry<String, String> entry : currentShapesModelStats.entrySet()) {
-            String v = entry.getValue();
-            log = new StringBuilder(log.append(v) + ",");
+        String var10002 = Main.datasetName;
+        StringBuilder log = new StringBuilder(var10002 + ", > " + confidence * 100.0 + "%, > " + support + ",");
+
+        StringBuilder var9;
+        for(Iterator var6 = currentShapesModelStats.entrySet().iterator(); var6.hasNext(); log = new StringBuilder("" + var9 + ",")) {
+            Map.Entry<String, String> entry = (Map.Entry)var6.next();
+            String v = (String)entry.getValue();
+            var9 = log.append(v);
         }
-        FilesUtil.writeToFileInAppendMode(log.toString(), logfileAddress);
-        //this.writeModelToFile("CUSTOM_" + confidence + "_" + support);
+
+        FilesUtil.writeToFileInAppendMode(log.toString(), this.logfileAddress);
     }
-    
+
     private Model constructShapeWithoutPruning(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes) {
         Model m = null;
         ModelBuilder b = new ModelBuilder();
         classToPropWithObjTypes.forEach((classEncodedLabel, propToObjectType) -> {
-            IRI subj = factory.createIRI(stringEncoder.decode(classEncodedLabel));
-            
+            IRI subj = this.factory.createIRI(this.stringEncoder.decode(classEncodedLabel));
             String nodeShape = "shape:" + subj.getLocalName() + "Shape";
-            b.subject(nodeShape)
-                    .add(RDF.TYPE, SHACL.NODE_SHAPE)
-                    .add(SHACL.TARGET_CLASS, subj)
-                    .add(SHACL.IGNORED_PROPERTIES, RDF.TYPE)
-                    .add(SHACL.CLOSED, false);
-            
+            b.subject(nodeShape).add(RDF.TYPE, SHACL.NODE_SHAPE).add(SHACL.TARGET_CLASS, subj).add(SHACL.IGNORED_PROPERTIES, RDF.TYPE).add(SHACL.CLOSED, false);
             if (propToObjectType != null) {
-                constructNodePropertyShapes(b, subj, nodeShape, propToObjectType);
+                this.constructNodePropertyShapes(b, subj, nodeShape, propToObjectType);
             }
+
         });
         m = b.build();
         return m;
     }
-    
+
     private Model constructShapesWithPruning(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes, Double confidence, Integer support) {
         Model m = null;
         ModelBuilder b = new ModelBuilder();
         classToPropWithObjTypes.forEach((classEncodedLabel, propToObjectType) -> {
-            IRI subj = factory.createIRI(stringEncoder.decode(classEncodedLabel));
-            
+            IRI subj = this.factory.createIRI(this.stringEncoder.decode(classEncodedLabel));
             String nodeShape = "shape:" + subj.getLocalName() + "Shape";
-            b.subject(nodeShape)
-                    .add(RDF.TYPE, SHACL.NODE_SHAPE)
-                    .add(SHACL.TARGET_CLASS, subj)
-                    .add(SHACL.IGNORED_PROPERTIES, RDF.TYPE)
-                    .add(SHACL.CLOSED, false);
-            
+            b.subject(nodeShape).add(RDF.TYPE, SHACL.NODE_SHAPE).add(SHACL.TARGET_CLASS, subj).add(SHACL.IGNORED_PROPERTIES, RDF.TYPE).add(SHACL.CLOSED, false);
             if (propToObjectType != null) {
-                //HashMap<Integer, HashSet<Integer>> propToObjectTypesLocal = performNodeShapePropPruning(classEncodedLabel, propToObjectType, confidence, support);
-                constructNodePropertyShapes(b, subj, nodeShape, propToObjectType, confidence, support);
+                this.constructNodePropertyShapes(b, subj, nodeShape, propToObjectType, confidence, support);
             }
+
         });
         m = b.build();
         return m;
     }
-    
+
     private void constructNodePropertyShapes(ModelBuilder b, IRI subj, String nodeShape, Map<Integer, Set<Integer>> propToObjectTypesLocal) {
         propToObjectTypesLocal.forEach((prop, propObjectTypes) -> {
-            IRI property = factory.createIRI(stringEncoder.decode(prop));
-            IRI propShape = factory.createIRI("sh:" + property.getLocalName() + subj.getLocalName() + "ShapeProperty");
-            b.subject(nodeShape)
-                    .add(SHACL.PROPERTY, propShape);
-            b.subject(propShape)
-                    .add(RDF.TYPE, SHACL.PROPERTY_SHAPE)
-                    .add(SHACL.PATH, property);
-            
-            propObjectTypes.forEach(encodedObjectType -> {
-                Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(stringEncoder.encode(subj.stringValue()), prop, encodedObjectType);
-                if (shapeTripletSupport.containsKey(tuple3)) {
-                    if (shapeTripletSupport.get(tuple3).getSupport().equals(classInstanceCount.get(stringEncoder.encode(subj.stringValue())))) {
-                        b.subject(propShape).add(SHACL.MIN_COUNT, 1);
-                    }
+            IRI property = this.factory.createIRI(this.stringEncoder.decode(prop));
+            ValueFactory var10000 = this.factory;
+            String var10001 = property.getLocalName();
+            IRI propShape = var10000.createIRI("sh:" + var10001 + subj.getLocalName() + "ShapeProperty");
+            b.subject(nodeShape).add(SHACL.PROPERTY, propShape);
+            b.subject(propShape).add(RDF.TYPE, SHACL.PROPERTY_SHAPE).add(SHACL.PATH, property);
+            propObjectTypes.forEach((encodedObjectType) -> {
+                Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3(this.stringEncoder.encode(subj.stringValue()), prop, encodedObjectType);
+                if (this.shapeTripletSupport.containsKey(tuple3) && ((SupportConfidence)this.shapeTripletSupport.get(tuple3)).getSupport().equals(this.classInstanceCount.get(this.stringEncoder.encode(subj.stringValue())))) {
+                    b.subject(propShape).add(SHACL.MIN_COUNT, 1);
                 }
-                String objectType = stringEncoder.decode(encodedObjectType);
+
+                String objectType = this.stringEncoder.decode(encodedObjectType);
                 if (objectType != null) {
-                    if (objectType.contains(XSD.NAMESPACE) || objectType.contains(RDF.LANGSTRING.toString())) {
-                        if (objectType.contains("<")) {objectType = objectType.replace("<", "").replace(">", "");}
-                        IRI objectTypeIri = factory.createIRI(objectType);
-                        b.subject(propShape).add(SHACL.DATATYPE, objectTypeIri);
-                        b.subject(propShape).add(SHACL.NODE_KIND, SHACL.LITERAL);
-                    } else {
-                        //objectType = objectType.replace("<", "").replace(">", "");
-                        IRI objectTypeIri = factory.createIRI(objectType);
+                    IRI objectTypeIri;
+                    if (!objectType.contains("http://www.w3.org/2001/XMLSchema#") && !objectType.contains(RDF.LANGSTRING.toString())) {
+                        objectTypeIri = this.factory.createIRI(objectType);
                         b.subject(propShape).add(SHACL.CLASS, objectTypeIri);
                         b.subject(propShape).add(SHACL.NODE_KIND, SHACL.IRI);
+                    } else {
+                        if (objectType.contains("<")) {
+                            objectType = objectType.replace("<", "").replace(">", "");
+                        }
+
+                        objectTypeIri = this.factory.createIRI(objectType);
+                        b.subject(propShape).add(SHACL.DATATYPE, objectTypeIri);
+                        b.subject(propShape).add(SHACL.NODE_KIND, SHACL.LITERAL);
                     }
                 } else {
-                    // in case the type is null, we set it default as string
                     b.subject(propShape).add(SHACL.DATATYPE, XSD.STRING);
                 }
+
             });
         });
     }
-    
+
     private void constructNodePropertyShapes(ModelBuilder b, IRI subj, String nodeShape, Map<Integer, Set<Integer>> propToObjectTypesLocal, Double confidence, Integer support) {
         propToObjectTypesLocal.forEach((prop, propObjectTypes) -> {
-            IRI property = factory.createIRI(stringEncoder.decode(prop));
-            IRI propShape = factory.createIRI("sh:" + property.getLocalName() + subj.getLocalName() + "ShapeProperty");
-            b.subject(nodeShape)
-                    .add(SHACL.PROPERTY, propShape);
-            b.subject(propShape)
-                    .add(RDF.TYPE, SHACL.PROPERTY_SHAPE)
-                    .add(SHACL.PATH, property);
-            
-            propObjectTypes.forEach(encodedObjectType -> {
-                Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(stringEncoder.encode(subj.stringValue()), prop, encodedObjectType);
-                if (shapeTripletSupport.containsKey(tuple3)) {
-                    if (shapeTripletSupport.get(tuple3).getSupport() > support && shapeTripletSupport.get(tuple3).getConfidence() > confidence) {
-                        b.subject(propShape).add(SHACL.MIN_COUNT, 1);
-                    }
+            IRI property = this.factory.createIRI(this.stringEncoder.decode(prop));
+            ValueFactory var10000 = this.factory;
+            String var10001 = property.getLocalName();
+            IRI propShape = var10000.createIRI("sh:" + var10001 + subj.getLocalName() + "ShapeProperty");
+            b.subject(nodeShape).add(SHACL.PROPERTY, propShape);
+            b.subject(propShape).add(RDF.TYPE, SHACL.PROPERTY_SHAPE).add(SHACL.PATH, property);
+            propObjectTypes.forEach((encodedObjectType) -> {
+                Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3(this.stringEncoder.encode(subj.stringValue()), prop, encodedObjectType);
+                if (this.shapeTripletSupport.containsKey(tuple3) && ((SupportConfidence)this.shapeTripletSupport.get(tuple3)).getSupport() > support && ((SupportConfidence)this.shapeTripletSupport.get(tuple3)).getConfidence() > confidence) {
+                    b.subject(propShape).add(SHACL.MIN_COUNT, 1);
                 }
-                
-                
-                String objectType = stringEncoder.decode(encodedObjectType);
+
+                String objectType = this.stringEncoder.decode(encodedObjectType);
                 if (objectType != null) {
-                    if (objectType.contains(XSD.NAMESPACE) || objectType.contains(RDF.LANGSTRING.toString())) {
-                        if (objectType.contains("<")) {objectType = objectType.replace("<", "").replace(">", "");}
-                        IRI objectTypeIri = factory.createIRI(objectType);
-                        b.subject(propShape).add(SHACL.DATATYPE, objectTypeIri);
-                        b.subject(propShape).add(SHACL.NODE_KIND, SHACL.LITERAL);
-                    } else {
-                        //objectType = objectType.replace("<", "").replace(">", "");
-                        IRI objectTypeIri = factory.createIRI(objectType);
+                    IRI objectTypeIri;
+                    if (!objectType.contains("http://www.w3.org/2001/XMLSchema#") && !objectType.contains(RDF.LANGSTRING.toString())) {
+                        objectTypeIri = this.factory.createIRI(objectType);
                         b.subject(propShape).add(SHACL.CLASS, objectTypeIri);
                         b.subject(propShape).add(SHACL.NODE_KIND, SHACL.IRI);
+                    } else {
+                        if (objectType.contains("<")) {
+                            objectType = objectType.replace("<", "").replace(">", "");
+                        }
+
+                        objectTypeIri = this.factory.createIRI(objectType);
+                        b.subject(propShape).add(SHACL.DATATYPE, objectTypeIri);
+                        b.subject(propShape).add(SHACL.NODE_KIND, SHACL.LITERAL);
                     }
                 } else {
-                    // in case the type is null, we set it default as string
                     b.subject(propShape).add(SHACL.DATATYPE, XSD.STRING);
                 }
+
             });
         });
     }
-    
+
     private HashMap<Integer, HashSet<Integer>> performNodeShapePropPruning(Integer classEncodedLabel, HashMap<Integer, HashSet<Integer>> propToObjectType, Double confidence, Integer support) {
-        HashMap<Integer, HashSet<Integer>> propToObjectTypesLocal = new HashMap<>();
+        HashMap<Integer, HashSet<Integer>> propToObjectTypesLocal = new HashMap();
         propToObjectType.forEach((prop, propObjectTypes) -> {
-            HashSet<Integer> objTypesSet = new HashSet<>();
-            propObjectTypes.forEach(encodedObjectType -> {
-                Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(classEncodedLabel, prop, encodedObjectType);
-                if (shapeTripletSupport.containsKey(tuple3)) {
-                    SupportConfidence sc = shapeTripletSupport.get(tuple3);
+            HashSet<Integer> objTypesSet = new HashSet();
+            propObjectTypes.forEach((encodedObjectType) -> {
+                Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3(classEncodedLabel, prop, encodedObjectType);
+                if (this.shapeTripletSupport.containsKey(tuple3)) {
+                    SupportConfidence sc = (SupportConfidence)this.shapeTripletSupport.get(tuple3);
                     if (support == 1) {
                         if (sc.getConfidence() > confidence && sc.getSupport() >= support) {
                             objTypesSet.add(encodedObjectType);
                         }
-                    } else {
-                        if (sc.getConfidence() > confidence && sc.getSupport() > support) {
-                            objTypesSet.add(encodedObjectType);
-                        }
+                    } else if (sc.getConfidence() > confidence && sc.getSupport() > support) {
+                        objTypesSet.add(encodedObjectType);
                     }
-                    
                 }
+
             });
             if (objTypesSet.size() != 0) {
                 propToObjectTypesLocal.put(prop, objTypesSet);
             }
+
         });
         return propToObjectTypesLocal;
     }
-    
+
     public HashMap<String, String> computeShapeStatistics(Model currentModel) {
-        HashMap<String, String> shapesStats = new HashMap<>();
+        HashMap<String, String> shapesStats = new HashMap();
         Repository db = new SailRepository(new MemoryStore());
         db.init();
-        try (RepositoryConnection conn = db.getConnection()) {
-            conn.add(currentModel); // You need to load the model in the repo to query
-            
-            //COUNT STATS
-            for (int i = 1; i <= 5; i++) {
-                String type = "count";
-                TupleQuery query = conn.prepareTupleQuery(FilesUtil.readShaclStatsQuery("query" + i, type));
-                Value queryOutput = executeQuery(query, type);
-                if (queryOutput != null && queryOutput.isLiteral()) {
-                    Literal literalCount = (Literal) queryOutput;
-                    shapesStats.put(ExperimentsUtil.getCsvHeader().get(i), literalCount.stringValue());
+
+        try {
+            RepositoryConnection conn = db.getConnection();
+
+            try {
+                conn.add(currentModel, new Resource[0]);
+
+                int i;
+                String type;
+                TupleQuery query;
+                Value queryOutput;
+                Literal literalCount;
+                for(i = 1; i <= 5; ++i) {
+                    type = "count";
+                    query = conn.prepareTupleQuery(FilesUtil.readShaclStatsQuery("query" + i, type));
+                    queryOutput = this.executeQuery(query, type);
+                    if (queryOutput != null && queryOutput.isLiteral()) {
+                        literalCount = (Literal)queryOutput;
+                        shapesStats.put((String)ExperimentsUtil.getCsvHeader().get(i), literalCount.stringValue());
+                    }
                 }
+
+                for(i = 1; i <= 4; ++i) {
+                    type = "avg";
+                    query = conn.prepareTupleQuery(FilesUtil.readShaclStatsQuery("query" + i, type));
+                    queryOutput = this.executeQuery(query, type);
+                    if (queryOutput != null && queryOutput.isLiteral()) {
+                        literalCount = (Literal)queryOutput;
+                        shapesStats.put((String)ExperimentsUtil.getAverageHeader().get(i), literalCount.stringValue());
+                    }
+
+                    type = "max";
+                    query = conn.prepareTupleQuery(FilesUtil.readShaclStatsQuery("query" + i, type));
+                    queryOutput = this.executeQuery(query, type);
+                    if (queryOutput != null && queryOutput.isLiteral()) {
+                        literalCount = (Literal)queryOutput;
+                        shapesStats.put((String)ExperimentsUtil.getMaxHeader().get(i), literalCount.stringValue());
+                    }
+
+                    type = "min";
+                    query = conn.prepareTupleQuery(FilesUtil.readShaclStatsQuery("query" + i, type));
+                    queryOutput = this.executeQuery(query, type);
+                    if (queryOutput != null && queryOutput.isLiteral()) {
+                        literalCount = (Literal)queryOutput;
+                        shapesStats.put((String)ExperimentsUtil.getMinHeader().get(i), literalCount.stringValue());
+                    }
+                }
+            } catch (Throwable var15) {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (Throwable var14) {
+                        var15.addSuppressed(var14);
+                    }
+                }
+
+                throw var15;
             }
-            //AVERAGE STATS
-            for (int i = 1; i <= 4; i++) {
-                String type = "avg";
-                TupleQuery query = conn.prepareTupleQuery(FilesUtil.readShaclStatsQuery("query" + i, type));
-                Value queryOutput = executeQuery(query, type);
-                if (queryOutput != null && queryOutput.isLiteral()) {
-                    Literal literalCount = (Literal) queryOutput;
-                    shapesStats.put(ExperimentsUtil.getAverageHeader().get(i), literalCount.stringValue());
-                }
-                //MAX STATS
-                type = "max";
-                query = conn.prepareTupleQuery(FilesUtil.readShaclStatsQuery("query" + i, type));
-                queryOutput = executeQuery(query, type);
-                if (queryOutput != null && queryOutput.isLiteral()) {
-                    Literal literalCount = (Literal) queryOutput;
-                    shapesStats.put(ExperimentsUtil.getMaxHeader().get(i), literalCount.stringValue());
-                }
-                //MIN STATS
-                type = "min";
-                query = conn.prepareTupleQuery(FilesUtil.readShaclStatsQuery("query" + i, type));
-                queryOutput = executeQuery(query, type);
-                if (queryOutput != null && queryOutput.isLiteral()) {
-                    Literal literalCount = (Literal) queryOutput;
-                    shapesStats.put(ExperimentsUtil.getMinHeader().get(i), literalCount.stringValue());
-                }
+
+            if (conn != null) {
+                conn.close();
             }
         } finally {
             db.shutDown();
         }
+
         return shapesStats;
     }
-    
+
     public void writeModelToFile(String fileIdentifier) {
         Path path = Paths.get(Main.datasetPath);
-        String fileName = FilenameUtils.removeExtension(path.getFileName().toString()) + "_" + fileIdentifier + "_SHACL.ttl";
+        String var10000 = FilenameUtils.removeExtension(path.getFileName().toString());
+        String fileName = var10000 + "_" + fileIdentifier + "_SHACL.ttl";
         System.out.println("::: SHACLER ~ WRITING MODEL TO FILE: " + fileName);
+
         try {
             FileWriter fileWriter = new FileWriter(Main.outputFilePath + fileName, false);
-            Rio.write(model, fileWriter, RDFFormat.TURTLE);
-        } catch (Exception e) {
-            e.printStackTrace();
+            Rio.write(this.model, fileWriter, RDFFormat.TURTLE);
+        } catch (Exception var5) {
+            var5.printStackTrace();
         }
+
     }
-    
+
     private Value executeQuery(TupleQuery query, String bindingName) {
         Value queryOutput = null;
-        // A QueryResult is also an AutoCloseable resource, so make sure it gets closed when done.
-        try (TupleQueryResult result = query.evaluate()) {
-            while (result.hasNext()) {
-                BindingSet solution = result.next();
-                //System.out.println("?count = " + solution.getValue(bindingName));
-                queryOutput = solution.getValue(bindingName);
+
+        try {
+            TupleQueryResult result = query.evaluate();
+
+            try {
+                while(result.hasNext()) {
+                    BindingSet solution = (BindingSet)result.next();
+                    queryOutput = solution.getValue(bindingName);
+                }
+            } catch (Throwable var8) {
+                if (result != null) {
+                    try {
+                        result.close();
+                    } catch (Throwable var7) {
+                        var8.addSuppressed(var7);
+                    }
+                }
+
+                throw var8;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            if (result != null) {
+                result.close();
+            }
+        } catch (Exception var9) {
+            var9.printStackTrace();
         }
+
         return queryOutput;
     }
-    
 }

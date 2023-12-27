@@ -1,363 +1,356 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.qse.querybased.sampling;
 
 import com.google.common.collect.Lists;
 import cs.Main;
 import cs.qse.common.EntityData;
-import cs.qse.common.Utility;
-import cs.qse.common.ShapesExtractor;
-import cs.qse.filebased.SupportConfidence;
 import cs.qse.common.ExperimentsUtil;
-import cs.qse.filebased.sampling.DynamicNeighborBasedReservoirSampling;
-import cs.utils.*;
-import cs.qse.common.encoders.StringEncoder;
+import cs.qse.common.ShapesExtractor;
+import cs.qse.common.Utility;
 import cs.qse.common.encoders.NodeEncoder;
+import cs.qse.common.encoders.StringEncoder;
+import cs.qse.filebased.SupportConfidence;
+import cs.qse.filebased.sampling.DynamicNeighborBasedReservoirSampling;
+import cs.utils.Constants;
+import cs.utils.FilesUtil;
+import cs.utils.Tuple2;
+import cs.utils.Tuple3;
+import cs.utils.Utils;
 import cs.utils.graphdb.GraphDBUtils;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.time.StopWatch;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 import org.semanticweb.yars.nx.parser.ParseException;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static cs.qse.common.Utility.*;
-
-/**
- * * Qb (query-based) Sampling Parser
- */
 public class QbSampling {
-    private final GraphDBUtils graphDBUtils;
+    private final GraphDBUtils graphDBUtils = new GraphDBUtils();
     Integer expectedNumberOfClasses;
     Integer expNoOfInstances;
     StringEncoder stringEncoder;
     String typePredicate;
     NodeEncoder nodeEncoder;
     Integer maxEntityThreshold;
-    
-    // In the following the size of each data structure
-    // N = number of distinct nodes in the graph
-    // T = number of distinct types
-    // P = number of distinct predicates
-    
-    Map<Integer, EntityData> entityDataMapContainer; // Size == N For every entity (encoded as integer) we save a number of summary information
-    Map<Integer, Integer> classEntityCount; // Size == T
-    Map<Integer, List<Integer>> sampledEntitiesPerClass; // Size == O(T*entityThreshold)
-    Map<Integer, Integer> reservoirCapacityPerClass; // Size == T
-    Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes; // Size O(T*P*T)
-    Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport; // Size O(T*P*T) For every unique <class,property,objectType> tuples, we save their support and confidence
-    
-    Map<Integer, Integer> propCount; // real count of *all (entire graph)* triples having predicate P   // |P| =  |< _, P , _ >| in G
-    Map<Integer, Integer> sampledPropCount; // count of triples having predicate P across all entities in all reservoirs  |< _ , P , _ >| (the sampled entities)
-    
-    /**
-     * ============================================= Constructor ========================================
-     */
+    Map<Integer, EntityData> entityDataMapContainer;
+    Map<Integer, Integer> classEntityCount;
+    Map<Integer, List<Integer>> sampledEntitiesPerClass;
+    Map<Integer, Integer> reservoirCapacityPerClass;
+    Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes;
+    Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport;
+    Map<Integer, Integer> propCount;
+    Map<Integer, Integer> sampledPropCount;
+
     public QbSampling(int expNoOfClasses, int expNoOfInstances, String typePredicate, Integer entitySamplingThreshold) {
-        this.graphDBUtils = new GraphDBUtils();
         this.expectedNumberOfClasses = expNoOfClasses;
         this.expNoOfInstances = expNoOfInstances;
         this.typePredicate = typePredicate;
-        this.classEntityCount = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
-        this.sampledEntitiesPerClass = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
-        this.classToPropWithObjTypes = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
-        this.entityDataMapContainer = new HashMap<>((int) ((expNoOfInstances) / 0.75 + 1));
-        this.propCount = new HashMap<>((int) ((10000) / 0.75 + 1));
-        this.sampledPropCount = new HashMap<>((int) ((10000) / 0.75 + 1));
+        this.classEntityCount = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
+        this.sampledEntitiesPerClass = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
+        this.classToPropWithObjTypes = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
+        this.entityDataMapContainer = new HashMap((int)((double)expNoOfInstances / 0.75 + 1.0));
+        this.propCount = new HashMap(13334);
+        this.sampledPropCount = new HashMap(13334);
         this.stringEncoder = new StringEncoder();
         this.nodeEncoder = new NodeEncoder();
         this.maxEntityThreshold = entitySamplingThreshold;
-        this.shapeTripletSupport = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
+        this.shapeTripletSupport = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
     }
-    
-    /**
-     * ============================================= Run Query-based Parser ============================================
-     */
+
     public void run() {
         System.out.println("Started EndpointSampling ...");
-        getNumberOfInstancesOfEachClass();
-        dynamicNeighborBasedReservoirSampling(); //first pass here is to send a query to the endpoint and get all entities, parse the entities and sample using reservoir sampling
-        entityConstraintsExtractionBatch();
-        //entityConstraintsExtraction(); //In the 2nd pass you run query for each sampled entity to get the property metadata ...
-        writeSupportToFile(stringEncoder, this.shapeTripletSupport, this.sampledEntitiesPerClass);
-        extractSHACLShapes(true, Main.qseFromSpecificClasses);
-        Utility.writeClassFrequencyInFile(classEntityCount, stringEncoder);
+        this.getNumberOfInstancesOfEachClass();
+        this.dynamicNeighborBasedReservoirSampling();
+        this.entityConstraintsExtractionBatch();
+        Utility.writeSupportToFile(this.stringEncoder, this.shapeTripletSupport, this.sampledEntitiesPerClass);
+        this.extractSHACLShapes(true, Main.qseFromSpecificClasses);
+        Utility.writeClassFrequencyInFile(this.classEntityCount, this.stringEncoder);
     }
-    
-    /**
-     * ====================================  Compute number of instances of each class by querying (Pre-phase 1) =================
-     */
+
     private void getNumberOfInstancesOfEachClass() {
         StopWatch watch = new StopWatch();
         watch.start();
-        String query = FilesUtil.readQuery("query2").replace(":instantiationProperty", typePredicate);
-        //This query will return a table having two columns class: IRI of the class, classCount: number of instances of class
-        graphDBUtils.runSelectQuery(query).forEach(result -> {
+        String query = FilesUtil.readQuery("query2").replace(":instantiationProperty", this.typePredicate);
+        this.graphDBUtils.runSelectQuery(query).forEach((result) -> {
             String c = result.getValue("class").stringValue();
             int classCount = 0;
             if (result.getBinding("classCount").getValue().isLiteral()) {
-                org.eclipse.rdf4j.model.Literal literalClassCount = (org.eclipse.rdf4j.model.Literal) result.getBinding("classCount").getValue();
+                Literal literalClassCount = (Literal)result.getBinding("classCount").getValue();
                 classCount = literalClassCount.intValue();
             }
-            classEntityCount.put(stringEncoder.encode(c), classCount);
+
+            this.classEntityCount.put(this.stringEncoder.encode(c), classCount);
         });
         watch.stop();
-        System.out.println("Time Elapsed getNumberOfInstancesOfEachClass: " + TimeUnit.MILLISECONDS.toSeconds(watch.getTime()) + " : " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+        PrintStream var10000 = System.out;
+        long var10001 = TimeUnit.MILLISECONDS.toSeconds(watch.getTime());
+        var10000.println("Time Elapsed getNumberOfInstancesOfEachClass: " + var10001 + " : " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
         Utils.logTime("getNumberOfInstancesOfEachClass ", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
-    
-    /**
-     * ============================ Phase 1: Entity Extraction using Dynamic Reservoir Sampling ========================
-     * Streaming over query results <s,a,o> line by line to extract set of entity types
-     * =================================================================================================================
-     */
+
     private void dynamicNeighborBasedReservoirSampling() {
         System.out.println("invoked:dynamicNeighborBasedReservoirSampling()");
         StopWatch watch = new StopWatch();
         watch.start();
-        String queryToGetWikiDataEntities = "PREFIX onto: <http://www.ontotext.com/>  CONSTRUCT from onto:explicit WHERE { ?s " + typePredicate + " ?o .} ";
-        
-        Random random = new Random(100);
+        String queryToGetWikiDataEntities = "PREFIX onto: <http://www.ontotext.com/>  CONSTRUCT from onto:explicit WHERE { ?s " + this.typePredicate + " ?o .} ";
+        Random random = new Random(100L);
         AtomicInteger lineCounter = new AtomicInteger();
-        this.reservoirCapacityPerClass = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
+        this.reservoirCapacityPerClass = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
         int minEntityThreshold = 1;
         int samplingPercentage = Main.entitySamplingTargetPercentage;
-        DynamicNeighborBasedReservoirSampling drs = new DynamicNeighborBasedReservoirSampling(entityDataMapContainer, sampledEntitiesPerClass, reservoirCapacityPerClass, nodeEncoder, stringEncoder);
+        DynamicNeighborBasedReservoirSampling drs = new DynamicNeighborBasedReservoirSampling(this.entityDataMapContainer, this.sampledEntitiesPerClass, this.reservoirCapacityPerClass, this.nodeEncoder, this.stringEncoder);
+
         try {
-            graphDBUtils.runConstructQuery(queryToGetWikiDataEntities).forEach(line -> {
+            this.graphDBUtils.runConstructQuery(queryToGetWikiDataEntities).forEach((line) -> {
                 try {
-                    String triple = "<" + line.getSubject() + "> <" + line.getPredicate() + "> <" + line.getObject() + "> ."; // prepare triple in N3 format to avoid changing many methods using nodes of type Node
-                    Node[] nodes = NxParser.parseNodes(triple); // Get [S,P,O] as Node from triple
-                    
-                    int objID = stringEncoder.encode(nodes[2].getLabel());
-                    sampledEntitiesPerClass.putIfAbsent(objID, new ArrayList<>(maxEntityThreshold));
-                    reservoirCapacityPerClass.putIfAbsent(objID, minEntityThreshold);
-                    
-                    if (sampledEntitiesPerClass.get(objID).size() < reservoirCapacityPerClass.get(objID)) {
+                    Resource var10000 = line.getSubject();
+                    String triple = "<" + var10000 + "> <" + line.getPredicate() + "> <" + line.getObject() + "> .";
+                    Node[] nodes = NxParser.parseNodes(triple);
+                    int objID = this.stringEncoder.encode(nodes[2].getLabel());
+                    this.sampledEntitiesPerClass.putIfAbsent(objID, new ArrayList(this.maxEntityThreshold));
+                    this.reservoirCapacityPerClass.putIfAbsent(objID, minEntityThreshold);
+                    if (((List)this.sampledEntitiesPerClass.get(objID)).size() < (Integer)this.reservoirCapacityPerClass.get(objID)) {
                         drs.sample(nodes);
                     } else {
                         drs.replace(random.nextInt(lineCounter.get()), nodes);
                     }
-                    classEntityCount.merge(objID, 1, Integer::sum); // Get the real entity count for current class
-                    drs.resizeReservoir(classEntityCount.get(objID), sampledEntitiesPerClass.get(objID).size(), maxEntityThreshold, samplingPercentage, objID);
-                    
-                    lineCounter.getAndIncrement(); // increment the line counter
-                } catch (ParseException e) {
-                    e.printStackTrace();
+
+                    this.classEntityCount.merge(objID, 1, Integer::sum);
+                    drs.resizeReservoir((Integer)this.classEntityCount.get(objID), ((List)this.sampledEntitiesPerClass.get(objID)).size(), this.maxEntityThreshold, samplingPercentage, objID);
+                    lineCounter.getAndIncrement();
+                } catch (ParseException var10) {
+                    var10.printStackTrace();
                 }
+
             });
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception var9) {
+            var9.printStackTrace();
         }
+
         watch.stop();
         Utils.logTime("firstPass:dynamicNeighborBasedReservoirSampling", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
-        Utils.logSamplingStats("dynamicNeighborBasedReservoirSampling", samplingPercentage, minEntityThreshold, maxEntityThreshold, entityDataMapContainer.size());
+        Utils.logSamplingStats("dynamicNeighborBasedReservoirSampling", samplingPercentage, minEntityThreshold, this.maxEntityThreshold, this.entityDataMapContainer.size());
     }
-    
-    
-    /**
-     * =================== Phase 2 & 3: BATCH Entity constraints extraction + Confidence and Support Computation ==========
-     * Querying to get properties and object types of each entity to collect the constraints and the metadata required
-     * to compute the support and confidence of each candidate shape.
-     * =================================================================================================================
-     */
-    
+
     private void entityConstraintsExtractionBatch() {
         StopWatch watch = new StopWatch();
         watch.start();
         System.out.println("Started secondPhaseBatch()");
-        
-        HashMap<Set<String>, List<String>> typesToEntities = new HashMap<>();
-        
-        for (Map.Entry<Integer, EntityData> entry : entityDataMapContainer.entrySet()) {
-            Integer entityID = entry.getKey();
-            EntityData entityData = entry.getValue();
-            Set<String> entityTypes = new HashSet<>();
-            
-            for (Integer entityTypeID : entityData.getClassTypes()) {
-                entityTypes.add(stringEncoder.decode(entityTypeID));
+        HashMap<Set<String>, List<String>> typesToEntities = new HashMap();
+        Iterator var3 = this.entityDataMapContainer.entrySet().iterator();
+
+        while(var3.hasNext()) {
+            Map.Entry<Integer, EntityData> entry = (Map.Entry)var3.next();
+            Integer entityID = (Integer)entry.getKey();
+            EntityData entityData = (EntityData)entry.getValue();
+            Set<String> entityTypes = new HashSet();
+            Iterator var8 = entityData.getClassTypes().iterator();
+
+            while(var8.hasNext()) {
+                Integer entityTypeID = (Integer)var8.next();
+                entityTypes.add(this.stringEncoder.decode(entityTypeID));
             }
-            typesToEntities.computeIfAbsent(entityTypes, k -> new ArrayList<>());
-            
-            List<String> current = typesToEntities.get(entityTypes);
-            current.add(nodeEncoder.decode(entityID).toString());
+
+            typesToEntities.computeIfAbsent(entityTypes, (k) -> {
+                return new ArrayList();
+            });
+            List<String> current = (List)typesToEntities.get(entityTypes);
+            current.add(this.nodeEncoder.decode(entityID).toString());
             typesToEntities.put(entityTypes, current);
         }
-        
+
         typesToEntities.forEach((types, entities) -> {
             if (entities.size() > 2000) {
                 List<List<String>> subEntities = Lists.partition(entities, 2000);
-                subEntities.forEach(listOfSubEntities -> {
-                    String batchQuery = buildBatchQuery(types, listOfSubEntities, typePredicate); // ?p ?o are binding variables
-                    iterateOverEntityTriples(types, batchQuery);
+                subEntities.forEach((listOfSubEntities) -> {
+                    String batchQuery = Utility.buildBatchQuery(types, listOfSubEntities, this.typePredicate);
+                    this.iterateOverEntityTriples(types, batchQuery);
                 });
             } else {
-                String batchQuery = buildBatchQuery(types, entities, typePredicate); // ?p ?o are binding variables
-                iterateOverEntityTriples(types, batchQuery);
+                String batchQuery = Utility.buildBatchQuery(types, entities, this.typePredicate);
+                this.iterateOverEntityTriples(types, batchQuery);
             }
+
         });
         watch.stop();
         Utils.logTime("secondPhaseBatch:cs.qse.endpoint.EndpointSampling", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
-    
+
     private void iterateOverEntityTriples(Set<String> types, String batchQuery) {
-        for (BindingSet row : graphDBUtils.evaluateSelectQuery(batchQuery)) {
+        Iterator var3 = this.graphDBUtils.evaluateSelectQuery(batchQuery).iterator();
+
+        while(var3.hasNext()) {
+            BindingSet row = (BindingSet)var3.next();
             String entity = row.getValue("entity").stringValue();
-            Integer entityID = nodeEncoder.encode(Utils.IriToNode(entity));
+            Integer entityID = this.nodeEncoder.encode(Utils.IriToNode(entity));
             String prop = row.getValue("p").stringValue();
-            //String propIri = "<" + prop + ">";
-            
-            int propID = stringEncoder.encode(prop);
-            
+            int propID = this.stringEncoder.encode(prop);
             String obj = row.getValue("o").stringValue();
             Node objNode = Utils.IriToNode(obj);
-            String objType = extractObjectType(obj); // find out if the object is literal or IRI
-            
-            Set<Integer> objTypesIDs = new HashSet<>(10);
-            Set<Tuple2<Integer, Integer>> prop2objTypeTuples = new HashSet<>(10);
-            
-            // object is an instance or entity of some class e.g., :Paris is an instance of :City & :Capital
+            String objType = Utility.extractObjectType(obj);
+            Set<Integer> objTypesIDs = new HashSet(10);
+            Set<Tuple2<Integer, Integer>> prop2objTypeTuples = new HashSet(10);
             if (objType.equals("IRI")) {
-                objTypesIDs = parseIriTypeObject(entityID, propID, objNode, objTypesIDs, prop2objTypeTuples);
+                objTypesIDs = this.parseIriTypeObject(entityID, propID, objNode, (Set)objTypesIDs, prop2objTypeTuples);
+            } else {
+                this.parseLiteralTypeObject(entityID, propID, objType, (Set)objTypesIDs);
             }
-            // Object is of type literal, e.g., xsd:String, xsd:Integer, etc.
-            else {
-                parseLiteralTypeObject(entityID, propID, objType, objTypesIDs);
-            }
-            // for each type (class) of current entity -> append the property and object type in classToPropWithObjTypes HashMap
-            // Also update shape triplet support map by computing support of triplets
-            //updateClassToPropWithObjTypesAndShapeTripletSupportMaps(entityData, propID, objTypesIDs);
-            
-            for (String entityTypeString : types) {
-                Integer entityTypeID = stringEncoder.encode(entityTypeString);
-                Map<Integer, Set<Integer>> propToObjTypes = classToPropWithObjTypes.computeIfAbsent(entityTypeID, k -> new HashMap<>());
-                Set<Integer> classObjTypes = propToObjTypes.computeIfAbsent(propID, k -> new HashSet<>());
-                
-                classObjTypes.addAll(objTypesIDs);
+
+            Iterator var14 = types.iterator();
+
+            while(var14.hasNext()) {
+                String entityTypeString = (String)var14.next();
+                Integer entityTypeID = this.stringEncoder.encode(entityTypeString);
+                Map<Integer, Set<Integer>> propToObjTypes = (Map)this.classToPropWithObjTypes.computeIfAbsent(entityTypeID, (k) -> {
+                    return new HashMap();
+                });
+                Set<Integer> classObjTypes = (Set)propToObjTypes.computeIfAbsent(propID, (k) -> {
+                    return new HashSet();
+                });
+                classObjTypes.addAll((Collection)objTypesIDs);
                 propToObjTypes.put(propID, classObjTypes);
-                classToPropWithObjTypes.put(entityTypeID, propToObjTypes);
-                
-                //Compute Support - <entityTypeID, propID, objTypesIDs
-                objTypesIDs.forEach(objTypeID -> {
-                    Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<Integer, Integer, Integer>(entityTypeID, propID, objTypeID);
-                    if (shapeTripletSupport.containsKey(tuple3)) {
-                        Integer support = shapeTripletSupport.get(tuple3).getSupport();
-                        support++;
-                        shapeTripletSupport.put(tuple3, new SupportConfidence(support));
+                this.classToPropWithObjTypes.put(entityTypeID, propToObjTypes);
+                ((Set)objTypesIDs).forEach((objTypeID) -> {
+                    Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3(entityTypeID, propID, objTypeID);
+                    if (this.shapeTripletSupport.containsKey(tuple3)) {
+                        Integer support = ((SupportConfidence)this.shapeTripletSupport.get(tuple3)).getSupport();
+                        support = support + 1;
+                        this.shapeTripletSupport.put(tuple3, new SupportConfidence(support));
                     } else {
-                        shapeTripletSupport.put(tuple3, new SupportConfidence(1));
+                        this.shapeTripletSupport.put(tuple3, new SupportConfidence(1));
                     }
+
                 });
             }
         }
+
     }
-    
-    /**
-     * ============================================= Phase 4: Shapes extraction ========================================
-     * Extracting shapes in SHACL syntax using various values for support and confidence thresholds
-     * =================================================================================================================
-     */
+
     protected void extractSHACLShapes(Boolean performPruning, Boolean qseFromSpecificClasses) {
         System.out.println("Started extractSHACLShapes()");
         StopWatch watch = new StopWatch();
         watch.start();
         String methodName = "extractSHACLShapes:No Pruning";
-        ShapesExtractor se = new ShapesExtractor(stringEncoder, shapeTripletSupport, classEntityCount, typePredicate);
-        //se.setPropWithClassesHavingMaxCountOne(statsComputer.getPropWithClassesHavingMaxCountOne());
-        //====================== Enable shapes extraction for specific classes ======================
-        if (qseFromSpecificClasses)
-            classToPropWithObjTypes = Utility.extractShapesForSpecificClassesOld(classToPropWithObjTypes, classEntityCount, stringEncoder);
-        
-        se.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
+        ShapesExtractor se = new ShapesExtractor(this.stringEncoder, this.shapeTripletSupport, this.classEntityCount, this.typePredicate);
+        if (qseFromSpecificClasses) {
+            this.classToPropWithObjTypes = Utility.extractShapesForSpecificClasses(this.classToPropWithObjTypes, this.classEntityCount, this.stringEncoder);
+        }
+
+        se.constructDefaultShapes(this.classToPropWithObjTypes);
         if (performPruning) {
             StopWatch watchForPruning = new StopWatch();
             watchForPruning.start();
             ExperimentsUtil.getSupportConfRange().forEach((conf, supportRange) -> {
-                supportRange.forEach(supp -> {
+                supportRange.forEach((supp) -> {
                     StopWatch innerWatch = new StopWatch();
                     innerWatch.start();
-                    se.constructPrunedShapes(classToPropWithObjTypes, conf, supp);
+                    se.constructPrunedShapes(this.classToPropWithObjTypes, conf, supp);
                     innerWatch.stop();
-                    Utils.logTime(conf + "_" + supp + "", TimeUnit.MILLISECONDS.toSeconds(innerWatch.getTime()), TimeUnit.MILLISECONDS.toMinutes(innerWatch.getTime()));
+                    Utils.logTime("" + conf + "_" + supp, TimeUnit.MILLISECONDS.toSeconds(innerWatch.getTime()), TimeUnit.MILLISECONDS.toMinutes(innerWatch.getTime()));
                 });
             });
             methodName = "extractSHACLShapes";
             watchForPruning.stop();
             Utils.logTime(methodName + "-Time.For.Pruning.Only", TimeUnit.MILLISECONDS.toSeconds(watchForPruning.getTime()), TimeUnit.MILLISECONDS.toMinutes(watchForPruning.getTime()));
         }
-        
+
         ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
         watch.stop();
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
-    
-    //============================================= Utility Methods ====================================================
-    
+
     private Set<Integer> parseIriTypeObject(Integer entityID, int propID, Node objNode, Set<Integer> objTypesIDs, Set<Tuple2<Integer, Integer>> prop2objTypeTuples) {
-        EntityData currEntityData = entityDataMapContainer.get(nodeEncoder.encode(objNode));
+        EntityData currEntityData = (EntityData)this.entityDataMapContainer.get(this.nodeEncoder.encode(objNode));
         if (currEntityData != null && currEntityData.getClassTypes().size() != 0) {
             objTypesIDs = currEntityData.getClassTypes();
-            for (Integer objTypeID : objTypesIDs) { // get classes of node2
-                prop2objTypeTuples.add(new Tuple2<>(propID, objTypeID));
+            Iterator var9 = objTypesIDs.iterator();
+
+            while(var9.hasNext()) {
+                Integer objTypeID = (Integer)var9.next();
+                prop2objTypeTuples.add(new Tuple2(propID, objTypeID));
             }
-            addEntityToPropertyConstraints(prop2objTypeTuples, entityID);
+
+            this.addEntityToPropertyConstraints(prop2objTypeTuples, entityID);
         } else {
-            int objID = stringEncoder.encode(Constants.OBJECT_UNDEFINED_TYPE);
+            int objID = this.stringEncoder.encode(Constants.OBJECT_UNDEFINED_TYPE);
             objTypesIDs.add(objID);
-            prop2objTypeTuples = Collections.singleton(new Tuple2<>(propID, objID));
-            addEntityToPropertyConstraints(prop2objTypeTuples, entityID);
+            prop2objTypeTuples = Collections.singleton(new Tuple2(propID, objID));
+            this.addEntityToPropertyConstraints(prop2objTypeTuples, entityID);
         }
-        /*else { bjTypesIDs.add(-1); // If we do not have data this is an unlabelled IRI objTypes = Collections.emptySet(); }*/
+
         return objTypesIDs;
     }
-    
+
     private void parseLiteralTypeObject(Integer entityID, int propID, String objType, Set<Integer> objTypesIDs) {
-        Set<Tuple2<Integer, Integer>> prop2objTypeTuples;
-        int objID = stringEncoder.encode(objType);
+        int objID = this.stringEncoder.encode(objType);
         objTypesIDs.add(objID);
-        prop2objTypeTuples = Collections.singleton(new Tuple2<>(propID, objID));
-        addEntityToPropertyConstraints(prop2objTypeTuples, entityID);
+        Set<Tuple2<Integer, Integer>> prop2objTypeTuples = Collections.singleton(new Tuple2(propID, objID));
+        this.addEntityToPropertyConstraints(prop2objTypeTuples, entityID);
     }
-    
+
     private void updateClassToPropWithObjTypesAndShapeTripletSupportMaps(EntityData entityData, int propID, Set<Integer> objTypesIDs) {
-        for (Integer entityTypeID : entityData.getClassTypes()) {
-            Map<Integer, Set<Integer>> propToObjTypes = classToPropWithObjTypes.computeIfAbsent(entityTypeID, k -> new HashMap<>());
-            Set<Integer> classObjTypes = propToObjTypes.computeIfAbsent(propID, k -> new HashSet<>());
-            
+        Iterator var4 = entityData.getClassTypes().iterator();
+
+        while(var4.hasNext()) {
+            Integer entityTypeID = (Integer)var4.next();
+            Map<Integer, Set<Integer>> propToObjTypes = (Map)this.classToPropWithObjTypes.computeIfAbsent(entityTypeID, (k) -> {
+                return new HashMap();
+            });
+            Set<Integer> classObjTypes = (Set)propToObjTypes.computeIfAbsent(propID, (k) -> {
+                return new HashSet();
+            });
             classObjTypes.addAll(objTypesIDs);
             propToObjTypes.put(propID, classObjTypes);
-            classToPropWithObjTypes.put(entityTypeID, propToObjTypes);
-            
-            //Compute Support - <entityTypeID, propID, objTypesIDs
-            objTypesIDs.forEach(objTypeID -> {
-                Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<Integer, Integer, Integer>(entityTypeID, propID, objTypeID);
-                if (shapeTripletSupport.containsKey(tuple3)) {
-                    Integer support = shapeTripletSupport.get(tuple3).getSupport();
-                    support++;
-                    shapeTripletSupport.put(tuple3, new SupportConfidence(support));
+            this.classToPropWithObjTypes.put(entityTypeID, propToObjTypes);
+            objTypesIDs.forEach((objTypeID) -> {
+                Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3(entityTypeID, propID, objTypeID);
+                if (this.shapeTripletSupport.containsKey(tuple3)) {
+                    Integer support = ((SupportConfidence)this.shapeTripletSupport.get(tuple3)).getSupport();
+                    support = support + 1;
+                    this.shapeTripletSupport.put(tuple3, new SupportConfidence(support));
                 } else {
-                    shapeTripletSupport.put(tuple3, new SupportConfidence(1));
+                    this.shapeTripletSupport.put(tuple3, new SupportConfidence(1));
                 }
+
             });
         }
+
     }
-    
-    //A utility method to add property constraints of each entity in the 2nd phase
+
     private void addEntityToPropertyConstraints(Set<Tuple2<Integer, Integer>> prop2objTypeTuples, Integer subject) {
-        EntityData currentEntityData = entityDataMapContainer.get(subject);
+        EntityData currentEntityData = (EntityData)this.entityDataMapContainer.get(subject);
         if (currentEntityData == null) {
             currentEntityData = new EntityData();
         }
-        //Add Property Constraint and Property cardinality
-        for (Tuple2<Integer, Integer> tuple2 : prop2objTypeTuples) {
-            currentEntityData.addPropertyConstraint(tuple2._1, tuple2._2);
+
+        Iterator var4 = prop2objTypeTuples.iterator();
+
+        while(var4.hasNext()) {
+            Tuple2<Integer, Integer> tuple2 = (Tuple2)var4.next();
+            currentEntityData.addPropertyConstraint((Integer)tuple2._1, (Integer)tuple2._2);
             if (Main.extractMaxCardConstraints) {
-                currentEntityData.addPropertyCardinality(tuple2._1);
+                currentEntityData.addPropertyCardinality((Integer)tuple2._1);
             }
         }
-        //Add entity data into the map
-        entityDataMapContainer.put(subject, currentEntityData);
+
+        this.entityDataMapContainer.put(subject, currentEntityData);
     }
-    
 }

@@ -111,3 +111,23 @@ test-1-asdf,secondPhase,0,0,7,0,false,null
 test-1-asdf,computeSupportConfidence,0,0,7,0,false,null
 test-1-asdf,extractSHACLShapes:No Pruning,0,0,7,0,false,null
 test-1-asdf,firstPass,0,0,7,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,0,0,0,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,6,0,6,0,false,null
+test-1-asdf,firstPass,0,0,6,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,0,0,0,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,0,0,0,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,5,0,5,0,false,null
+test-1-asdf,0.25_10 extractSHACLShapes:WithPruning-Time.For.Pruning.Only,0,0,5,0,false,null
+test-1-asdf,extractSHACLShapes:WithPruning,0,0,5,0,false,null

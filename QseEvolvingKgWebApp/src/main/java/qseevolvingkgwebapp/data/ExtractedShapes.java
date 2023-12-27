@@ -23,6 +23,10 @@ public class ExtractedShapes extends AbstractEntity{
     @CollectionTable(name = "ExtractedShapesClasses")
     List<String> classes;
 
+    @Lob
+    @Column(name = "fileContent", columnDefinition = "BLOB")
+    byte[] fileContent;
+
     public Version getVersionObject() {
         return versionEntity;
     }

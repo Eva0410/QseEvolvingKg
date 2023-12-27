@@ -1,46 +1,57 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.qse.common.encoders;
 
 import java.util.HashMap;
 
-/**
- * This class encodes the String values into Integers and also provides decode functionality
- */
 public class StringEncoder implements Encoder {
     int counter;
     HashMap<Integer, String> table;
     HashMap<String, Integer> reverseTable;
-    
+
     public StringEncoder() {
         this.counter = -1;
-        this.table = new HashMap<>();
-        this.reverseTable = new HashMap<>();
+        this.table = new HashMap();
+        this.reverseTable = new HashMap();
     }
-    
+
+    public StringEncoder(int counter, HashMap<Integer, String> table, HashMap<String, Integer> reverseTable) {
+        this.counter = counter;
+        this.table = table;
+        this.reverseTable = reverseTable;
+    }
+
     public int encode(String val) {
-        if (reverseTable.containsKey(val)) {
-            return reverseTable.get(val);
+        if (this.reverseTable.containsKey(val)) {
+            return (Integer)this.reverseTable.get(val);
         } else {
-            this.counter++;
-            table.put(counter, val);
-            reverseTable.put(val, counter);
-            return counter;
+            ++this.counter;
+            this.table.put(this.counter, val);
+            this.reverseTable.put(val, this.counter);
+            return this.counter;
         }
     }
-    
+
     public boolean isEncoded(String val) {
-        return reverseTable.containsKey(val);
+        return this.reverseTable.containsKey(val);
     }
-    
-    
+
     public HashMap<Integer, String> getTable() {
-        return table;
+        return this.table;
     }
-    
+
     public String decode(int val) {
-        return this.table.get(val);
+        return (String)this.table.get(val);
     }
-    
+
     public HashMap<String, Integer> getRevTable() {
-        return reverseTable;
+        return this.reverseTable;
+    }
+
+    public HashMap<String, Integer> getReverseTable() {
+        return this.reverseTable;
     }
 }

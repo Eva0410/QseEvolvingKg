@@ -1,32 +1,46 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package cs.qse.querybased.sampling.parallel;
 
 import com.google.common.collect.Lists;
 import cs.Main;
 import cs.qse.common.EntityData;
 import cs.qse.common.ExperimentsUtil;
+import cs.qse.common.ShapesExtractor;
+import cs.qse.common.Utility;
 import cs.qse.common.encoders.ConcurrentStringEncoder;
 import cs.qse.common.encoders.NodeEncoder;
-import cs.qse.common.ShapesExtractor;
 import cs.qse.filebased.SupportConfidence;
 import cs.utils.Constants;
 import cs.utils.FilesUtil;
 import cs.utils.Tuple3;
 import cs.utils.Utils;
 import cs.utils.graphdb.GraphDBUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 import org.semanticweb.yars.nx.parser.ParseException;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static cs.qse.common.Utility.writeSupportToFile;
-
 public class ParallelQbSampling {
-    private final GraphDBUtils graphDBUtils;
+    private final GraphDBUtils graphDBUtils = new GraphDBUtils();
     Integer expectedNumberOfClasses;
     Integer expNoOfInstances;
     ConcurrentStringEncoder encoder;
@@ -34,120 +48,111 @@ public class ParallelQbSampling {
     NodeEncoder nodeEncoder;
     Integer maxEntityThreshold;
     Integer numOfThreads;
-    
-    // In the following the size of each data structure
-    // N = number of distinct nodes in the graph
-    // T = number of distinct types
-    // P = number of distinct predicates
-    
-    Map<Integer, EntityData> entityDataMapContainer; // Size == N For every entity (encoded as integer) we save a number of summary information
-    Map<Integer, Integer> classEntityCount; // Size == T
-    Map<Integer, List<Integer>> sampledEntitiesPerClass; // Size == O(T*entityThreshold)
-    Map<Integer, Integer> reservoirCapacityPerClass; // Size == T
-    
-    Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes; // Size O(T*P*T)
-    Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport; // Size O(T*P*T) For every unique <class,property,objectType> tuples, we save their support and confidence
-    Map<Integer, Integer> propCount; // real count of *all (entire graph)* triples having predicate P   // |P| =  |< _, P , _ >| in G
-    Map<Integer, Integer> sampledPropCount; // count of triples having predicate P across all entities in all reservoirs  |< _ , P , _ >| (the sampled entities)
-    
+    Map<Integer, EntityData> entityDataMapContainer;
+    Map<Integer, Integer> classEntityCount;
+    Map<Integer, List<Integer>> sampledEntitiesPerClass;
+    Map<Integer, Integer> reservoirCapacityPerClass;
+    Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes;
+    Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport;
+    Map<Integer, Integer> propCount;
+    Map<Integer, Integer> sampledPropCount;
+
     public ParallelQbSampling(int expNoOfClasses, int expNoOfInstances, String typePredicate, Integer entitySamplingThreshold, int numOfThreads) {
-        this.graphDBUtils = new GraphDBUtils();
         this.expectedNumberOfClasses = expNoOfClasses;
         this.expNoOfInstances = expNoOfInstances;
         this.typePredicate = typePredicate;
-        this.classEntityCount = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
-        this.sampledEntitiesPerClass = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
-        this.entityDataMapContainer = new HashMap<>((int) ((expNoOfInstances) / 0.75 + 1));
-        
+        this.classEntityCount = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
+        this.sampledEntitiesPerClass = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
+        this.entityDataMapContainer = new HashMap((int)((double)expNoOfInstances / 0.75 + 1.0));
         this.encoder = new ConcurrentStringEncoder();
         this.nodeEncoder = new NodeEncoder();
         this.maxEntityThreshold = entitySamplingThreshold;
         this.numOfThreads = numOfThreads;
     }
-    
-    
+
     public void run() {
-        System.out.println("Started ParallelQbSampling with " + numOfThreads + " threads.");
-        getNumberOfInstancesOfEachClass();
-        dynamicNeighborBasedReservoirSampling();  // send a query to the endpoint and get all entities, parse the entities and sample using reservoir sampling
-        collectEntityPropData(); //run query for each sampled entity to get the property metadata ...
-        writeSupportToFile(encoder, this.shapeTripletSupport, this.sampledEntitiesPerClass);
-        extractSHACLShapes(false);
+        System.out.println("Started ParallelQbSampling with " + this.numOfThreads + " threads.");
+        this.getNumberOfInstancesOfEachClass();
+        this.dynamicNeighborBasedReservoirSampling();
+        this.collectEntityPropData();
+        Utility.writeSupportToFile(this.encoder, this.shapeTripletSupport, this.sampledEntitiesPerClass);
+        this.extractSHACLShapes(false);
     }
-    
+
     private void getNumberOfInstancesOfEachClass() {
         StopWatch watch = new StopWatch();
         watch.start();
-        String query = FilesUtil.readQuery("query2").replace(":instantiationProperty", typePredicate);
-        //This query will return a table having two columns class: IRI of the class, classCount: number of instances of class
-        graphDBUtils.runSelectQuery(query).forEach(result -> {
+        String query = FilesUtil.readQuery("query2").replace(":instantiationProperty", this.typePredicate);
+        this.graphDBUtils.runSelectQuery(query).forEach((result) -> {
             String c = result.getValue("class").stringValue();
             int classCount = 0;
             if (result.getBinding("classCount").getValue().isLiteral()) {
-                Literal literalClassCount = (Literal) result.getBinding("classCount").getValue();
+                Literal literalClassCount = (Literal)result.getBinding("classCount").getValue();
                 classCount = literalClassCount.intValue();
             }
-            classEntityCount.put(encoder.encode(c), classCount);
+
+            this.classEntityCount.put(this.encoder.encode(c), classCount);
         });
         watch.stop();
         Utils.logTime("getNumberOfInstancesOfEachClass ", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
-    
+
     private void dynamicNeighborBasedReservoirSampling() {
         System.out.println("started dynamicNeighborBasedReservoirSampling()");
         StopWatch watch = new StopWatch();
         watch.start();
-        String queryToGetWikiDataEntities = "PREFIX onto: <http://www.ontotext.com/>  CONSTRUCT from onto:explicit WHERE { ?s " + typePredicate + " ?o .} ";
-        
-        Random random = new Random(100);
+        String queryToGetWikiDataEntities = "PREFIX onto: <http://www.ontotext.com/>  CONSTRUCT from onto:explicit WHERE { ?s " + this.typePredicate + " ?o .} ";
+        Random random = new Random(100L);
         AtomicInteger lineCounter = new AtomicInteger();
-        this.reservoirCapacityPerClass = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
+        this.reservoirCapacityPerClass = new HashMap((int)((double)this.expectedNumberOfClasses / 0.75 + 1.0));
         int minEntityThreshold = 1;
         int samplingPercentage = Main.entitySamplingTargetPercentage;
-        NbResSamplingForQb drs = new NbResSamplingForQb(entityDataMapContainer, sampledEntitiesPerClass, reservoirCapacityPerClass, nodeEncoder, encoder);
+        NbResSamplingForQb drs = new NbResSamplingForQb(this.entityDataMapContainer, this.sampledEntitiesPerClass, this.reservoirCapacityPerClass, this.nodeEncoder, this.encoder);
+
         try {
-            graphDBUtils.runConstructQuery(queryToGetWikiDataEntities).forEach(line -> {
+            this.graphDBUtils.runConstructQuery(queryToGetWikiDataEntities).forEach((line) -> {
                 try {
-                    String triple = "<" + line.getSubject() + "> <" + line.getPredicate() + "> <" + line.getObject() + "> ."; // prepare triple in N3 format to avoid changing many methods using nodes of type Node
-                    Node[] nodes = NxParser.parseNodes(triple); // Get [S,P,O] as Node from triple
-                    
-                    int objID = encoder.encode(nodes[2].getLabel());
-                    sampledEntitiesPerClass.putIfAbsent(objID, new ArrayList<>(maxEntityThreshold));
-                    reservoirCapacityPerClass.putIfAbsent(objID, minEntityThreshold);
-                    
-                    if (sampledEntitiesPerClass.get(objID).size() < reservoirCapacityPerClass.get(objID)) {
+                    Resource var10000 = line.getSubject();
+                    String triple = "<" + var10000 + "> <" + line.getPredicate() + "> <" + line.getObject() + "> .";
+                    Node[] nodes = NxParser.parseNodes(triple);
+                    int objID = this.encoder.encode(nodes[2].getLabel());
+                    this.sampledEntitiesPerClass.putIfAbsent(objID, new ArrayList(this.maxEntityThreshold));
+                    this.reservoirCapacityPerClass.putIfAbsent(objID, minEntityThreshold);
+                    if (((List)this.sampledEntitiesPerClass.get(objID)).size() < (Integer)this.reservoirCapacityPerClass.get(objID)) {
                         drs.sample(nodes);
                     } else {
                         drs.replace(random.nextInt(lineCounter.get()), nodes);
                     }
-                    classEntityCount.merge(objID, 1, Integer::sum); // Get the real entity count for current class
-                    drs.resizeReservoir(classEntityCount.get(objID), sampledEntitiesPerClass.get(objID).size(), maxEntityThreshold, samplingPercentage, objID);
-                    
-                    lineCounter.getAndIncrement(); // increment the line counter
-                } catch (ParseException e) {
-                    e.printStackTrace();
+
+                    this.classEntityCount.merge(objID, 1, Integer::sum);
+                    drs.resizeReservoir((Integer)this.classEntityCount.get(objID), ((List)this.sampledEntitiesPerClass.get(objID)).size(), this.maxEntityThreshold, samplingPercentage, objID);
+                    lineCounter.getAndIncrement();
+                } catch (ParseException var10) {
+                    var10.printStackTrace();
                 }
+
             });
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception var9) {
+            var9.printStackTrace();
         }
+
         watch.stop();
         Utils.logTime("firstPass:dynamicNeighborBasedReservoirSampling", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
-        Utils.logSamplingStats("dynamicNeighborBasedReservoirSampling", samplingPercentage, minEntityThreshold, maxEntityThreshold, entityDataMapContainer.size());
+        Utils.logSamplingStats("dynamicNeighborBasedReservoirSampling", samplingPercentage, minEntityThreshold, this.maxEntityThreshold, this.entityDataMapContainer.size());
     }
-    
+
     private void collectEntityPropData() {
         StopWatch watch = new StopWatch();
         watch.start();
         System.out.println("Started collectEntityPropData(threads=" + numOfThreads + ")");
-        
+
         try {
             List<Integer> entitiesList = new ArrayList<>(entityDataMapContainer.keySet());
             List<List<Integer>> entitiesPart = Lists.partition(entitiesList, entitiesList.size() / numOfThreads);
-            
+
             //declare jobs
             List<Callable<SubEntityPropDataCollector>> jobs = new ArrayList<>();
-            
+
             // create jobs
             int jobIndex = 1;
             for (List<Integer> part : entitiesPart) {
@@ -160,7 +165,7 @@ public class ParallelQbSampling {
                 });
                 jobIndex++;
             }
-            
+
             //execute jobs using invokeAll() method and collect results
             try {
                 StopWatch sw = new StopWatch();
@@ -188,78 +193,75 @@ public class ParallelQbSampling {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         watch.stop();
         System.out.println("ParallelQbSampling.collectEntityPropData with : " + numOfThreads + " threads took " + TimeUnit.MILLISECONDS.toSeconds(watch.getTime()) + " sec or " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()) + " min");
         Utils.logTime("cs.qse.querybased.sampling.parallel.ParallelQbSampling.collectEntityPropData with threads: " + numOfThreads + " ", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
-    
+
     private void mergeJobsOutput(SubEntityPropDataCollector sEpDc) {
-        // 1. Merging class to property with object type information
         sEpDc.classToPropWithObjTypes.forEach((c, localPwOt) -> {
-            Map<Integer, Set<Integer>> globalPwOt = this.classToPropWithObjTypes.get(c);
+            Map<Integer, Set<Integer>> globalPwOt = (Map)this.classToPropWithObjTypes.get(c);
             if (globalPwOt == null) {
                 this.classToPropWithObjTypes.put(c, localPwOt);
             } else {
                 localPwOt.forEach((p, localOt) -> {
-                    Set<Integer> globalOt = globalPwOt.get(p);
+                    Set<Integer> globalOt = (Set)globalPwOt.get(p);
                     if (globalOt == null) {
                         globalPwOt.put(p, localOt);
                     } else {
-                        globalPwOt.get(p).addAll(localOt);
+                        ((Set)globalPwOt.get(p)).addAll(localOt);
                     }
+
                 });
                 this.classToPropWithObjTypes.put(c, globalPwOt);
             }
+
         });
-        
-        // 2. Merging shape triplet support
         sEpDc.shapeTripletSupport.forEach((tuple3, localSupp) -> {
-            SupportConfidence globalSupp = this.shapeTripletSupport.get(tuple3);
+            SupportConfidence globalSupp = (SupportConfidence)this.shapeTripletSupport.get(tuple3);
             if (globalSupp == null) {
                 this.shapeTripletSupport.put(tuple3, localSupp);
             } else {
                 this.shapeTripletSupport.put(tuple3, new SupportConfidence(globalSupp.getSupport() + localSupp.getSupport()));
             }
+
         });
-        
-        // 3. Merging count of sampled properties
         sEpDc.sampledPropCount.forEach((p, localCount) -> {
-            Integer globalCount = this.sampledPropCount.get(p);
+            Integer globalCount = (Integer)this.sampledPropCount.get(p);
             if (globalCount == null) {
                 this.sampledPropCount.put(p, localCount);
-            } else { //equivalent to this.sampledPropCount.containsKey(p)
+            } else {
                 this.sampledPropCount.put(p, globalCount + localCount);
             }
+
         });
     }
-    
+
     protected void extractSHACLShapes(Boolean performPruning) {
         System.out.println("Started extractSHACLShapes()");
         StopWatch watch = new StopWatch();
         watch.start();
         String methodName = "extractSHACLShapes:No Pruning";
-        ShapesExtractor se = new ShapesExtractor(encoder, shapeTripletSupport, classEntityCount, typePredicate);
-        //se.setPropWithClassesHavingMaxCountOne(statsComputer.getPropWithClassesHavingMaxCountOne());
-        se.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
-        
+        ShapesExtractor se = new ShapesExtractor(this.encoder, this.shapeTripletSupport, this.classEntityCount, this.typePredicate);
+        se.constructDefaultShapes(this.classToPropWithObjTypes);
         if (performPruning) {
             StopWatch watchForPruning = new StopWatch();
             watchForPruning.start();
             ExperimentsUtil.getSupportConfRange().forEach((conf, supportRange) -> {
-                supportRange.forEach(supp -> {
+                supportRange.forEach((supp) -> {
                     StopWatch innerWatch = new StopWatch();
                     innerWatch.start();
-                    se.constructPrunedShapes(classToPropWithObjTypes, conf, supp);
+                    se.constructPrunedShapes(this.classToPropWithObjTypes, conf, supp);
                     innerWatch.stop();
-                    Utils.logTime(conf + "_" + supp + "", TimeUnit.MILLISECONDS.toSeconds(innerWatch.getTime()), TimeUnit.MILLISECONDS.toMinutes(innerWatch.getTime()));
+                    Utils.logTime("" + conf + "_" + supp, TimeUnit.MILLISECONDS.toSeconds(innerWatch.getTime()), TimeUnit.MILLISECONDS.toMinutes(innerWatch.getTime()));
                 });
             });
             methodName = "extractSHACLShapes";
             watchForPruning.stop();
             Utils.logTime(methodName + "-Time.For.Pruning.Only", TimeUnit.MILLISECONDS.toSeconds(watchForPruning.getTime()), TimeUnit.MILLISECONDS.toMinutes(watchForPruning.getTime()));
         }
-        
+
         ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
         watch.stop();
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));

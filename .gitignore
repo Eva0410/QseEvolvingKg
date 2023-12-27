@@ -41,7 +41,7 @@ OUTPUT_QUERY/*
 .settings
 .project
 .classpath
-
+	
 *.iml
 .DS_Store
 
