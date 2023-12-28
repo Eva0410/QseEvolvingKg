@@ -20,7 +20,7 @@ public class NodeShape {
     IRI targetClass;
     Integer support;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<PropertyShape> propertyShapeList;
 
     public NodeShape() {}

@@ -15,9 +15,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 import qseevolvingkgwebapp.views.compareshapes.CompareShapesView;
 import qseevolvingkgwebapp.views.comparisiondetails.ComparisionDetailsView;
-import qseevolvingkgwebapp.views.generateshapes.GenerateShapesView;
 import qseevolvingkgwebapp.views.graphs.GraphsView;
-import qseevolvingkgwebapp.views.gridwithfilters.GridwithFiltersView;
 import qseevolvingkgwebapp.views.shapes.ShapesView;
 import qseevolvingkgwebapp.views.versions.VersionsView;
 
@@ -57,12 +55,7 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
 
-//        nav.addItem(new SideNavItem("Hello World", HelloWorldView.class, LineAwesomeIcon.GLOBE_SOLID.create()));
-//        nav.addItem(new SideNavItem("About", AboutView.class, LineAwesomeIcon.FILE.create()));
-        nav.addItem(
-                new SideNavItem("Grid with Filters", GridwithFiltersView.class, LineAwesomeIcon.FILTER_SOLID.create()));
         nav.addItem(new SideNavItem("Graphs", GraphsView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
-//        nav.addItem(new SideNavItem("New Graph", NewGraphView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
         nav.addItem(new SideNavItem("Versions", VersionsView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
         nav.addItem(new SideNavItem("Shapes", ShapesView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
         nav.addItem(new SideNavItem("Compare Shapes", CompareShapesView.class,

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 public class ExtractedShapes extends AbstractEntity{
@@ -48,11 +49,11 @@ public class ExtractedShapes extends AbstractEntity{
 
     public String getClassesAsString() {
         if (classes != null && !classes.isEmpty()) {
-            var shortenedList = new ArrayList<String>(classes);
+            var shortenedList = new ArrayList<>(classes);
             for (int i = 0; i < classes.size(); i++) {
                 shortenedList.set(i, shortenedList.get(i).split("#")[1]);
             }
-            return String.join(", ", shortenedList);
+            return String.join(", ", shortenedList.stream().sorted().collect(Collectors.toList()));
         }
         return "";
     }

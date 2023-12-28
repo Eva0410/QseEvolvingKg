@@ -233,8 +233,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
             classes.add(((Type)i).className);
         }
         extractedShapes.setClasses(classes);
-        extractedShapes.setConfidence(!confidence.isEmpty() ? confidence.getValue() : 0.0);
-        extractedShapes.setSupport(!support.isEmpty() ? support.getValue() : 0);
+        extractedShapes.setConfidence(confidence.isEnabled() ? confidence.getValue() : 0.0);
+        extractedShapes.setSupport(support.isEnabled() ? support.getValue() : 0);
         extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
         extractedShapes.setCreatedAt(LocalDateTime.now());
         extractedShapes.setFileContent(Files.readAllBytes(Paths.get(outputAddress)));
@@ -322,10 +322,10 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, Long aLong) {
+        Utils.setComboBoxGraphData(graphService, comboBoxGraph);
         currentVersionId = aLong;
         currentVersion = versionService.get(currentVersionId).get();
         currentGraph = currentVersion.getGraph();
-        Utils.setComboBoxGraphData(graphService, comboBoxGraph);
         if(currentGraph != null)  {
             var graphItem = comboBoxGraph.getDataProvider().fetch(new Query<>()).filter(g -> g.id.equals(currentGraph.getId())).findFirst();
             comboBoxGraph.setValue(graphItem.get());

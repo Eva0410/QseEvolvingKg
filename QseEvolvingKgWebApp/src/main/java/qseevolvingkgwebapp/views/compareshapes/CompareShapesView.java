@@ -6,26 +6,22 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 
+import java.sql.Array;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import cs.qse.common.structure.NS;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import qseevolvingkgwebapp.data.NodeShape;
-import qseevolvingkgwebapp.data.PropertyShape;
-import qseevolvingkgwebapp.data.SamplePerson;
+import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.services.*;
 import qseevolvingkgwebapp.views.MainLayout;
 
@@ -58,13 +54,25 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 GridVariant.LUMO_NO_ROW_BORDERS);
         treeViewComparision.setWidth("100%");
         treeViewComparision.getStyle().set("flex-grow", "0");
-        setGridSampleData(treeViewComparision);
         getContent().add(layoutRow);
         layoutRow.add(multiSelectShapes);
         getContent().add(treeViewComparision);
+        multiSelectShapes.addValueChangeListener(e -> {
+            var extractedShapes = new ArrayList<ExtractedShapes>();
+            for(var i : multiSelectShapes.getSelectedItems()) {
+                extractedShapes.add(shapeService.get(i.id).get());
+            }
+            if(extractedShapes.stream().map(o -> o.getSupport()).distinct().count() > 1)
+                Notification.show("Caution, the compared items do not have the same support-value!");
+            if(extractedShapes.stream().map(o -> o.getConfidence()).distinct().count() > 1)
+                Notification.show("Caution, the compared items do not have the same confidence-value!");
+            if(extractedShapes.stream().map(o -> o.getClassesAsString()).distinct().count() > 1)
+                Notification.show("Caution, the compared items were not analyzed for the same classes!");
+
+            setTreeViewData();
+        });
         addAttachListener(e ->{
             fillComboBox();
-            setMultiSelectComboBoxSampleData();
         });
     }
 
@@ -90,51 +98,79 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         }
     }
 
-    record SampleItem(String value, String label, Boolean disabled) {
-    }
-
-    private void setMultiSelectComboBoxSampleData() {
+    private void setTreeViewData() {
         var nodeShapesToShow = new ArrayList<ComparisionTreeViewItem>();
         treeViewComparision.removeAllColumns();
-        treeViewComparision.addHierarchyColumn(ComparisionTreeViewItem::getShapeName)
-                .setHeader("NodeShape");
+        boolean first = true;
         for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
             var extractedShapes = shapeService.get(comboBoxItem.id).get();
             var nodeShapes = extractedShapes.getNodeShapes();
-            var selected = nodeShapes.stream().filter(n -> !nodeShapesToShow
-                            .stream().map(ns -> ns.getShapeName())
-                            .collect(Collectors.toList())
-                        .contains(n.getIri().getLocalName()))
-                    .map(ns -> new ComparisionTreeViewItem(ns))
+            var nodeShapesToShowMap =  nodeShapesToShow
+                    .stream().map(ns -> ns.getShapeName())
                     .collect(Collectors.toList());
-            nodeShapesToShow.addAll(selected);
-
-            treeViewComparision.addColumn(o -> {
-                return o.getShapeName();
-            }).setHeader(comboBoxItem.label);
+            for(var ns : nodeShapes) {
+                if(nodeShapesToShowMap.contains(ns.getIri().getLocalName())) {
+                    var nodeShapeToShow = nodeShapesToShow.stream().filter(n -> n.getShapeName()
+                            .equals(ns.getIri().getLocalName())).findFirst().get();
+                    nodeShapeToShow.addNodeShape(ns, comboBoxItem.id);
+                }
+                else {
+                    var newItem = new ComparisionTreeViewItem();
+                    newItem.addNodeShape(ns, comboBoxItem.id);
+                    nodeShapesToShow.add(newItem);
+                }
+            }
+            if(first) {
+                treeViewComparision.addHierarchyColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id))
+                    .setHeader(comboBoxItem.label);
+                first = false;
+            }
+            else {
+                treeViewComparision.addColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id)).setHeader(comboBoxItem.label);
+            }
         }
         treeViewComparision.setItems(nodeShapesToShow, this::getPropertyShapes);
+        treeViewComparision.expand(nodeShapesToShow);
+    }
+
+    private String getTreeViewTextFromViewItem(ComparisionTreeViewItem o, Long extractedShapesId) {
+        if(o.isNodeShapeLine()) {
+            if(o.getNodeShapeList().keySet().contains(extractedShapesId))
+                return o.getShapeName();
+            else
+                return "-";
+        }
+        else {
+            if(o.getPropertyShapeList().keySet().contains(extractedShapesId))
+                return o.getShapeName();
+            else
+                return "-";
+        }
     }
 
     private List<ComparisionTreeViewItem> getPropertyShapes(ComparisionTreeViewItem item) {
-        
-        if(item.getShapeName()=="OntologyShape")
-        {
-            var propertyShapes = new ArrayList<ComparisionTreeViewItem>();
-       propertyShapes.add(new ComparisionTreeViewItem("test"));
-     return propertyShapes;        }
+        var propertyShapesToShow = new ArrayList<ComparisionTreeViewItem>();
+        for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
+            var extractedShapes = shapeService.get(comboBoxItem.id).get().getNodeShapes()
+                    .stream().filter(n -> n.getIri().getLocalName().equals(item.getShapeName())).findFirst();
+            if(extractedShapes.isPresent()) {
+                var propertyShapesToShowMap =  propertyShapesToShow
+                        .stream().map(ns -> ns.getShapeName())
+                        .collect(Collectors.toList());
+                for(var ps : extractedShapes.get().getPropertyShapeList()) {
+                    if (propertyShapesToShowMap.contains(ps.getIri().getLocalName())) {
+                        var propertyShapeToShow = propertyShapesToShow.stream().filter(n -> n.getShapeName()
+                                .equals(ps.getIri().getLocalName())).findFirst().get();
+                        propertyShapeToShow.addPropertyShape(ps, comboBoxItem.id);
+                    } else {
+                        var newItem = new ComparisionTreeViewItem();
+                        newItem.addPropertyShape(ps, comboBoxItem.id);
+                        propertyShapesToShow.add(newItem);
+                    }
+                }
+            }
 
-//        var propertyShapes = new ArrayList<ComparisionTreeViewItem>();
-//
-//        i.add(new ComparisionTreeViewItem(item.getShapeName()+"i"));
-//        return i;
-return new ArrayList<>();
+        }
+        return propertyShapesToShow;
     }
-
-    private void setGridSampleData(Grid grid) {
-
-    }
-
-    @Autowired()
-    private SamplePersonService samplePersonService;
 }
