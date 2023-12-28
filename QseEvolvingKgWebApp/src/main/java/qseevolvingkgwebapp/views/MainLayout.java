@@ -13,13 +13,11 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
-import qseevolvingkgwebapp.views.about.AboutView;
 import qseevolvingkgwebapp.views.compareshapes.CompareShapesView;
 import qseevolvingkgwebapp.views.comparisiondetails.ComparisionDetailsView;
 import qseevolvingkgwebapp.views.generateshapes.GenerateShapesView;
 import qseevolvingkgwebapp.views.graphs.GraphsView;
 import qseevolvingkgwebapp.views.gridwithfilters.GridwithFiltersView;
-import qseevolvingkgwebapp.views.newgraph.NewGraphView;
 import qseevolvingkgwebapp.views.shapes.ShapesView;
 import qseevolvingkgwebapp.views.versions.VersionsView;
 
@@ -66,8 +64,6 @@ public class MainLayout extends AppLayout {
         nav.addItem(new SideNavItem("Graphs", GraphsView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
 //        nav.addItem(new SideNavItem("New Graph", NewGraphView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
         nav.addItem(new SideNavItem("Versions", VersionsView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
-        nav.addItem(new SideNavItem("Generate Shapes", GenerateShapesView.class,
-                LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
         nav.addItem(new SideNavItem("Shapes", ShapesView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
         nav.addItem(new SideNavItem("Compare Shapes", CompareShapesView.class,
                 LineAwesomeIcon.PENCIL_RULER_SOLID.create()));

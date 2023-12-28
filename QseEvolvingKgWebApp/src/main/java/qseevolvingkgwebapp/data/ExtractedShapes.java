@@ -3,6 +3,8 @@ package qseevolvingkgwebapp.data;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,7 +13,7 @@ public class ExtractedShapes extends AbstractEntity{
     @ManyToOne
     Version versionEntity;
 
-    LocalDate createdAt;
+    LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     QseType qseType;
@@ -19,13 +21,32 @@ public class ExtractedShapes extends AbstractEntity{
     int support;
     double confidence;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "ExtractedShapesClasses")
     List<String> classes;
 
     @Lob
     @Column(name = "fileContent", columnDefinition = "BLOB")
     byte[] fileContent;
+
+
+    public String getClassesAsString() {
+        if (classes != null && !classes.isEmpty()) {
+            var shortenedList = new ArrayList<String>(classes);
+            for (int i = 0; i < classes.size(); i++) {
+                shortenedList.set(i, shortenedList.get(i).split("#")[1]);
+            }
+            return String.join(", ", shortenedList);
+        }
+        return "";
+    }
+    public byte[] getFileContent() {
+        return fileContent;
+    }
+
+    public void setFileContent(byte[] fileContent) {
+        this.fileContent = fileContent;
+    }
 
     public Version getVersionObject() {
         return versionEntity;
@@ -39,11 +60,11 @@ public class ExtractedShapes extends AbstractEntity{
         return versionEntity;
     }
 
-    public LocalDate getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

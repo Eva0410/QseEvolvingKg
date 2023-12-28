@@ -4,10 +4,8 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -20,39 +18,42 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.ListDataView;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cs.Main;
 import cs.qse.common.encoders.StringEncoder;
 import cs.qse.common.structure.NS;
 import cs.qse.filebased.Parser;
-
-import java.awt.*;
-import java.io.File;
-import java.security.CodeSource;
-import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import qseevolvingkgwebapp.ShactorUtils.PruningUtil;
-import qseevolvingkgwebapp.data.*;
+import qseevolvingkgwebapp.data.ExtractedShapes;
+import qseevolvingkgwebapp.data.Graph;
+import qseevolvingkgwebapp.data.QseType;
+import qseevolvingkgwebapp.data.Version;
 import qseevolvingkgwebapp.services.*;
 import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
 import qseevolvingkgwebapp.views.MainLayout;
+import qseevolvingkgwebapp.views.shapes.ShapesView;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @PageTitle("Generate Shapes")
 @Route(value = "generate-shapes", layout = MainLayout.class)
 @Uses(Icon.class)
-public class GenerateShapesView extends Composite<VerticalLayout> {
+public class GenerateShapesView extends Composite<VerticalLayout> implements HasUrlParameter<Long> {
 
     @Autowired()
     private VersionService versionService;
@@ -150,7 +151,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             if(event.getValue() != null) {
                 Long selectedValue = event.getValue().id;
                 currentGraph = graphService.get(event.getValue().id).get();
-                setComboBoxVersionsData(selectedValue);
+                Utils.setComboBoxVersionsData(selectedValue, versionService, comboBoxVersion, true);
             }
         });
         comboBoxVersion.addValueChangeListener(event -> {
@@ -173,42 +174,19 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             }
         });
         buttonPrimary.addClickListener(buttonClickEvent -> {
-            completeFileBasedShapesExtraction();
-            getUI().ifPresent(ui -> ui.navigate("shapes"));
+            try {
+                completeFileBasedShapesExtraction();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            getUI().ifPresent(ui -> ui.navigate(ShapesView.class, currentVersionId));
         });
 
         addAttachListener(event -> {
-            setComboBoxGraphData();
             setPaths();
         });
     }
 
-    private void generateShapeEntity() {
-        if(!checkbox.getValue().booleanValue()) {
-            prunedFileAddress = parser.extractSHACLShapesWithPruning(!chosenClasses.isEmpty(), confidence.getValue(), support.getValue(), chosenClasses);
-            System.out.println(prunedFileAddress);
-        }
-    }
-
-    private void setComboBoxGraphData() {
-        List<Utils.ComboBoxItem> graphs = Utils.getAllGraphs(graphService);
-        comboBoxGraph.setItems(graphs);
-        comboBoxGraph.setItemLabelGenerator(item -> item.label);
-        if (graphs.size() > 0) {
-            var firstItem = graphs.stream().findFirst();
-            comboBoxGraph.setValue(firstItem.get());
-        }
-    }
-
-    private void setComboBoxVersionsData(Long graphId) {
-        List<Utils.ComboBoxItem> versions = Utils.getAllVersions(versionService, graphId);
-        comboBoxVersion.setItems(versions);
-        comboBoxVersion.setItemLabelGenerator(item -> item.label);
-        if (versions.size() > 0) {
-            var firstItem = versions.stream().findFirst();
-            comboBoxVersion.setValue(firstItem.get());
-        }
-    }
 
     private void setGridSampleData() {
         //Copied from Shactor
@@ -222,7 +200,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         setupGridInMultiSelectionMode(getClasses(parser.classEntityCount, parser.getStringEncoder()), parser.getStringEncoder(), parser.classEntityCount.size());
     }
 
-    private void completeFileBasedShapesExtraction() {
+    private void completeFileBasedShapesExtraction() throws IOException {
         parser.entityConstraintsExtraction();
         parser.computeSupportConfidence();
 
@@ -257,7 +235,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setConfidence(!confidence.isEmpty() ? confidence.getValue() : 0.0);
         extractedShapes.setSupport(!support.isEmpty() ? support.getValue() : 0);
         extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
-        extractedShapes.setCreatedAt(LocalDate.now());
+        extractedShapes.setCreatedAt(LocalDateTime.now());
+        extractedShapes.setFileContent(Files.readAllBytes(Paths.get(outputAddress)));
         shapeService.insert(extractedShapes);
     }
 
@@ -336,6 +315,23 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setParameter(BeforeEvent beforeEvent, Long aLong) {
+        currentVersionId = aLong;
+        currentVersion = versionService.get(currentVersionId).get();
+        currentGraph = currentVersion.getGraph();
+        Utils.setComboBoxGraphData(graphService, comboBoxGraph);
+        if(currentGraph != null)  {
+            var graphItem = comboBoxGraph.getDataProvider().fetch(new Query<>()).filter(g -> g.id.equals(currentGraph.getId())).findFirst();
+            comboBoxGraph.setValue(graphItem.get());
+        }
+        if(currentVersion != null) {
+            var versionItem =  comboBoxVersion.getDataProvider().fetch(new Query<>())
+                    .filter(v -> v.id.equals(aLong)).findFirst();
+            comboBoxVersion.setValue(versionItem.get());
         }
     }
 }

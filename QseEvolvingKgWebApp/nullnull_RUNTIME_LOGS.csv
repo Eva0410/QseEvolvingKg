@@ -131,3 +131,46 @@ test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
 test-1-asdf,extractSHACLShapes:No Pruning,5,0,5,0,false,null
 test-1-asdf,0.25_10 extractSHACLShapes:WithPruning-Time.For.Pruning.Only,0,0,5,0,false,null
 test-1-asdf,extractSHACLShapes:WithPruning,0,0,5,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,0,0,0,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,2,0,2,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,52,0,52,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+null,firstPass,78,1,78,1,false,null
+test-1-asdf,firstPass,79,1,157,2,false,null
+test-1-asdf,firstPass,75,1,232,3,false,null
+test-1-asdf,firstPass,0,0,232,3,false,null
+test-1-asdf,firstPass,0,0,232,3,false,null
+test-1-asdf,firstPass,0,0,232,3,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,48,0,48,0,false,null
+test-1-asdf,firstPass,0,0,48,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-2-asdf2,firstPass,0,0,0,0,false,null
+test2-2-sadf2,secondPhase,0,0,0,0,false,null
+test2-2-sadf2,computeSupportConfidence,0,0,0,0,false,null
+test2-2-sadf2,extractSHACLShapes:No Pruning,2,0,2,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-2-asdf2,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-2-asdf2,firstPass,0,0,0,0,false,null
+test2-1-sadf,firstPass,0,0,0,0,false,null
+test2-2-sadf2,secondPhase,0,0,0,0,false,null
+test2-2-sadf2,computeSupportConfidence,0,0,0,0,false,null
+test2-2-sadf2,extractSHACLShapes:No Pruning,2,0,2,0,false,null

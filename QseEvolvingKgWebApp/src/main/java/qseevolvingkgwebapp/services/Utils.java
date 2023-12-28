@@ -1,5 +1,6 @@
 package qseevolvingkgwebapp.services;
 
+import com.vaadin.flow.component.select.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -38,4 +39,25 @@ public class Utils {
         }
     }
 
+    public static Select<ComboBoxItem> setComboBoxGraphData(GraphService graphService, Select<ComboBoxItem> selectItemGraph) {
+        List<Utils.ComboBoxItem> graphs = Utils.getAllGraphs(graphService);
+        selectItemGraph.setItems(graphs);
+        selectItemGraph.setItemLabelGenerator(item -> item.label);
+        if (graphs.size() > 0) {
+            var firstItem = graphs.stream().findFirst();
+            selectItemGraph.setValue(firstItem.get());
+        }
+        return selectItemGraph;
+    }
+
+    public static Select<ComboBoxItem> setComboBoxVersionsData(Long graphId, VersionService versionService, Select<ComboBoxItem> selectItemVersion, boolean setFirstVersion) {
+        List<Utils.ComboBoxItem> versions = Utils.getAllVersions(versionService, graphId);
+        selectItemVersion.setItems(versions);
+        selectItemVersion.setItemLabelGenerator(item -> item.label);
+        if (versions.size() > 0 && setFirstVersion) {
+            var firstItem = versions.stream().findFirst();
+            selectItemVersion.setValue(firstItem.get());
+        }
+        return selectItemVersion;
+    }
 }
