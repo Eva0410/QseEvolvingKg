@@ -174,3 +174,26 @@ test2-1-sadf,firstPass,0,0,0,0,false,null
 test2-2-sadf2,secondPhase,0,0,0,0,false,null
 test2-2-sadf2,computeSupportConfidence,0,0,0,0,false,null
 test2-2-sadf2,extractSHACLShapes:No Pruning,2,0,2,0,false,null
+null,firstPass,0,0,0,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,0,0,0,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,2,0,2,0,false,null
+test-1-asdf,0.25_10 extractSHACLShapes:WithPruning-Time.For.Pruning.Only,0,0,2,0,false,null
+test-1-asdf,extractSHACLShapes:WithPruning,0,0,2,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,0,0,0,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,2,0,2,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,0,0,0,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,0,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,2,0,2,0,false,null
+test-1-asdf,firstPass,0,0,2,0,false,null
+test-1-asdf,firstPass,0,0,2,0,false,null
+test-2-asdf2,secondPhase,0,0,2,0,false,null
+test-2-asdf2,computeSupportConfidence,0,0,2,0,false,null
+test-2-asdf2,extractSHACLShapes:No Pruning,0,0,2,0,false,null
+test-2-asdf2,0.25_10 extractSHACLShapes:WithPruning-Time.For.Pruning.Only,0,0,2,0,false,null
+test-2-asdf2,extractSHACLShapes:WithPruning,0,0,2,0,false,null

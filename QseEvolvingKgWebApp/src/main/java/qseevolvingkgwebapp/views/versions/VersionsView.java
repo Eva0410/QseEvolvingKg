@@ -54,6 +54,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
         basicGrid.setWidth("100%");
         basicGrid.getStyle().set("flex-grow", "0");
         basicGrid.setColumns("versionNumber", "name", "createdAt","path");
+        basicGrid.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
         buttonPrimary.setText("New Version");
         buttonPrimary.setWidth("min-content");
         buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

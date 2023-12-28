@@ -122,6 +122,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
         classesGrid.getStyle().set("flex-grow", "0");
         classesGrid.addColumn("name").setHeader("Class IRI").setSortable(true);
         classesGrid.addColumn("instanceCount").setHeader("Class Instance Count").setSortable(true);
+        classesGrid.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
         support.setLabel("Support");
         support.setWidth("min-content");
         support.setMin(0);
@@ -207,9 +208,9 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
         //default shapes must be computed first
         System.out.println(chosenClasses);
         String outputAddress = parser.extractSHACLShapes(chosenClasses.size()>0, chosenClasses);
+        List<NS> nodeShapes = parser.shapesExtractor.getNodeShapes();
 
         if(!checkbox.getValue().booleanValue()) {
-            List<NS> nodeShapes = null;
             int supportValue = support.getValue();
             double confidenceValue = confidence.getValue()/100;
 
@@ -237,6 +238,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
         extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
         extractedShapes.setCreatedAt(LocalDateTime.now());
         extractedShapes.setFileContent(Files.readAllBytes(Paths.get(outputAddress)));
+        extractedShapes.setNodeShapes(nodeShapes);
         shapeService.insert(extractedShapes);
     }
 

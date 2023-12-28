@@ -37,6 +37,10 @@ public class Utils {
             this.label = label;
             this.id = id;
         }
+
+        public ComboBoxItem() {
+
+        }
     }
 
     public static Select<ComboBoxItem> setComboBoxGraphData(GraphService graphService, Select<ComboBoxItem> selectItemGraph) {

@@ -1,6 +1,8 @@
 package qseevolvingkgwebapp.data;
 
+import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
+import org.w3c.dom.Node;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +31,20 @@ public class ExtractedShapes extends AbstractEntity{
     @Column(name = "fileContent", columnDefinition = "BLOB")
     byte[] fileContent;
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    List<NodeShape> nodeShapes;
+
+    public List<NodeShape> getNodeShapes() {
+        return nodeShapes;
+    }
+
+    public void setNodeShapes(List<NS> ns) {
+        var list = new ArrayList<NodeShape>();
+        for(var item : ns) {
+            list.add(new NodeShape(item));
+        }
+        this.nodeShapes = list;
+    }
 
     public String getClassesAsString() {
         if (classes != null && !classes.isEmpty()) {

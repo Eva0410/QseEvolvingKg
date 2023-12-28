@@ -45,6 +45,7 @@ public class GraphsView extends Composite<VerticalLayout> {
         });
         basicGrid.setWidth("100%");
         basicGrid.getStyle().set("flex-grow", "0");
+        basicGrid.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
         setGridSampleData(basicGrid);
         getContent().add(layoutRow);
         layoutRow.add(buttonPrimary);

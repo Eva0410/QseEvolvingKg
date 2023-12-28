@@ -83,7 +83,7 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
             if(event.getValue() != null) {
                 Long selectedValue = event.getValue().id;
                 currentGraph = graphService.get(selectedValue).get();
-                selectItemVersion =  Utils.setComboBoxVersionsData(selectedValue, versionService, selectItemVersion, false);
+                selectItemVersion =  Utils.setComboBoxVersionsData(selectedValue, versionService, selectItemVersion, true);
             }
         });
 
@@ -99,11 +99,12 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
     }
 
     private void setGridData() {
-        gridShapes.addColumn(o -> ((ExtractedShapes) o).getCreatedAt()).setHeader("Created At");
-        gridShapes.addColumn(o -> ((ExtractedShapes) o).getQseType()).setHeader("QSE Type");
-        gridShapes.addColumn(o -> ((ExtractedShapes) o).getSupport()).setHeader("Support");
-        gridShapes.addColumn(o -> ((ExtractedShapes) o).getConfidence()).setHeader("Confidence");
-        gridShapes.addColumn(o -> ((ExtractedShapes) o).getClassesAsString()).setHeader("Classes");
+        gridShapes.removeAllColumns();
+        gridShapes.addColumn(o -> ((ExtractedShapes) o).getCreatedAt()).setHeader("Created At").setResizable(true);
+        gridShapes.addColumn(o -> ((ExtractedShapes) o).getQseType()).setHeader("QSE Type").setResizable(true);
+        gridShapes.addColumn(o -> ((ExtractedShapes) o).getSupport()).setHeader("Support").setResizable(true);
+        gridShapes.addColumn(o -> ((ExtractedShapes) o).getConfidence()).setHeader("Confidence").setResizable(true);
+        gridShapes.addColumn(o -> ((ExtractedShapes) o).getClassesAsString()).setHeader("Classes").setResizable(true);
         var items = shapeService.listByVersionId(currentVersionId);
 
         if(items != null)
