@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import qseevolvingkgwebapp.data.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,7 +36,11 @@ public class ShapesService {
     }
 
     public List<ExtractedShapes> listAll() {
-        return repository.findAll();
+        var all =  repository.findAll();
+        Comparator<ExtractedShapes> shapeComparator = Comparator.comparing(ExtractedShapes::getGraphCreationTime)
+                .thenComparing(ExtractedShapes::getVersionCreationTime)
+                .thenComparing(ExtractedShapes::getCreatedAt);
+        return all.stream().sorted(shapeComparator).collect(Collectors.toList());
     }
 
     public Page<ExtractedShapes> list(Pageable pageable, Specification<ExtractedShapes> filter) {

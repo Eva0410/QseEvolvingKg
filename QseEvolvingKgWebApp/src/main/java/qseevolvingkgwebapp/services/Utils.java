@@ -1,9 +1,25 @@
 package qseevolvingkgwebapp.services;
 
 import com.vaadin.flow.component.select.Select;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.sparql.resultset.RDFOutput;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.sparqlbuilder.core.Prefix;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,5 +79,11 @@ public class Utils {
             selectItemVersion.setValue(firstItem.get());
         }
         return selectItemVersion;
+    }
+    public static String generateTTLFromIRIInModel(IRI iri, Model model) {
+        StringWriter out = new StringWriter();
+        Model aboutVanGogh = model.filter(iri, null, null);
+        Rio.write(aboutVanGogh, out, RDFFormat.TURTLE);
+        return out.toString();
     }
 }

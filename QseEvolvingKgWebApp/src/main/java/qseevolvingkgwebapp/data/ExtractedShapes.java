@@ -2,8 +2,16 @@ package qseevolvingkgwebapp.data;
 
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 import org.w3c.dom.Node;
 
+import javax.xml.stream.Location;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,6 +43,33 @@ public class ExtractedShapes extends AbstractEntity{
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     List<NodeShape> nodeShapes;
 
+    @Transient
+    Model model;
+
+
+    public LocalDateTime getGraphCreationTime() {
+        return this.getVersionEntity().getGraph().getCreatedAt();
+    }
+
+    public LocalDateTime getVersionCreationTime() {
+        return this.getVersionEntity().getCreatedAt();
+    }
+
+    public Model getModel() {
+        if(model == null) {
+//            Model m = ModelFactory.createDefaultModel();
+            InputStream inputStream = new ByteArrayInputStream(fileContent);
+            try {
+                this.model = Rio.parse(inputStream, "", RDFFormat.TURTLE);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+//            this.model =  m.read(inputStream, null, "TTL");
+        }
+        return this.model;
+    }
+
     public List<NodeShape> getNodeShapes() {
         return nodeShapes;
     }
@@ -42,7 +77,7 @@ public class ExtractedShapes extends AbstractEntity{
     public void setNodeShapes(List<NS> ns) {
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
-            list.add(new NodeShape(item));
+            list.add(new NodeShape(item, this));
         }
         this.nodeShapes = list;
     }

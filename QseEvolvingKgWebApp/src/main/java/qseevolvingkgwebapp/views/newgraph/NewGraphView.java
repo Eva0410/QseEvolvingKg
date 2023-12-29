@@ -92,6 +92,7 @@ public class NewGraphView extends Composite<VerticalLayout> {
         String generatedFileName = graphName + "_" + version.getVersionNumber() +".nt";
         String filePath = directory+generatedFileName;
         version.setPath(filePath);
+        version.setName("Original");
         versionService.update(version);
         File file = new File(directory);
 

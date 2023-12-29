@@ -23,6 +23,9 @@ public class NodeShape {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<PropertyShape> propertyShapeList;
 
+    @ManyToOne
+    ExtractedShapes extractedShapes;
+
     public NodeShape() {}
     public NodeShape(NS ns) {
         this.iri = ns.getIri();
@@ -30,8 +33,21 @@ public class NodeShape {
         this.support = ns.getSupport();
         this.propertyShapeList = new ArrayList<>();
         for (var ps : ns.getPropertyShapes()) {
-            propertyShapeList.add(new PropertyShape(ps));
+            propertyShapeList.add(new PropertyShape(ps, this));
         }
+    }
+
+    public NodeShape(NS ns, ExtractedShapes es) {
+        this(ns);
+        this.extractedShapes = es;
+    }
+
+    public ExtractedShapes getExtractedShapes() {
+        return extractedShapes;
+    }
+
+    public void setExtractedShapes(ExtractedShapes extractedShapes) {
+        this.extractedShapes = extractedShapes;
     }
 
     public IRI getIri() {

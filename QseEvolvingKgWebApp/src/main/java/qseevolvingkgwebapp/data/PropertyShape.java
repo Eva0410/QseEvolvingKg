@@ -22,6 +22,9 @@ public class PropertyShape {
     Double confidence;
 //    List<ShaclOrListItem> shaclOrListItems;
 
+    @ManyToOne
+    NodeShape nodeShape;
+
     public PropertyShape(PS ps) {
         iri = ps.getIri();
         path = ps.getPath();
@@ -31,8 +34,20 @@ public class PropertyShape {
         confidence = ps.getConfidence();
 //        shaclOrListItems = ps.getShaclOrListItems();
     }
+
+    public PropertyShape(PS ps, NodeShape ns) {
+        this(ps);
+        this.nodeShape = ns;
+    }
     public PropertyShape() {}
 
+    public NodeShape getNodeShape() {
+        return nodeShape;
+    }
+
+    public void setNodeShape(NodeShape nodeShape) {
+        this.nodeShape = nodeShape;
+    }
 
     public IRI getIri() {
         return iri;

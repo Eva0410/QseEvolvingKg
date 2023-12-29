@@ -60,8 +60,6 @@ public class MainLayout extends AppLayout {
         nav.addItem(new SideNavItem("Shapes", ShapesView.class, LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
         nav.addItem(new SideNavItem("Compare Shapes", CompareShapesView.class,
                 LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
-        nav.addItem(new SideNavItem("Comparision Details", ComparisionDetailsView.class,
-                LineAwesomeIcon.PENCIL_RULER_SOLID.create()));
 
         return nav;
     }

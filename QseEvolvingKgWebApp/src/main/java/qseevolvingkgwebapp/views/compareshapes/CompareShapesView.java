@@ -1,6 +1,8 @@
 package qseevolvingkgwebapp.views.compareshapes;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
@@ -11,19 +13,23 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 
 import java.sql.Array;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.services.*;
 import qseevolvingkgwebapp.views.MainLayout;
+import qseevolvingkgwebapp.views.comparisiondetails.ComparisionDetailsView;
+import qseevolvingkgwebapp.views.shapes.ShapesView;
 
 @PageTitle("Compare Shapes")
 @Route(value = "compare-shapes", layout = MainLayout.class)
@@ -70,6 +76,12 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 Notification.show("Caution, the compared items were not analyzed for the same classes!");
 
             setTreeViewData();
+        });
+        treeViewComparision.addItemClickListener(event -> {
+            ComparisionTreeViewItem clickedItem = event.getItem();
+            VaadinSession.getCurrent().setAttribute("currentCompareObject", clickedItem);
+            getUI().ifPresent(ui -> ui.navigate(ComparisionDetailsView.class));
+
         });
         addAttachListener(e ->{
             fillComboBox();

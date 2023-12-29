@@ -7,10 +7,12 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
@@ -105,6 +107,15 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getSupport()).setHeader("Support").setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getConfidence()).setHeader("Confidence").setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getClassesAsString()).setHeader("Classes").setResizable(true);
+        gridShapes.addColumn(new ComponentRenderer<>(Button::new, (button, es) -> {
+            button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
+            button.addClickListener(e -> {
+                ExtractedShapes extractedShapes = (ExtractedShapes)es;
+                shapeService.delete(extractedShapes.getId());
+                setGridData();
+            });
+            button.setIcon(new Icon(VaadinIcon.TRASH));
+        })).setHeader("");
         var items = shapeService.listByVersionId(currentVersionId);
 
         if(items != null)
