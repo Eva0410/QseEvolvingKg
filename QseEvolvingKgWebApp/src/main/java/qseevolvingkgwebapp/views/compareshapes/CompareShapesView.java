@@ -1,11 +1,8 @@
 package qseevolvingkgwebapp.views.compareshapes;
 
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
@@ -13,14 +10,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 
-import java.sql.Array;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,8 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.services.*;
 import qseevolvingkgwebapp.views.MainLayout;
-import qseevolvingkgwebapp.views.comparisiondetails.ComparisionDetailsView;
-import qseevolvingkgwebapp.views.shapes.ShapesView;
+import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
 
 @PageTitle("Compare Shapes")
 @Route(value = "compare-shapes", layout = MainLayout.class)
@@ -80,7 +72,8 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         treeViewComparision.addItemClickListener(event -> {
             ComparisionTreeViewItem clickedItem = event.getItem();
             VaadinSession.getCurrent().setAttribute("currentCompareObject", clickedItem);
-            getUI().ifPresent(ui -> ui.navigate(ComparisionDetailsView.class));
+            VaadinSession.getCurrent().setAttribute("currentComboBoxItems", multiSelectShapes.getSelectedItems());
+            getUI().ifPresent(ui -> ui.navigate(ComparisonDetailsView.class));
 
         });
         addAttachListener(e ->{
@@ -91,16 +84,11 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     private void fillComboBox() {
         var shapes = shapeService.listAll();
         var comboBoxItems = new ArrayList<Utils.ComboBoxItem>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         for (var shape : shapes) {
             var comboBoxItem = new Utils.ComboBoxItem();
             comboBoxItem.id = shape.getId();
-            var version = shape.getVersionEntity();
-            var graph = version.getGraph();
-            comboBoxItem.label = graph.getName() + "-" + version.getVersionNumber() + "-" + version.getName() + "-"
-                    + formatter.format(shape.getCreatedAt()) + "-"
-                    + shape.getQseType() + "-" + shape.getSupport() + "-" + shape.getConfidence();
+            comboBoxItem.label = Utils.getComboBoxLabelForExtractedShapes(shape);
             comboBoxItems.add(comboBoxItem);
         }
         multiSelectShapes.setItems(comboBoxItems);

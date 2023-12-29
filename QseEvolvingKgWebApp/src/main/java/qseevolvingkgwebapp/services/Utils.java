@@ -1,6 +1,9 @@
 package qseevolvingkgwebapp.services;
 
 import com.vaadin.flow.component.select.Select;
+import cs.qse.common.TurtlePrettyFormatter;
+import de.atextor.turtle.formatter.FormattingStyle;
+import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
@@ -16,10 +19,10 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.sparqlbuilder.core.Prefix;
 import org.springframework.beans.factory.annotation.Autowired;
+import qseevolvingkgwebapp.data.ExtractedShapes;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.StringWriter;
+import java.io.*;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,8 +85,27 @@ public class Utils {
     }
     public static String generateTTLFromIRIInModel(IRI iri, Model model) {
         StringWriter out = new StringWriter();
-        Model aboutVanGogh = model.filter(iri, null, null);
-        Rio.write(aboutVanGogh, out, RDFFormat.TURTLE);
+        Model filteredModel = model.filter(iri, null, null);
+        Rio.write(filteredModel, out, RDFFormat.TURTLE);
+        //TODO pretty format!
+//        TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+//        org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(filteredModel);
+//        filteredModel.forEach(stmt -> jenaModel.add(convert(stmt)));
+//
+//        String output = formatter.apply(jenaModel);
+
         return out.toString();
+    }
+
+    public static String getComboBoxLabelForExtractedShapes(ExtractedShapes shape) {
+        var comboBoxItem = new Utils.ComboBoxItem();
+        comboBoxItem.id = shape.getId();
+        var version = shape.getVersionEntity();
+        var graph = version.getGraph();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        return graph.getName() + "-" + version.getVersionNumber() + "-" + version.getName() + "-"
+                + formatter.format(shape.getCreatedAt()) + "-"
+                + shape.getQseType() + "-" + shape.getSupport() + "-" + shape.getConfidence();
     }
 }

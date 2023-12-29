@@ -11,21 +11,9 @@ import java.util.Objects;
 
 public class ComparisionTreeViewItem {
 
-    public ComparisionTreeViewItem(NodeShape ns) {
-        shapeName = ns.getIri().getLocalName();
-    }
-
-    public ComparisionTreeViewItem(PropertyShape ps) {
-        shapeName = ps.getIri().getLocalName();
-    }
-
     public ComparisionTreeViewItem() {
-
     }
 
-    public ComparisionTreeViewItem(String name) {
-        shapeName = name;
-    }
     String shapeName;
     HashMap<Long,NodeShape> nodeShapeList = new HashMap<>();
     HashMap<Long,PropertyShape> propertyShapeList = new HashMap<>();

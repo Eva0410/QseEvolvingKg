@@ -14,7 +14,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 import qseevolvingkgwebapp.views.compareshapes.CompareShapesView;
-import qseevolvingkgwebapp.views.comparisiondetails.ComparisionDetailsView;
 import qseevolvingkgwebapp.views.graphs.GraphsView;
 import qseevolvingkgwebapp.views.shapes.ShapesView;
 import qseevolvingkgwebapp.views.versions.VersionsView;
