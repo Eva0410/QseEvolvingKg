@@ -1,25 +1,24 @@
 package qseevolvingkgwebapp.views.versions;
 
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import qseevolvingkgwebapp.data.Version;
 import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
 import qseevolvingkgwebapp.services.GraphService;
-import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.newversion.NewVersionView;
@@ -36,48 +35,58 @@ public class VersionsView extends Composite<VerticalLayout>  {
     @Autowired()
     private GraphService graphService;
 
-    private Grid basicGrid;
+    private Grid gridVersions;
+    private Long currentGraphId;
 
     public VersionsView() {
-        HorizontalLayout layoutRow = new HorizontalLayout();
-        Select<ComboBoxItem> comboBox = new Select<>();
-        Button buttonPrimary = new Button();
-        basicGrid = new Grid(Version.class);
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        Select<ComboBoxItem> comboBoxGraphs = new Select<>();
+        Button buttonNewVersion = new Button();
+        gridVersions = new Grid(Version.class);
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
-        layoutRow.setWidth("100%");
-        layoutRow.setHeight("min-content");
-        layoutRow.setSpacing(true);
-        layoutRow.setAlignItems(FlexComponent.Alignment.BASELINE);
-        comboBox.setLabel("Graph");
-        comboBox.setWidth("min-content");
-        basicGrid.setWidth("100%");
-        basicGrid.getStyle().set("flex-grow", "0");
-        basicGrid.setColumns("versionNumber", "name", "createdAt","path");
-        basicGrid.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
-        buttonPrimary.setText("New Version");
-        buttonPrimary.setWidth("min-content");
-        buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonPrimary.addClickListener(event -> {
-            getUI().ifPresent(ui -> ui.navigate(NewVersionView.class,comboBox.getValue().id));
+        horizontalLayout.setWidth("100%");
+        horizontalLayout.setHeight("min-content");
+        horizontalLayout.setSpacing(true);
+        horizontalLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
+        comboBoxGraphs.setLabel("Graph");
+        comboBoxGraphs.setWidth("min-content");
+        gridVersions.setWidth("100%");
+        gridVersions.getStyle().set("flex-grow", "0");
+        gridVersions.setColumns("versionNumber", "name", "createdAt","path");
+        gridVersions.addColumn(new ComponentRenderer<>(Button::new, (button, ver) -> {
+            button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
+            button.addClickListener(e -> {
+                Version version = (Version) ver;
+                versionService.delete(version.getId());
+                fillGrid();
+            });
+            button.setIcon(new Icon(VaadinIcon.TRASH));
+        })).setHeader("");
+        gridVersions.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
+        buttonNewVersion.setText("New Version");
+        buttonNewVersion.setWidth("min-content");
+        buttonNewVersion.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        buttonNewVersion.addClickListener(event -> {
+            getUI().ifPresent(ui -> ui.navigate(NewVersionView.class,comboBoxGraphs.getValue().id));
         });
-        getContent().add(layoutRow);
-        layoutRow.add(comboBox);
-        layoutRow.add(buttonPrimary);
-        getContent().add(basicGrid);
-        comboBox.addValueChangeListener(event -> {
+        getContent().add(horizontalLayout);
+        horizontalLayout.add(comboBoxGraphs);
+        horizontalLayout.add(buttonNewVersion);
+        getContent().add(gridVersions);
+        comboBoxGraphs.addValueChangeListener(event -> {
             if(event.getValue() != null) {
-                Long selectedValue = event.getValue().id;
-                fillGrid(basicGrid, selectedValue);
+                currentGraphId = event.getValue().id;
+                fillGrid();
             }
         });
 
         addAttachListener(event -> {
-            setComboBoxSampleData(comboBox, basicGrid);
+            setGraphs(comboBoxGraphs);
         });
     }
 
-    private void setComboBoxSampleData(Select<ComboBoxItem> comboBox, Grid grid) {
+    private void setGraphs(Select<ComboBoxItem> comboBox) {
         List<ComboBoxItem> comboBoxItemList = graphService.listAll().stream()
                 .map(graph -> new ComboBoxItem(graph.getName(),graph.getId()))
                 .collect(Collectors.toList());
@@ -89,9 +98,9 @@ public class VersionsView extends Composite<VerticalLayout>  {
         }
     }
 
-    private void fillGrid(Grid grid, Long graphId) {
-        grid.setItems(query -> versionService.listByGraphId(
-                        PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)), graphId)
+    private void fillGrid() {
+        gridVersions.setItems(query -> versionService.listByGraphId(
+                        PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)), currentGraphId)
                 .stream());
     }
 }

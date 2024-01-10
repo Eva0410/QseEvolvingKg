@@ -1,5 +1,7 @@
 package qseevolvingkgwebapp.services;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,8 +14,8 @@ import java.util.Optional;
 
 @Service
 public class GraphService {
-
     private final GraphRepository repository;
+
 
     public GraphService(GraphRepository repository) {
         this.repository = repository;
@@ -29,6 +31,7 @@ public class GraphService {
 
     public void delete(Long id) {
         repository.deleteById(id);
+        repository.flush();
     }
 
     public Page<Graph> list(Pageable pageable) {
@@ -50,7 +53,7 @@ public class GraphService {
     public Graph insert(Graph graph) {
         Graph g = repository.save(graph);
         repository.flush();
-        return g;
+        return this.get(g.getId()).get();
     }
 
 }

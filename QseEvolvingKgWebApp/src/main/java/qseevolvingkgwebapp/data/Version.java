@@ -13,7 +13,7 @@ public class Version extends AbstractEntity {
 
     private LocalDateTime createdAt;
 
-    @ManyToOne
+    @ManyToOne()
     private Graph graph;
 
     String path;
