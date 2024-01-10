@@ -8,6 +8,7 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -16,6 +17,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 
 import java.text.DecimalFormat;
@@ -53,7 +55,6 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
     Long currentVersionId;
     public ShapesView() {
         HorizontalLayout layoutRow = new HorizontalLayout();
-        HorizontalLayout layoutRowButton = new HorizontalLayout();
         selectItemGraph = new Select<>();
         selectItemVersion = new Select<>();
         Button buttonGenerateShapes = new Button();
@@ -63,9 +64,7 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
         layoutRow.addClassName(Gap.MEDIUM);
         layoutRow.setWidth("100%");
         layoutRow.setHeight("min-content");
-        layoutRowButton.addClassName(Gap.MEDIUM);
-        layoutRowButton.setWidth("100%");
-        layoutRowButton.setHeight("min-content");
+        layoutRow.setVerticalComponentAlignment(FlexComponent.Alignment.END, buttonGenerateShapes);
         selectItemGraph.setLabel("Graph");
         selectItemGraph.setWidth("min-content");
         selectItemVersion.setLabel("Version");
@@ -74,13 +73,13 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
         buttonGenerateShapes.setWidth("min-content");
         buttonGenerateShapes.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         gridShapes.setWidth("100%");
+        gridShapes.setHeight("70vh");
         gridShapes.getStyle().set("flex-grow", "0");
 
         getContent().add(layoutRow);
-        getContent().add(layoutRowButton);
         layoutRow.add(selectItemGraph);
         layoutRow.add(selectItemVersion);
-        layoutRowButton.add(buttonGenerateShapes);
+        layoutRow.add(buttonGenerateShapes);
         getContent().add(gridShapes);
 
         selectItemGraph.addValueChangeListener(event -> {

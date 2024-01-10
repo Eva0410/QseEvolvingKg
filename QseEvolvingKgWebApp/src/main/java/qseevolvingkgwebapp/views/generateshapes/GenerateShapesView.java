@@ -72,17 +72,14 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
     List<String> chosenClasses;
     Set<Integer> chosenClassesEncoded;
     Button buttonPrimary;
-    String defaultShapesOutputFileAddress = "";
     String prunedFileAddress = "";
     Checkbox checkbox;
     NumberField confidence;
     IntegerField support;
-
-    HashMap<String, String> defaultShapesModelStats;
     Graph currentGraph;
     Version currentVersion;
     RadioButtonGroup radioGroupQseType;
-
+    DecimalFormat decimalFormatter = new DecimalFormat("#,###");
 
 
     public GenerateShapesView() {
@@ -103,6 +100,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
         buttonPrimary = new Button();
         graphInfo = new H5();
         searchField = new TextField();
+        searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
+        searchField.setValueChangeMode(ValueChangeMode.EAGER);
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
         comboBoxGraph.setLabel("Graph");
@@ -122,6 +121,9 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
         classesGrid.addColumn("name").setHeader("Class IRI").setSortable(true);
         classesGrid.addColumn("instanceCount").setHeader("Class Instance Count").setSortable(true);
         classesGrid.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
+        classesGrid.addSelectionListener(selection -> {
+            buttonPrimary.setEnabled(selection.getAllSelectedItems().size() > 0);
+        });
         support.setLabel("Support");
         support.setWidth("min-content");
         support.setMin(0);
@@ -157,7 +159,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
         comboBoxVersion.addValueChangeListener(event -> {
             if(event.getValue() != null) {
                 currentVersionId = event.getValue().id;
-                setGridSampleData();
+                setClassesGridData();
                 currentVersion = versionService.get(event.getValue().id).get();
                 Main.setDataSetNameForJar(currentGraph.getName() + "-" + event.getValue().label.replace(" ",""));
             }
@@ -188,19 +190,39 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
     }
 
 
-    private void setGridSampleData() {
+    private void setClassesGridData() {
         //Copied from Shactor
         Version version = versionService.get(currentVersionId).get();
         parser = new Parser(version.getPath(), 50, 5000, "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>");
         parser.entityExtraction();
-        graphInfo.setVisible(true);
-        DecimalFormat formatter = new DecimalFormat("#,###");
-        String info = "No. of entities: " + formatter.format(parser.entityDataHashMap.size()) + " ; " + "No. of classes: " + formatter.format(parser.classEntityCount.size()) + ". Please select the classes from the table below for which you want to extract shapes.";
+        String info = "No. of entities: " + decimalFormatter.format(parser.entityDataHashMap.size()) + " ; " + "No. of classes: " + decimalFormatter.format(parser.classEntityCount.size()) + ". Please select the classes from the table below for which you want to extract shapes.";
         graphInfo.setText(info);
-        setupGridInMultiSelectionMode(getClasses(parser.classEntityCount, parser.getStringEncoder()), parser.getStringEncoder(), parser.classEntityCount.size());
+
+        var classes = getClasses(parser.classEntityCount, parser.getStringEncoder());
+        var dataView = classesGrid.setItems(classes);
+        searchField.addValueChangeListener(e -> dataView.refreshAll());
+
+        dataView.addFilter(type -> {
+            String searchTerm = searchField.getValue().trim();
+            if (searchTerm.isEmpty())
+                return true;
+            Type t = (Type)type;
+            return t.getName().toLowerCase().contains(searchTerm.toLowerCase());
+        });
+
+        classes.forEach(item -> classesGrid.select(item));
     }
 
     private void completeFileBasedShapesExtraction() throws IOException {
+        chosenClasses = new ArrayList<>();
+        chosenClassesEncoded = new HashSet<>();
+
+        classesGrid.getSelectedItems().forEach(item -> {
+            Type t = (Type) item;
+            chosenClasses.add(t.getName());
+            chosenClassesEncoded.add(parser.getStringEncoder().encode(t.getName()));
+        });
+
         parser.entityConstraintsExtraction();
         parser.computeSupportConfidence();
 
@@ -254,45 +276,6 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
         return types;
     }
 
-    private void setupGridInMultiSelectionMode(List<Type> classes, StringEncoder encoder, Integer classEntityCountSize) {
-        var dataView = classesGrid.setItems(classes);
-        searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
-        searchField.setValueChangeMode(ValueChangeMode.EAGER);
-        searchField.addValueChangeListener(e -> dataView.refreshAll());
-
-        dataView.addFilter(type -> {
-            String searchTerm = searchField.getValue().trim();
-            if (searchTerm.isEmpty())
-                return true;
-            Type t = (Type)type;
-            return t.getName().toLowerCase().contains(searchTerm.toLowerCase());
-        });
-
-        classesGrid.addSelectionListener(selection -> {
-            //System.out.printf("Number of selected classes: %s%n", selection.getAllSelectedItems().size());
-            if (selection.getAllSelectedItems().size() == classEntityCountSize) {
-                System.out.println("Extract Shapes for All Classes");
-                chosenClasses = new ArrayList<>();
-                chosenClassesEncoded = new HashSet<>();
-            } else {
-                System.out.println("Extract Shapes for Chosen Classes");
-                chosenClasses = new ArrayList<>();
-                chosenClassesEncoded = new HashSet<>();
-                selection.getAllSelectedItems().forEach(item -> {
-                    Type t = (Type) item;
-                    chosenClasses.add(t.getName());
-                    chosenClassesEncoded.add(encoder.encode(t.getName()));
-                });
-            }
-            buttonPrimary.setEnabled(selection.getAllSelectedItems().size() > 0);
-        });
-        searchField.setVisible(true);
-
-        for (var item: classes) {
-            classesGrid.select(item);
-        }
-    }
-
     private static void setPaths() {
         try {
             String jarDir = System.getProperty("user.dir");
@@ -300,6 +283,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
             Main.setConfigDirPathForJar(jarDir + "/config/");
             Main.setResourcesPathForJar(jarDir + "/resources/");
             Main.qseFromSpecificClasses = false;
+
             //Clean output directory
             File[] filesInOutputDir = new File(jarDir + "/Output/").listFiles();
             assert filesInOutputDir != null;

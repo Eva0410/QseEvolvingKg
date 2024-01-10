@@ -61,9 +61,10 @@ public class VersionsView extends Composite<VerticalLayout>  {
         comboBoxGraphs.setLabel("Graph");
         comboBoxGraphs.setWidth("min-content");
         gridVersions.setWidth("100%");
+        gridVersions.setHeight("70vh");
         gridVersions.getStyle().set("flex-grow", "0");
         gridVersions.setColumns("versionNumber", "name", "createdAt","path");
-        gridVersions.getColumnByKey("path").setTooltipGenerator(v -> ((Version)v).getPath());
+        gridVersions.getColumnByKey("path").setTooltipGenerator(v -> ((Version)v).getPathWithSpacesForTooltip());
         gridVersions.getColumnByKey("createdAt").setRenderer(new TextRenderer<>(e -> ((Version)e).getCreatedAt().format(Utils.formatter)));
         gridVersions.addColumn(new ComponentRenderer<>(Button::new, (button, ver) -> {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);

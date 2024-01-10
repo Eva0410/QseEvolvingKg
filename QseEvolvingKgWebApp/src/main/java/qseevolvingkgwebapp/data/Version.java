@@ -47,6 +47,14 @@ public class Version extends AbstractEntity {
     public String getPath() {
         return path;
     }
+    public String getPathWithSpacesForTooltip() {
+        StringBuilder builder = new StringBuilder(this.path);
+        int interval = 35;
+        for (int i = interval; i < builder.length(); i += interval + 1) {
+            builder.insert(i, ' ');
+        }
+        return builder.toString();
+    }
 
     public void setPath(String path) {
         this.path = path;

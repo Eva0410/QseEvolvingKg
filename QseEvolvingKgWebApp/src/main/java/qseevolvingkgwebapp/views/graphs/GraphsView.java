@@ -3,6 +3,7 @@ package qseevolvingkgwebapp.views.graphs;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
@@ -58,6 +59,7 @@ public class GraphsView extends Composite<VerticalLayout> {
             getUI().ifPresent(ui -> ui.navigate(NewGraphView.class));
         });
         gridGraphs.setWidth("100%");
+        gridGraphs.setHeight("80vh");
         gridGraphs.getStyle().set("flex-grow", "0");
         gridGraphs.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
         gridGraphs.setColumns("name","createdAt");

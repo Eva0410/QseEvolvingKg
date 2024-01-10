@@ -52,6 +52,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 GridVariant.LUMO_NO_ROW_BORDERS);
         treeViewComparision.setWidth("100%");
         treeViewComparision.getStyle().set("flex-grow", "0");
+        treeViewComparision.setHeight("70vh");
         getContent().add(layoutRow);
         layoutRow.add(multiSelectShapes);
         getContent().add(treeViewComparision);
@@ -68,6 +69,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 Notification.show("Caution, the compared items were not analyzed for the same classes!");
 
             setTreeViewData();
+
         });
         treeViewComparision.addItemClickListener(event -> {
             ComparisionTreeViewItem clickedItem = event.getItem();
@@ -129,7 +131,11 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 treeViewComparision.addColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id)).setHeader(comboBoxItem.label);
             }
         }
+        long startTime = System.nanoTime();
+
         treeViewComparision.setItems(nodeShapesToShow, this::getPropertyShapes);
+        System.out.println("Method execution time: " + (System.nanoTime()-startTime)/ 1_000_000_000.0 + " seconds");
+
         treeViewComparision.expand(nodeShapesToShow);
     }
 
@@ -150,26 +156,28 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
     private List<ComparisionTreeViewItem> getPropertyShapes(ComparisionTreeViewItem item) {
         var propertyShapesToShow = new ArrayList<ComparisionTreeViewItem>();
-        for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
-            var extractedShapes = shapeService.get(comboBoxItem.id).get().getNodeShapes()
-                    .stream().filter(n -> n.getIri().getLocalName().equals(item.getShapeName())).findFirst();
-            if(extractedShapes.isPresent()) {
-                var propertyShapesToShowMap =  propertyShapesToShow
-                        .stream().map(ns -> ns.getShapeName())
-                        .collect(Collectors.toList());
-                for(var ps : extractedShapes.get().getPropertyShapeList()) {
-                    if (propertyShapesToShowMap.contains(ps.getIri().getLocalName())) {
-                        var propertyShapeToShow = propertyShapesToShow.stream().filter(n -> n.getShapeName()
-                                .equals(ps.getIri().getLocalName())).findFirst().get();
-                        propertyShapeToShow.addPropertyShape(ps, comboBoxItem.id);
-                    } else {
-                        var newItem = new ComparisionTreeViewItem();
-                        newItem.addPropertyShape(ps, comboBoxItem.id);
-                        propertyShapesToShow.add(newItem);
+        if(item.getPropertyShapeList().size() == 0) { //important for performance
+            for (var comboBoxItem : multiSelectShapes.getSelectedItems()) {
+                var extractedShapes = shapeService.get(comboBoxItem.id).get().getNodeShapes()
+                        .stream().filter(n -> n.getIri().getLocalName().equals(item.getShapeName())).findFirst();
+                if (extractedShapes.isPresent()) {
+                    var propertyShapesToShowMap = propertyShapesToShow
+                            .stream().map(ns -> ns.getShapeName())
+                            .collect(Collectors.toList());
+                    for (var ps : extractedShapes.get().getPropertyShapeList()) {
+                        if (propertyShapesToShowMap.contains(ps.getIri().getLocalName())) {
+                            var propertyShapeToShow = propertyShapesToShow.stream().filter(n -> n.getShapeName()
+                                    .equals(ps.getIri().getLocalName())).findFirst().get();
+                            propertyShapeToShow.addPropertyShape(ps, comboBoxItem.id);
+                        } else {
+                            var newItem = new ComparisionTreeViewItem();
+                            newItem.addPropertyShape(ps, comboBoxItem.id);
+                            propertyShapesToShow.add(newItem);
+                        }
                     }
                 }
-            }
 
+            }
         }
         return propertyShapesToShow;
     }
