@@ -23,7 +23,6 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import qseevolvingkgwebapp.data.Graph;
 import qseevolvingkgwebapp.data.Version;
 import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
@@ -64,6 +63,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
         gridVersions.setWidth("100%");
         gridVersions.getStyle().set("flex-grow", "0");
         gridVersions.setColumns("versionNumber", "name", "createdAt","path");
+        gridVersions.getColumnByKey("path").setTooltipGenerator(v -> ((Version)v).getPath());
         gridVersions.getColumnByKey("createdAt").setRenderer(new TextRenderer<>(e -> ((Version)e).getCreatedAt().format(Utils.formatter)));
         gridVersions.addColumn(new ComponentRenderer<>(Button::new, (button, ver) -> {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
@@ -104,6 +104,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
                 ((Focusable) editorComponent).focus();
             }
         });
+
         editor.addCancelListener(e -> {
             nameValidationMessage.setText("");
         });

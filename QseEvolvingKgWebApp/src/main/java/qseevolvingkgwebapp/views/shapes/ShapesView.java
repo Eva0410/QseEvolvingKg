@@ -109,7 +109,9 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getQseType()).setHeader("QSE Type").setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getSupport()).setHeader("Support").setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getConfidence()).setHeader("Confidence").setResizable(true);
-        gridShapes.addColumn(o -> ((ExtractedShapes) o).getClassesAsString()).setHeader("Classes").setResizable(true);
+        gridShapes.addColumn(o -> ((ExtractedShapes) o).getClassesAsString())
+                .setTooltipGenerator(s -> ((ExtractedShapes)s).getClassesAsString())
+                .setHeader("Classes").setResizable(true);
         gridShapes.addColumn(new ComponentRenderer<>(Button::new, (button, es) -> {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener(e -> {
