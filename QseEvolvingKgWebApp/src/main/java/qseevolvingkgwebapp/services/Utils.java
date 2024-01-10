@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 public class Utils {
 
     static String graphDirectory;
+    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
 
     public static String getGraphDirectory() {
         String projectDirectory = System.getProperty("user.dir");

@@ -1,26 +1,36 @@
 package qseevolvingkgwebapp.views.versions;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import qseevolvingkgwebapp.data.Graph;
 import qseevolvingkgwebapp.data.Version;
+import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
 import qseevolvingkgwebapp.services.GraphService;
 import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
+import qseevolvingkgwebapp.views.Utils.ValidationMessage;
 import qseevolvingkgwebapp.views.newversion.NewVersionView;
 
 import java.util.List;
@@ -54,6 +64,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
         gridVersions.setWidth("100%");
         gridVersions.getStyle().set("flex-grow", "0");
         gridVersions.setColumns("versionNumber", "name", "createdAt","path");
+        gridVersions.getColumnByKey("createdAt").setRenderer(new TextRenderer<>(e -> ((Version)e).getCreatedAt().format(Utils.formatter)));
         gridVersions.addColumn(new ComponentRenderer<>(Button::new, (button, ver) -> {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener(e -> {
@@ -62,7 +73,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
                 fillGrid();
             });
             button.setIcon(new Icon(VaadinIcon.TRASH));
-        })).setHeader("");
+        })).setHeader("").setAutoWidth(true).setFlexGrow(0);;
         gridVersions.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
         buttonNewVersion.setText("New Version");
         buttonNewVersion.setWidth("min-content");
@@ -70,9 +81,40 @@ public class VersionsView extends Composite<VerticalLayout>  {
         buttonNewVersion.addClickListener(event -> {
             getUI().ifPresent(ui -> ui.navigate(NewVersionView.class,comboBoxGraphs.getValue().id));
         });
+
+        Binder<Version> binder = new Binder<>(Version.class);
+        Editor<Version> editor = gridVersions.getEditor();
+        editor.setBinder(binder);
+        ValidationMessage nameValidationMessage = new ValidationMessage();
+
+        TextField nameField = new TextField();
+        nameField.setWidthFull();
+        addCloseHandler(nameField, editor);
+        binder.forField(nameField)
+                .asRequired("Name must not be empty")
+                .withStatusLabel(nameValidationMessage)
+                .bind(Version::getName, Version::setName);
+        gridVersions.getColumnByKey("name").setEditorComponent(nameField);
+
+        gridVersions.addItemDoubleClickListener(e -> {
+            var event = (ItemDoubleClickEvent)e;
+            editor.editItem((Version) event.getItem());
+            Component editorComponent = event.getColumn().getEditorComponent();
+            if (editorComponent instanceof Focusable) {
+                ((Focusable) editorComponent).focus();
+            }
+        });
+        editor.addCancelListener(e -> {
+            nameValidationMessage.setText("");
+        });
+        editor.addCloseListener(e -> {
+            versionService.update(e.getItem());
+        });
+
         getContent().add(horizontalLayout);
         horizontalLayout.add(comboBoxGraphs);
         horizontalLayout.add(buttonNewVersion);
+        getContent().add(nameValidationMessage);
         getContent().add(gridVersions);
         comboBoxGraphs.addValueChangeListener(event -> {
             if(event.getValue() != null) {
@@ -84,6 +126,12 @@ public class VersionsView extends Composite<VerticalLayout>  {
         addAttachListener(event -> {
             setGraphs(comboBoxGraphs);
         });
+    }
+
+    private static void addCloseHandler(Component textField,
+                                        Editor<Version> editor) {
+        textField.getElement().addEventListener("keydown", e -> editor.cancel())
+                .setFilter("event.code === 'Escape'");
     }
 
     private void setGraphs(Select<ComboBoxItem> comboBox) {

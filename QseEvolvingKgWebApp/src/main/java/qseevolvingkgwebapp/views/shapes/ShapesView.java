@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
@@ -53,8 +54,8 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
     public ShapesView() {
         HorizontalLayout layoutRow = new HorizontalLayout();
         HorizontalLayout layoutRowButton = new HorizontalLayout();
-        selectItemGraph = new Select<Utils.ComboBoxItem>();
-        selectItemVersion = new Select<Utils.ComboBoxItem>();
+        selectItemGraph = new Select<>();
+        selectItemVersion = new Select<>();
         Button buttonGenerateShapes = new Button();
         gridShapes = new Grid(ExtractedShapes.class, false);
         getContent().setWidth("100%");
@@ -74,6 +75,7 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
         buttonGenerateShapes.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         gridShapes.setWidth("100%");
         gridShapes.getStyle().set("flex-grow", "0");
+
         getContent().add(layoutRow);
         getContent().add(layoutRowButton);
         layoutRow.add(selectItemGraph);
@@ -102,7 +104,8 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
 
     private void setGridData() {
         gridShapes.removeAllColumns();
-        gridShapes.addColumn(o -> ((ExtractedShapes) o).getCreatedAt()).setHeader("Created At").setResizable(true);
+        gridShapes.addColumn(o -> ((ExtractedShapes) o).getCreatedAt()).setHeader("Created At")
+        .setRenderer(new TextRenderer<>(e -> ((ExtractedShapes)e).getCreatedAt().format(Utils.formatter))).setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getQseType()).setHeader("QSE Type").setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getSupport()).setHeader("Support").setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getConfidence()).setHeader("Confidence").setResizable(true);
@@ -115,7 +118,7 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
                 setGridData();
             });
             button.setIcon(new Icon(VaadinIcon.TRASH));
-        })).setHeader("");
+        })).setHeader("").setAutoWidth(true).setFlexGrow(0);;
         var items = shapeService.listByVersionId(currentVersionId);
 
         if(items != null)
