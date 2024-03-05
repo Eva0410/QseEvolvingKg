@@ -54,11 +54,13 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         treeViewItem = (ComparisionTreeViewItem)VaadinSession.getCurrent().getAttribute("currentCompareObject");
 
         var comboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
-
-        selectItemOld.setItems(comboBoxItems);
-        selectItemOld.setItemLabelGenerator(item -> item.label);
-        selectItemNew.setItems(comboBoxItems);
-        selectItemNew.setItemLabelGenerator(item -> item.label);
+        if(comboBoxItems != null)
+        {
+            selectItemOld.setItems(comboBoxItems);
+            selectItemOld.setItemLabelGenerator(item -> item.label);
+            selectItemNew.setItems(comboBoxItems);
+            selectItemNew.setItemLabelGenerator(item -> item.label);
+        }
 
         var list = selectItemOld.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
         selectItemOld.setValue(list.get(0));
@@ -100,18 +102,18 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         NodeShape nodeShape;
         if(treeViewItem.isNodeShapeLine()) {
             nodeShape = treeViewItem.getNodeShapeList().get(extractedShapesId);
+            if(nodeShape == null)
+                return "";
+            iri = nodeShape.getIri();
         }
         else {
             var ps = treeViewItem.getPropertyShapeList().get(extractedShapesId);
             if(ps == null)
-                nodeShape = null;
+                return "";
             else
                 nodeShape = ps.getNodeShape();
+            iri = ps.getIri();
         }
-        if(nodeShape == null) {
-            return "";
-        }
-        iri = nodeShape.getIri();
         var extractedShapes = nodeShape.getExtractedShapes();
         var model = extractedShapes.getModel();
         var output = Utils.generateTTLFromIRIInModel(iri, model);

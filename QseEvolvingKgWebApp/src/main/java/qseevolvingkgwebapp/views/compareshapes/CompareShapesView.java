@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -72,12 +73,11 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
         });
         treeViewComparision.addItemClickListener(event -> {
-            ComparisionTreeViewItem clickedItem = event.getItem();
-            VaadinSession.getCurrent().setAttribute("currentCompareObject", clickedItem);
+            VaadinSession.getCurrent().setAttribute("currentCompareObject", event.getItem());
             VaadinSession.getCurrent().setAttribute("currentComboBoxItems", multiSelectShapes.getSelectedItems());
             getUI().ifPresent(ui -> ui.navigate(ComparisonDetailsView.class));
-
         });
+
         addAttachListener(e ->{
             fillComboBox();
         });

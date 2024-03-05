@@ -1,11 +1,8 @@
 package qseevolvingkgwebapp.data;
 
 import cs.qse.common.structure.PS;
-import cs.qse.common.structure.ShaclOrListItem;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
-
-import java.util.List;
 
 @Entity
 public class PropertyShape {

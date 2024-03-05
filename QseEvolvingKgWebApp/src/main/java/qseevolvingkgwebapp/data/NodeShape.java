@@ -3,7 +3,6 @@ package qseevolvingkgwebapp.data;
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
-import org.hibernate.mapping.Property;
 
 import java.util.ArrayList;
 import java.util.List;
