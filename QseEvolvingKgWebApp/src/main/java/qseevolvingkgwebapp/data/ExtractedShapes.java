@@ -10,6 +10,7 @@ import org.w3c.dom.Node;
 
 import javax.xml.stream.Location;
 import java.io.ByteArrayInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -57,15 +58,12 @@ public class ExtractedShapes extends AbstractEntity{
 
     public Model getModel() {
         if(model == null) {
-//            Model m = ModelFactory.createDefaultModel();
             InputStream inputStream = new ByteArrayInputStream(fileContent);
             try {
                 this.model = Rio.parse(inputStream, "", RDFFormat.TURTLE);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-//            this.model =  m.read(inputStream, null, "TTL");
         }
         return this.model;
     }

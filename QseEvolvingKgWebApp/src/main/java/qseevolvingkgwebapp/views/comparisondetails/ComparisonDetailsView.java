@@ -54,19 +54,18 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         treeViewItem = (ComparisionTreeViewItem)VaadinSession.getCurrent().getAttribute("currentCompareObject");
 
         var comboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
-        if(comboBoxItems != null)
-        {
+        if(comboBoxItems != null) {
             selectItemOld.setItems(comboBoxItems);
             selectItemOld.setItemLabelGenerator(item -> item.label);
             selectItemNew.setItems(comboBoxItems);
             selectItemNew.setItemLabelGenerator(item -> item.label);
-        }
 
-        var list = selectItemOld.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
-        selectItemOld.setValue(list.get(0));
-        selectItemNew.setValue(list.get(list.size()-1));
-        oldText = escapeNew(getText(list.get(0).id));
-        newText = escapeNew(getText(list.get(list.size()-1).id));
+            var list = selectItemOld.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+            selectItemOld.setValue(list.get(0));
+            selectItemNew.setValue(list.get(list.size() - 1));
+            oldText = escapeNew(getText(list.get(0).id));
+            newText = escapeNew(getText(list.get(list.size() - 1).id));
+        }
 
         comparisonDiv = new ComparisonDiv(oldText, newText);
         layout.add(comparisonDiv);
@@ -110,8 +109,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             var ps = treeViewItem.getPropertyShapeList().get(extractedShapesId);
             if(ps == null)
                 return "";
-            else
-                nodeShape = ps.getNodeShape();
+            nodeShape = ps.getNodeShape();
             iri = ps.getIri();
         }
         var extractedShapes = nodeShape.getExtractedShapes();

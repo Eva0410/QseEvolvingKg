@@ -269,3 +269,12 @@ Film_ShactorTest-1-Original,computeSupportConfidence,0,0,2,0,false,null
 Film_ShactorTest-1-Original,extractSHACLShapes:No Pruning,1,0,3,0,false,null
 Film_ShactorTest-1-Original,0.25_10 extractSHACLShapes:WithPruning-Time.For.Pruning.Only,0,0,3,0,false,null
 Film_ShactorTest-1-Original,extractSHACLShapes:WithPruning,0,0,3,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,secondPhase,1,0,1,0,false,null
+test-1-asdf,computeSupportConfidence,0,0,1,0,false,null
+test-1-asdf,extractSHACLShapes:No Pruning,4,0,5,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+Film0-1-null,secondPhase,0,0,0,0,false,null
+Film0-1-null,computeSupportConfidence,0,0,0,0,false,null
+Film0-1-null,extractSHACLShapes:No Pruning,4,0,4,0,false,null
