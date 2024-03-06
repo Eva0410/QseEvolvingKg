@@ -3,6 +3,7 @@ package qseevolvingkgwebapp.data;
 import cs.qse.common.structure.PS;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
+import qseevolvingkgwebapp.services.Utils;
 
 @Entity
 public class PropertyShape {
@@ -19,10 +20,13 @@ public class PropertyShape {
     Double confidence;
 //    List<ShaclOrListItem> shaclOrListItems;
 
+    @Lob
+    String generatedText;
+
     @ManyToOne
     NodeShape nodeShape;
 
-    public PropertyShape(PS ps) {
+    private PropertyShape(PS ps) {
         iri = ps.getIri();
         path = ps.getPath();
         nodeKind = ps.getNodeKind();
@@ -35,6 +39,7 @@ public class PropertyShape {
     public PropertyShape(PS ps, NodeShape ns) {
         this(ps);
         this.nodeShape = ns;
+        this.generateText();
     }
     public PropertyShape() {}
 
@@ -108,5 +113,18 @@ public class PropertyShape {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getGeneratedText() {
+        return generatedText;
+    }
+
+    public void setGeneratedText(String generatedText) {
+        this.generatedText = generatedText;
+    }
+
+    public void generateText() {
+        var model = this.nodeShape.extractedShapes.getModel();
+        this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);;
     }
 }

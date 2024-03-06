@@ -7,10 +7,10 @@ import com.vaadin.flow.component.html.Div;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
-import jdk.jshell.execution.Util;
-import qseevolvingkgwebapp.services.Utils;
 
-@JavaScript("https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.js") //path to jsdiff file, https://npm.runkit.com/diff
+@JavaScript("https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.js") //path to jsdiff file
+// https://npm.runkit.com/diff
+// https://github.com/kpdecker/jsdiff
 public class ComparisonDiv extends Div {
     String t1;
     String t2;

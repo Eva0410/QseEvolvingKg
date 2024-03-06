@@ -2,9 +2,9 @@ package qseevolvingkgwebapp.views.compareshapes;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.ExtractedShapes;
+import qseevolvingkgwebapp.data.NodeShape;
+import qseevolvingkgwebapp.data.PropertyShape;
 import qseevolvingkgwebapp.services.*;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
@@ -27,6 +29,10 @@ import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
 @PageTitle("Compare Shapes")
 @Route(value = "compare-shapes", layout = MainLayout.class)
 @Uses(Icon.class)
+@CssImport(
+        themeFor = "vaadin-grid",
+        value = "themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css"
+)
 public class CompareShapesView extends Composite<VerticalLayout> {
 
     @Autowired()
@@ -101,6 +107,8 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     }
 
     private void setTreeViewData() {
+        long startTime = System.nanoTime();
+
         var nodeShapesToShow = new ArrayList<ComparisionTreeViewItem>();
         treeViewComparision.removeAllColumns();
         boolean first = true;
@@ -131,12 +139,15 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 treeViewComparision.addColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id)).setHeader(comboBoxItem.label);
             }
         }
-        long startTime = System.nanoTime();
+
+        addEqualInformationNS(nodeShapesToShow);
 
         treeViewComparision.setItems(nodeShapesToShow, this::getPropertyShapes);
         System.out.println("Method execution time: " + (System.nanoTime()-startTime)/ 1_000_000_000.0 + " seconds");
 
         treeViewComparision.expand(nodeShapesToShow);
+        treeViewComparision.setClassNameGenerator(e -> !e.areShapesEqual() ? "warn" : null);
+
     }
 
     private String getTreeViewTextFromViewItem(ComparisionTreeViewItem o, Long extractedShapesId) {
@@ -179,6 +190,54 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
             }
         }
+        addEqualInformationPS(propertyShapesToShow);
         return propertyShapesToShow;
+    }
+
+    private void addEqualInformationPS(ArrayList<ComparisionTreeViewItem> propertyShapesToShow) {
+        for (var comparisonTreeViewItem:
+             propertyShapesToShow) {
+            for (var ps : comparisonTreeViewItem.getPropertyShapeList().values()) {
+                if(ps.getGeneratedText() == null || ps.getGeneratedText().isEmpty()) {
+                    ps.generateText();
+                    shapeService.update(ps.getNodeShape().getExtractedShapes());
+                }
+
+            }
+            comparisonTreeViewItem.setShapesEqual(
+                    areAllStringsEqual(
+                            comparisonTreeViewItem.getPropertyShapeList().values().stream()
+                                    .map(PropertyShape::getGeneratedText).collect(Collectors.toList())));
+
+        }
+    }
+
+    private void addEqualInformationNS(ArrayList<ComparisionTreeViewItem> propertyShapesToShow) {
+        for (var comparisonTreeViewItem:
+                propertyShapesToShow) {
+            for (var ps : comparisonTreeViewItem.getNodeShapeList().values()) {
+                if(ps.getGeneratedText() == null || ps.getGeneratedText().isEmpty()) {
+                    ps.generateText();
+                    shapeService.update(ps.getExtractedShapes());
+                }
+            }
+            comparisonTreeViewItem.setShapesEqual(
+                    areAllStringsEqual(
+                            comparisonTreeViewItem.getNodeShapeList().values().stream()
+                                    .map(NodeShape::getGeneratedText).collect(Collectors.toList())));
+
+        }
+    }
+    private Boolean areAllStringsEqual(List<String> texts) {
+        if(texts.size() != multiSelectShapes.getSelectedItems().size())
+            return false;
+        for (int i = 0; i < texts.size(); i++) {
+            for (int j = i + 1; j < texts.size(); j++) {
+                if (!texts.get(i).equals(texts.get(j))) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

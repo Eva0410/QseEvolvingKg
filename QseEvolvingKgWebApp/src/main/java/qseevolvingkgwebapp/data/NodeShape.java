@@ -3,6 +3,7 @@ package qseevolvingkgwebapp.data;
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
+import qseevolvingkgwebapp.services.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,8 @@ public class NodeShape {
     IRI iri;
     IRI targetClass;
     Integer support;
+    @Lob
+    String generatedText;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<PropertyShape> propertyShapeList;
@@ -26,19 +29,17 @@ public class NodeShape {
     ExtractedShapes extractedShapes;
 
     public NodeShape() {}
-    public NodeShape(NS ns) {
+
+    public NodeShape(NS ns, ExtractedShapes es) {
         this.iri = ns.getIri();
         this.targetClass = ns.getTargetClass();
         this.support = ns.getSupport();
         this.propertyShapeList = new ArrayList<>();
+        this.extractedShapes = es;
         for (var ps : ns.getPropertyShapes()) {
             propertyShapeList.add(new PropertyShape(ps, this));
         }
-    }
-
-    public NodeShape(NS ns, ExtractedShapes es) {
-        this(ns);
-        this.extractedShapes = es;
+        this.generateText();
     }
 
     public ExtractedShapes getExtractedShapes() {
@@ -87,5 +88,18 @@ public class NodeShape {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getGeneratedText() {
+        return generatedText;
+    }
+
+    public void setGeneratedText(String generatedText) {
+        this.generatedText = generatedText;
+    }
+
+    public void generateText() {
+        var model = extractedShapes.getModel();
+        this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);
     }
 }
