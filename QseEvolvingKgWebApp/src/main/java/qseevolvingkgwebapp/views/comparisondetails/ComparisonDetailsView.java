@@ -97,30 +97,18 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
     }
 
     private String getText(Long extractedShapesId) {
-        IRI iri = null;
-        NodeShape nodeShape;
         if(treeViewItem.isNodeShapeLine()) {
-            nodeShape = treeViewItem.getNodeShapeList().get(extractedShapesId);
-            if(nodeShape == null)
+            NodeShape ns = treeViewItem.getNodeShapeList().get(extractedShapesId);
+            if(ns == null)
                 return "";
-            iri = nodeShape.getIri();
+            return ns.getGeneratedText();
         }
         else {
             var ps = treeViewItem.getPropertyShapeList().get(extractedShapesId);
             if(ps == null)
                 return "";
-            nodeShape = ps.getNodeShape();
-            iri = ps.getIri();
+            return ps.getGeneratedText();
         }
-        var extractedShapes = nodeShape.getExtractedShapes();
-        var model = extractedShapes.getModel();
-        var output = Utils.generateTTLFromIRIInModel(iri, model);
-
-        return output;
-    }
-
-    public static String escapeNewlines(String input) {
-        return input.replaceAll("\n", "\\\\\\\\n");
     }
     public static String convertNewlinesToHtmlBreaks(String input) {
         String s = ComparisonDiv.escapeHtmlCharacters(input);

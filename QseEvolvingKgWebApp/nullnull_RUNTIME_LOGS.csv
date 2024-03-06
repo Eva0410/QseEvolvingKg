@@ -297,3 +297,9 @@ Film0-1-null,firstPass,0,0,3,0,false,null
 Film0-2-NoGender,secondPhase,0,0,3,0,false,null
 Film0-2-NoGender,computeSupportConfidence,0,0,3,0,false,null
 Film0-2-NoGender,extractSHACLShapes:No Pruning,1,0,4,0,false,null
+null,firstPass,0,0,0,0,false,null
+test-1-asdf,firstPass,0,0,0,0,false,null
+Film0-1-null,firstPass,0,0,0,0,false,null
+Film0-3-NoFilmStudio,secondPhase,0,0,0,0,false,null
+Film0-3-NoFilmStudio,computeSupportConfidence,0,0,0,0,false,null
+Film0-3-NoFilmStudio,extractSHACLShapes:No Pruning,4,0,4,0,false,null
