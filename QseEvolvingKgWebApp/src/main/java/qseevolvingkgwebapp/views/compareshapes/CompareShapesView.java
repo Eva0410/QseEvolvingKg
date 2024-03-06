@@ -7,9 +7,15 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
@@ -43,16 +49,23 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     private ShapesService shapeService;
     MultiSelectComboBox<Utils.ComboBoxItem> multiSelectShapes;
     TreeGrid<ComparisionTreeViewItem> treeViewComparision;
-
+    TextField filterField = new TextField("Filter");
+    RadioButtonGroup<String> radioGroupFilter = new RadioButtonGroup<>();
     public CompareShapesView() {
-        HorizontalLayout layoutRow = new HorizontalLayout();
+        HorizontalLayout layoutRowComboBox = new HorizontalLayout();
+        HorizontalLayout layoutRowFilter = new HorizontalLayout();
         multiSelectShapes = new MultiSelectComboBox();
         treeViewComparision = new TreeGrid<>();
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
-        layoutRow.addClassName(Gap.MEDIUM);
-        layoutRow.setWidth("100%");
-        layoutRow.setHeight("min-content");
+        getContent().setSpacing(false);
+        layoutRowComboBox.addClassName(Gap.MEDIUM);
+        layoutRowComboBox.setWidth("100%");
+        layoutRowComboBox.setHeight("min-content");
+        layoutRowFilter.addClassName(Gap.MEDIUM);
+        layoutRowFilter.setWidth("100%");
+        layoutRowFilter.setHeight("min-content");
+        filterField.setHeight("min-content");
         multiSelectShapes.setLabel("Shapes");
         multiSelectShapes.setWidthFull();
         treeViewComparision.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER,
@@ -60,9 +73,42 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         treeViewComparision.setWidth("100%");
         treeViewComparision.getStyle().set("flex-grow", "0");
         treeViewComparision.setHeight("70vh");
-        getContent().add(layoutRow);
-        layoutRow.add(multiSelectShapes);
+        radioGroupFilter.setItems(Arrays.stream(FilterEnum.values()).map(FilterEnum::getLabel).collect(Collectors.toList()));
+        radioGroupFilter.setValue(FilterEnum.ALL.getLabel());
+        layoutRowFilter.setAlignItems(FlexComponent.Alignment.BASELINE);
+        getContent().add(layoutRowComboBox);
+        layoutRowComboBox.add(multiSelectShapes);
+        getContent().add(layoutRowFilter);
+        layoutRowFilter.add(filterField);
+        layoutRowFilter.add(radioGroupFilter);
         getContent().add(treeViewComparision);
+
+        filterField.setValueChangeMode(ValueChangeMode.EAGER);
+        filterField.addValueChangeListener(event -> {
+            var dataProvider = ((TreeDataProvider<ComparisionTreeViewItem>)treeViewComparision.getDataProvider());
+            if (event.getValue() == null) {
+                dataProvider.setFilter(null);
+            } else {
+                dataProvider.setFilter(item -> item.getShapeName().toLowerCase()
+                        .contains(event.getValue().toLowerCase()));
+            }
+//            applyFilters();
+
+        });
+
+        radioGroupFilter.addValueChangeListener(event -> {
+//            var dataProvider = ((TreeDataProvider<ComparisionTreeViewItem>)treeViewComparision.getDataProvider());
+//            if (event.getValue().equals(FilterEnum.ALL.getLabel())) {
+//                dataProvider.setFilter(null);
+//            } else if (event.getValue().equals(FilterEnum.IDENTICAL.getLabel())) {
+//                dataProvider.setFilter(item -> item.areShapesEqual());
+//            } else {
+//                dataProvider.setFilter(item -> !item.areShapesEqual());
+//            }
+//            applyFilters();
+
+        });
+
         multiSelectShapes.addValueChangeListener(e -> {
             var extractedShapes = new ArrayList<ExtractedShapes>();
             for(var i : multiSelectShapes.getSelectedItems()) {
@@ -89,6 +135,45 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         });
     }
 
+//    private boolean filter(ComparisionTreeViewItem item, String filterText, String radioGroupText) {
+//        if (radioGroupText.equals(FilterEnum.ALL.getLabel())) {
+//            return item.getShapeName().toLowerCase()
+//                    .contains(filterText.toLowerCase());
+//        } else if (radioGroupText.equals(FilterEnum.IDENTICAL.getLabel())) {
+//            dataProvider.setFilter(item -> item.areShapesEqual());
+//        } else {
+//            dataProvider.setFilter(item -> !item.areShapesEqual());
+//        }
+//    }
+
+//    private void applyFilters() {
+//        var dataProvider = (TreeDataProvider<ComparisionTreeViewItem>) treeViewComparision.getDataProvider();
+//
+//        // Get values from filter components
+//        String filterValue = filterField.getValue();
+//        String selectedFilter = radioGroupFilter.getValue();
+//
+//        // Define filter predicate based on filter values
+//        if (filterValue == null && selectedFilter == null) {
+//            dataProvider.setFilter(null); // No filter
+//        } else {
+//            dataProvider.setFilter(item -> {
+//                // Apply filter based on filter field value
+//                boolean filterFieldPass = filterValue == null || item.getShapeName().toLowerCase().contains(filterValue.toLowerCase());
+//
+//                // Apply filter based on radio group selection
+//                boolean radioGroupPass = selectedFilter == null || (selectedFilter == FilterEnum.IDENTICAL.getLabel() && item.areShapesEqual())
+//                        || (selectedFilter == FilterEnum.DIFFERENT.getLabel() && !item.areShapesEqual());
+//
+//                return filterFieldPass && radioGroupPass;
+//            });
+//            treeViewComparision.expandRecursively(dataProvider.getTreeData().getRootItems(),
+//                    99);
+//        }
+
+        // Expand tree
+//        treeViewComparision.expandRecursively(dataProvider.getTreeData().getRootItems(), 99);
+//    }
     private void fillComboBox() {
         var shapes = shapeService.listAll();
         var comboBoxItems = new ArrayList<Utils.ComboBoxItem>();
@@ -147,7 +232,6 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
         treeViewComparision.expand(nodeShapesToShow);
         treeViewComparision.setClassNameGenerator(e -> !e.areShapesEqual() ? "warn" : null);
-
     }
 
     private String getTreeViewTextFromViewItem(ComparisionTreeViewItem o, Long extractedShapesId) {
@@ -239,5 +323,19 @@ public class CompareShapesView extends Composite<VerticalLayout> {
             }
         }
         return true;
+    }
+
+    public enum FilterEnum {
+        ALL("All"),
+        IDENTICAL("Identical shapes"),
+        DIFFERENT("Different shapes");
+
+        private final String label;
+
+        private FilterEnum(String label) {
+            this.label = label;
+        }public String getLabel() {
+            return label;
+        }
     }
 }
