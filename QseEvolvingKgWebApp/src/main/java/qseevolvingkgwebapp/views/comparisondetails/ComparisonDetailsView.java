@@ -63,19 +63,19 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             var list = selectItemOld.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
             selectItemOld.setValue(list.get(0));
             selectItemNew.setValue(list.get(list.size() - 1));
-            oldText = escapeNew(getText(list.get(0).id));
-            newText = escapeNew(getText(list.get(list.size() - 1).id));
+            oldText = Utils.escapeNew(getText(list.get(0).id));
+            newText = Utils.escapeNew(getText(list.get(list.size() - 1).id));
         }
 
         comparisonDiv = new ComparisonDiv(oldText, newText);
         layout.add(comparisonDiv);
 
         selectItemOld.addValueChangeListener(e -> {
-            oldText = escapeNew(getText(e.getValue().id));
+            oldText = Utils.escapeNew(getText(e.getValue().id));
             comparisonDiv.updateTextDifferences(oldText,newText);
         });
         selectItemNew.addValueChangeListener(e -> {
-            newText = escapeNew(getText(e.getValue().id));
+            newText = Utils.escapeNew(getText(e.getValue().id));
             comparisonDiv.updateTextDifferences(oldText,newText);
         });
 
@@ -116,12 +116,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         var model = extractedShapes.getModel();
         var output = Utils.generateTTLFromIRIInModel(iri, model);
 
-        return escapeNew(output);
-    }
-
-    public static String escapeNew(String input) {
-        input = input.replaceFirst("\r\n", "");
-        return input.replaceAll("\r\n", "\\\\\\\\n");
+        return output;
     }
 
     public static String escapeNewlines(String input) {
@@ -129,7 +124,10 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
     }
     public static String convertNewlinesToHtmlBreaks(String input) {
         String s = ComparisonDiv.escapeHtmlCharacters(input);
-        return s.replaceAll("\\\\\\\\n", "<br>");
+        if(Utils.usePrettyFormatting)
+            return s.replaceAll("\r","").replaceAll("\n", "<br>");
+        else
+            return s.replaceAll("\\\\\\\\n", "<br>");
     }
 
     @Override

@@ -1,31 +1,17 @@
 package qseevolvingkgwebapp.services;
 
 import com.vaadin.flow.component.select.Select;
-import cs.qse.common.TurtlePrettyFormatter;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.sparql.resultset.RDFOutput;
-import org.apache.zookeeper.data.Stat;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.Models;
-import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.sparqlbuilder.core.Prefix;
-import org.hibernate.result.Output;
-import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.ExtractedShapes;
+import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
 
 import java.io.*;
 import java.time.format.DateTimeFormatter;
@@ -92,70 +78,62 @@ public class Utils {
         }
         return selectItemVersion;
     }
+
+    public static Boolean usePrettyFormatting = true; //debugging
     public static String generateTTLFromIRIInModel(IRI iri, Model model) {
-        StringWriter out = new StringWriter();
-        //Model filteredModel = model.filter(iri, null, null); //filters things
-        var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
-        SimpleValueFactory vf = SimpleValueFactory.getInstance();
-        var filteredModel2 = addBlankNodesToModel(filteredModel, model);
+        if(usePrettyFormatting) {
+            var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
+            var filteredModelWithBlankNodes = addBlankNodesToModel(filteredModel, model);
 
-        // Filter the model to select statements with the given IRI as subject or with blank node subjects
-//        var filteredModel = model.stream().filter(statement -> {
-//            var subject = statement.getSubject();
-////            return subject.equals(iri) || (subject instanceof BNode && model.contains(subject, null, null)); //also returns all other blank nodes
-//            var object = statement.getObject();
-//            return subject.equals(iri) || (subject instanceof BNode && model.filter( null, null, object).stream().anyMatch(stmt -> stmt.getSubject().equals(iri)));
-//
-//        }).collect(Collectors.toSet());
+            //need to write to file to load as jena model
+            var tmpPath = System.getProperty("user.dir")+"\\tmp.ttl";
+            FileWriter fileWriter = null;
+            try {
+                fileWriter = new FileWriter(tmpPath, false);
+                Rio.write(filteredModelWithBlankNodes, fileWriter, RDFFormat.TURTLE);
+                fileWriter.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(tmpPath);
 
+            File file = new File(tmpPath);
+            if (file.exists()) {
+                file.delete();
+            }
 
-
-
-//        Rio.write(filteredModel, out, RDFFormat.TURTLE);
-
-        var tmpPath = System.getProperty("user.dir")+"\\tmp.ttl";
-        FileWriter fileWriter = null;
-        try {
-            fileWriter = new FileWriter(tmpPath, false);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+            OutputStream outputStream = new ByteArrayOutputStream();
+            formatter.accept(jenaModel, outputStream);
+            return outputStream.toString().replaceAll("\n+$", "");
         }
-        Rio.write(filteredModel, fileWriter, RDFFormat.TURTLE);
-
-        org.apache.jena.rdf.model.Model modeljena2 = RDFDataMgr.loadModel(tmpPath);
-//        var modeljena = ModelFactory.createDefaultModel()
-//                .read(out.toString(), null, "TURTLE");
-
-        File file = new File(tmpPath);
-        if (file.exists()) {
-            file.delete();
+        else {
+            StringWriter out = new StringWriter();
+            Model filteredModel = model.filter(iri, null, null); //filters current propertyshape
+            Rio.write(filteredModel, out, RDFFormat.TURTLE);
+            return escapeNew(out.toString());
         }
+    }
 
-//        System.out.println("Pretty Formatting");
-        TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
-//        OutputStream out = new FileOutputStream(outputPath, false);
-//        org.apache.jena.rdf.model.Model model = RDFDataMgr.loadModel(this.fileAddress);
-        OutputStream outputStream = new ByteArrayOutputStream();
-        formatter.accept(modeljena2, outputStream);
-        var asdf = outputStream.toString();
-        //TODO pretty format!
-//        TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
-//        org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(filteredModel);
-//        filteredModel.forEach(stmt -> jenaModel.add(convert(stmt)));
-//
-//        String output = formatter.apply(jenaModel);
-
-        return out.toString();
+    public static String escapeNew(String input) {
+        if(usePrettyFormatting) {
+            return input.replaceAll("\r","").replaceAll("\n","\\\\\\\\n");
+        }
+        else {
+            input = input.replaceFirst("\r\n", "");
+            return input.replaceAll("\r\n", "\\\\\\\\n");
+        }
     }
 
     private static Set<Statement> addBlankNodesToModel(Set<Statement> filteredModel, Model model) {
         var blankNodeQueue = filteredModel.stream().filter(statement -> statement.getObject() instanceof BNode).collect(Collectors.toList());
         while(blankNodeQueue.size() != 0) {
-            var next = blankNodeQueue.get(0).getObject();
-            var modelToAdd = model.stream().filter(statement -> statement.getObject().equals(next)).collect(Collectors.toList());
+            var nextStatement = blankNodeQueue.get(0);
+            var modelToAdd = model.stream().filter(statement -> statement.getSubject().equals(nextStatement.getObject())).collect(Collectors.toList());
             filteredModel.addAll(modelToAdd);
-            blankNodeQueue.remove(next);
-            blankNodeQueue.addAll(modelToAdd.stream().filter(statement -> statement.getObject() instanceof BNode).collect(Collectors.toList()));
+            blankNodeQueue.remove(nextStatement);
+            var tmp = modelToAdd.stream().filter(statement -> statement.getObject() instanceof BNode).collect(Collectors.toList());
+            blankNodeQueue.addAll(tmp);
         }
         return filteredModel;
     }

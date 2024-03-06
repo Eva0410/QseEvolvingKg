@@ -7,8 +7,10 @@ import com.vaadin.flow.component.html.Div;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import jdk.jshell.execution.Util;
+import qseevolvingkgwebapp.services.Utils;
 
-@JavaScript("https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.js") //path to jsdiff file
+@JavaScript("https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.js") //path to jsdiff file, https://npm.runkit.com/diff
 public class ComparisonDiv extends Div {
     String t1;
     String t2;
@@ -54,11 +56,12 @@ public class ComparisonDiv extends Div {
     }
 
     public void updateTextDifferences(String t1, String t2) {
+        var js = "    const originalText = '" + t1 + "';" +
+                "    const modifiedText = '" + t2 + "';" +
+                "    const diff = Diff.diffWords(originalText, modifiedText);" +
+                "    return diff;";
         UI.getCurrent().getPage().executeJs(
-                "const originalText = '" + t1 + "';" +
-                        "const modifiedText = '" + t2 + "';" +
-                        "const diff = Diff.diffWords(originalText, modifiedText);" +
-                        "return diff;"
+                js
         ).then(response -> {
             if (response instanceof JsonArray) {
                 displayDiffOnUI((JsonArray) response);
