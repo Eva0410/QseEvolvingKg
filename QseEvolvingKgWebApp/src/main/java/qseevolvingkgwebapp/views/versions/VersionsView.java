@@ -20,10 +20,12 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import qseevolvingkgwebapp.data.Version;
+import qseevolvingkgwebapp.services.ComparisonTreeViewItem;
 import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
 import qseevolvingkgwebapp.services.GraphService;
@@ -121,6 +123,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
         comboBoxGraphs.addValueChangeListener(event -> {
             if(event.getValue() != null) {
                 currentGraphId = event.getValue().id;
+                VaadinSession.getCurrent().setAttribute("versions_currentGraphId", currentGraphId);
                 fillGrid();
             }
         });
@@ -143,8 +146,14 @@ public class VersionsView extends Composite<VerticalLayout>  {
         comboBox.setItems(comboBoxItemList);
         comboBox.setItemLabelGenerator(item -> ((ComboBoxItem)item).label);
         if (comboBoxItemList.size() > 0) {
-            var firstItem = comboBoxItemList.stream().findFirst();
-            comboBox.setValue(firstItem.get());
+            var currentGraphId = (Long)VaadinSession.getCurrent().getAttribute("versions_currentGraphId");
+            var selectedGraph = comboBoxItemList.stream().filter(c -> c.id.equals(currentGraphId)).findFirst();
+            if(selectedGraph.isPresent())
+                comboBox.setValue(selectedGraph.get());
+            else {
+                var firstItem = comboBoxItemList.stream().findFirst();
+                comboBox.setValue(firstItem.get());
+            }
         }
     }
 

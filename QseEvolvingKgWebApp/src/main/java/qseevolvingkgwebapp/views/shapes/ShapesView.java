@@ -3,7 +3,6 @@ package qseevolvingkgwebapp.views.shapes;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
@@ -12,34 +11,27 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import com.vaadin.flow.router.*;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
-import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import cs.Main;
-import cs.qse.filebased.Parser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.data.Graph;
-import qseevolvingkgwebapp.data.SamplePerson;
 import qseevolvingkgwebapp.data.Version;
-import qseevolvingkgwebapp.services.*;
+import qseevolvingkgwebapp.services.GraphService;
+import qseevolvingkgwebapp.services.ShapesService;
+import qseevolvingkgwebapp.services.Utils;
+import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.generateshapes.GenerateShapesView;
 
 @PageTitle("Shapes")
 @Route(value = "shapes", layout = MainLayout.class)
 @Uses(Icon.class)
-public class ShapesView extends Composite<VerticalLayout> implements HasUrlParameter<Long> {
+public class ShapesView extends Composite<VerticalLayout>{
 
     @Autowired()
     private VersionService versionService;
@@ -85,20 +77,26 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
         selectItemGraph.addValueChangeListener(event -> {
             if(event.getValue() != null) {
                 Long selectedValue = event.getValue().id;
+                VaadinSession.getCurrent().setAttribute("shapes_currentGraphId", selectedValue);
                 currentGraph = graphService.get(selectedValue).get();
-                selectItemVersion =  Utils.setComboBoxVersionsData(selectedValue, versionService, selectItemVersion, true);
+                Utils.setComboBoxVersionsData(selectedValue, versionService, selectItemVersion);
             }
         });
 
         selectItemVersion.addValueChangeListener(event -> {
             if(event.getValue() != null) {
                 currentVersionId = event.getValue().id;
+                VaadinSession.getCurrent().setAttribute("shapes_currentVersionId", currentVersionId);
                 currentVersion = versionService.get(currentVersionId).get();
                 setGridData();
             }
         });
 
-        buttonGenerateShapes.addClickListener(buttonClickEvent -> getUI().ifPresent(ui -> ui.navigate(GenerateShapesView.class, currentVersionId)));
+        buttonGenerateShapes.addClickListener(buttonClickEvent -> getUI().ifPresent(ui -> ui.navigate(GenerateShapesView.class)));
+
+        addAttachListener(event -> {
+            Utils.setComboBoxGraphData(graphService, selectItemGraph);
+        });
     }
 
     private void setGridData() {
@@ -124,27 +122,5 @@ public class ShapesView extends Composite<VerticalLayout> implements HasUrlParam
 
         if(items != null)
             gridShapes.setItems(items);
-    }
-
-    @Override
-    public void setParameter(BeforeEvent beforeEvent, @OptionalParameter Long aLong) {
-        Utils.setComboBoxGraphData(graphService, selectItemGraph);
-        if(aLong == null || aLong == 0) {
-            Utils.setComboBoxVersionsData(currentGraph.getId(), versionService, selectItemVersion, true);
-        }
-        else {
-            currentVersionId = aLong;
-            currentVersion = versionService.get(currentVersionId).get();
-            currentGraph = currentVersion.getGraph();
-            if(currentGraph != null)  {
-                var graphItem = selectItemGraph.getDataProvider().fetch(new Query<>()).filter(g -> g.id.equals(currentGraph.getId())).findFirst();
-                selectItemGraph.setValue(graphItem.get());
-            }
-            if(currentVersion != null) {
-                var versionItem =  selectItemVersion.getDataProvider().fetch(new Query<>())
-                        .filter(v -> v.id.equals(aLong)).findFirst();
-                selectItemVersion.setValue(versionItem.get());
-            }
-        }
     }
 }

@@ -1,6 +1,8 @@
 package qseevolvingkgwebapp.services;
 
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.server.VaadinSession;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.jena.riot.RDFDataMgr;
@@ -11,7 +13,6 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import qseevolvingkgwebapp.data.ExtractedShapes;
-import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
 
 import java.io.*;
 import java.time.format.DateTimeFormatter;
@@ -57,26 +58,45 @@ public class Utils {
         }
     }
 
-    public static Select<ComboBoxItem> setComboBoxGraphData(GraphService graphService, Select<ComboBoxItem> selectItemGraph) {
+    public static void setComboBoxGraphData(GraphService graphService, Select<ComboBoxItem> selectItemGraph) {
         List<Utils.ComboBoxItem> graphs = Utils.getAllGraphs(graphService);
         selectItemGraph.setItems(graphs);
         selectItemGraph.setItemLabelGenerator(item -> item.label);
-        if (graphs.size() > 0) {
-            var firstItem = graphs.stream().findFirst();
-            selectItemGraph.setValue(firstItem.get());
+        var selectedGraphId = (Long) VaadinSession.getCurrent().getAttribute("shapes_currentGraphId");
+        var firstItem = graphs.stream().findFirst();
+
+
+        if(selectedGraphId != null && !selectedGraphId.equals(0)) {
+            var graphItem = selectItemGraph.getDataProvider().fetch(new Query<>()).filter(g -> g.id.equals(selectedGraphId)).findFirst();
+            if(graphItem.isPresent())
+                selectItemGraph.setValue(graphItem.get());
+            else
+                if(firstItem.isPresent())
+                    selectItemGraph.setValue(firstItem.get());
         }
-        return selectItemGraph;
+        else
+            if(firstItem.isPresent())
+                selectItemGraph.setValue(firstItem.get());
     }
 
-    public static Select<ComboBoxItem> setComboBoxVersionsData(Long graphId, VersionService versionService, Select<ComboBoxItem> selectItemVersion, boolean setFirstVersion) {
+    public static void setComboBoxVersionsData(Long graphId, VersionService versionService, Select<ComboBoxItem> selectItemVersion) {
         List<Utils.ComboBoxItem> versions = Utils.getAllVersions(versionService, graphId);
         selectItemVersion.setItems(versions);
         selectItemVersion.setItemLabelGenerator(item -> item.label);
-        if (versions.size() > 0 && setFirstVersion) {
-            var firstItem = versions.stream().findFirst();
-            selectItemVersion.setValue(firstItem.get());
+        var currentVersionId = (Long) VaadinSession.getCurrent().getAttribute("shapes_currentVersionId");
+        var firstItem = versions.stream().findFirst();
+
+        if(currentVersionId != null && !currentVersionId.equals(0)) {
+            var graphItem = selectItemVersion.getDataProvider().fetch(new Query<>()).filter(v -> v.id.equals(currentVersionId)).findFirst();
+            if(graphItem.isPresent())
+                selectItemVersion.setValue(graphItem.get());
+            else
+            if(firstItem.isPresent())
+                selectItemVersion.setValue(firstItem.get());
         }
-        return selectItemVersion;
+        else
+        if(firstItem.isPresent())
+            selectItemVersion.setValue(firstItem.get());
     }
 
     public static Boolean usePrettyFormatting = true; //debugging

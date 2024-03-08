@@ -18,12 +18,10 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import cs.Main;
 import cs.qse.common.encoders.StringEncoder;
 import cs.qse.common.structure.NS;
@@ -52,7 +50,7 @@ import java.util.stream.Collectors;
 @PageTitle("Generate Shapes")
 @Route(value = "generate-shapes", layout = MainLayout.class)
 @Uses(Icon.class)
-public class GenerateShapesView extends Composite<VerticalLayout> implements HasUrlParameter<Long> {
+public class GenerateShapesView extends Composite<VerticalLayout> {
 
     @Autowired()
     private VersionService versionService;
@@ -152,13 +150,15 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
         comboBoxGraph.addValueChangeListener(event -> {
             if(event.getValue() != null) {
                 Long selectedValue = event.getValue().id;
+                VaadinSession.getCurrent().setAttribute("shapes_currentGraphId", selectedValue);
                 currentGraph = graphService.get(event.getValue().id).get();
-                Utils.setComboBoxVersionsData(selectedValue, versionService, comboBoxVersion, true);
+                Utils.setComboBoxVersionsData(selectedValue, versionService, comboBoxVersion);
             }
         });
         comboBoxVersion.addValueChangeListener(event -> {
             if(event.getValue() != null) {
                 currentVersionId = event.getValue().id;
+                VaadinSession.getCurrent().setAttribute("shapes_currentVersionId", currentVersionId);
                 setClassesGridData();
                 currentVersion = versionService.get(event.getValue().id).get();
                 Main.setDataSetNameForJar(currentGraph.getName() + "-" + event.getValue().label.replace(" ",""));
@@ -181,11 +181,12 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            getUI().ifPresent(ui -> ui.navigate(ShapesView.class, currentVersionId));
+            getUI().ifPresent(ui -> ui.navigate(ShapesView.class));
         });
 
         addAttachListener(event -> {
             setPaths();
+            Utils.setComboBoxGraphData(graphService,comboBoxGraph);
         });
     }
 
@@ -300,23 +301,6 @@ public class GenerateShapesView extends Composite<VerticalLayout> implements Has
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void setParameter(BeforeEvent beforeEvent, Long aLong) {
-        Utils.setComboBoxGraphData(graphService, comboBoxGraph);
-        currentVersionId = aLong;
-        currentVersion = versionService.get(currentVersionId).get();
-        currentGraph = currentVersion.getGraph();
-        if(currentGraph != null)  {
-            var graphItem = comboBoxGraph.getDataProvider().fetch(new Query<>()).filter(g -> g.id.equals(currentGraph.getId())).findFirst();
-            comboBoxGraph.setValue(graphItem.get());
-        }
-        if(currentVersion != null) {
-            var versionItem =  comboBoxVersion.getDataProvider().fetch(new Query<>())
-                    .filter(v -> v.id.equals(aLong)).findFirst();
-            comboBoxVersion.setValue(versionItem.get());
         }
     }
 }
