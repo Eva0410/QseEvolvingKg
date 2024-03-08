@@ -12,12 +12,16 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.data.NodeShape;
+import qseevolvingkgwebapp.data.PropertyShape;
 import qseevolvingkgwebapp.services.ComparisonTreeViewItem;
 import qseevolvingkgwebapp.services.ShapesService;
 import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.views.MainLayout;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,8 +66,10 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             var list = selectItemOld.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
             selectItemOld.setValue(list.get(0));
             selectItemNew.setValue(list.get(list.size() - 1));
-            oldText = Utils.escapeNew(getText(list.get(0).id));
-            newText = Utils.escapeNew(getText(list.get(list.size() - 1).id));
+            if(treeViewItem != null) {
+                oldText = Utils.escapeNew(getText(list.get(0).id));
+                newText = Utils.escapeNew(getText(list.get(list.size() - 1).id));
+            }
         }
 
         comparisonDiv = new ComparisonDiv(oldText, newText);
@@ -89,10 +95,28 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         });
     }
 
-    private Set<Long> getKeySetFromTreeViewItem() {
+    private List<Long> getKeySetFromTreeViewItem() {
         if(treeViewItem.isNodeShapeLine())
-            return treeViewItem.getNodeShapeList().keySet();
-        return treeViewItem.getPropertyShapeList().keySet();
+        {
+            var nsComparator = Comparator
+                    .comparing(ns -> ((NodeShape)ns).getExtractedShapes().getGraphCreationTime())
+                    .thenComparing(ns -> ((NodeShape)ns).getExtractedShapes().getVersionCreationTime())
+                    .thenComparing(ns -> ((NodeShape)ns).getExtractedShapes().getCreatedAt());
+
+            return treeViewItem.getNodeShapeList().values().stream()
+                    .sorted(nsComparator)
+                    .map(ns -> ns.getExtractedShapes().getId()).collect(Collectors.toList());
+        }
+        else {
+            var psComparator = Comparator
+                    .comparing(ps -> ((PropertyShape)ps).getNodeShape().getExtractedShapes().getGraphCreationTime())
+                    .thenComparing(ps -> ((PropertyShape)ps).getNodeShape().getExtractedShapes().getVersionCreationTime())
+                    .thenComparing(ps -> ((PropertyShape)ps).getNodeShape().getExtractedShapes().getCreatedAt());
+
+            return treeViewItem.getPropertyShapeList().values().stream()
+                    .sorted(psComparator).collect(Collectors.toList())
+                    .stream().map(ps -> ps.getNodeShape().getExtractedShapes().getId()).collect(Collectors.toList());
+        }
     }
 
     private String getText(Long extractedShapesId) {

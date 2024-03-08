@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,6 +48,7 @@ public class ExtractedShapes extends AbstractEntity{
     @Transient
     Model model;
 
+    String comboBoxString;
 
     public LocalDateTime getGraphCreationTime() {
         return this.getVersionEntity().getGraph().getCreatedAt();
@@ -152,5 +154,18 @@ public class ExtractedShapes extends AbstractEntity{
 
     public boolean isDefaultshape() {
         return confidence == 0 && support == 0;
+    }
+
+    public void generateComboBoxString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        this.comboBoxString = versionEntity.getGraph().getName() + "-" + versionEntity.getVersionNumber() + "-" +
+                versionEntity.getName() + "-"
+                + formatter.format(createdAt) + "-"
+                + qseType + "-" + support + "-" + confidence;
+    }
+
+    public String getComboBoxString() {
+        return comboBoxString;
     }
 }

@@ -261,6 +261,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setCreatedAt(LocalDateTime.now());
         extractedShapes.setFileContent(Files.readAllBytes(Paths.get(outputAddress)));
         extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.generateComboBoxString();
         shapeService.insert(extractedShapes);
     }
 

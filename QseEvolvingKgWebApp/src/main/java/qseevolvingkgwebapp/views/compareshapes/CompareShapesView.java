@@ -170,7 +170,12 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
         var currentComboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
         if(currentComboBoxItems != null) {
-            multiSelectShapes.setValue(currentComboBoxItems);
+            for (var cbi :
+                    currentComboBoxItems) {
+                var newComboBoxItem = comboBoxItems.stream().filter(c -> c.id.equals(cbi.id)).findFirst();
+                if(newComboBoxItem.isPresent())
+                    multiSelectShapes.select(newComboBoxItem.get());
+            }
         }else {
             if (comboBoxItems.size() > 1) {
                 multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));

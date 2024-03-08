@@ -159,14 +159,8 @@ public class Utils {
     }
 
     public static String getComboBoxLabelForExtractedShapes(ExtractedShapes shape) {
-        var comboBoxItem = new Utils.ComboBoxItem();
-        comboBoxItem.id = shape.getId();
-        var version = shape.getVersionEntity();
-        var graph = version.getGraph();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        return graph.getName() + "-" + version.getVersionNumber() + "-" + version.getName() + "-"
-                + formatter.format(shape.getCreatedAt()) + "-"
-                + shape.getQseType() + "-" + shape.getSupport() + "-" + shape.getConfidence();
+        if(shape.getComboBoxString()== null|| shape.getComboBoxString().isEmpty())
+            shape.generateComboBoxString();
+        return shape.getComboBoxString();
     }
 }
