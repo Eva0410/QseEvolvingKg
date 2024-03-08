@@ -7,15 +7,16 @@ import java.util.HashMap;
 
 //represents one line in the tree view. This can be either be a line of 2+ node shapes, or of 2+ property shapes
 //node or property shapes have the same shapename
-public class ComparisionTreeViewItem {
+public class ComparisonTreeViewItem {
 
-    public ComparisionTreeViewItem() {
+    public ComparisonTreeViewItem() {
     }
 
     String shapeName;
     HashMap<Long,NodeShape> nodeShapeList = new HashMap<>();
     HashMap<Long,PropertyShape> propertyShapeList = new HashMap<>();
     Boolean shapesEqual = null;
+    ComparisonTreeViewItem parentShape = null;
 
     public void addNodeShape(NodeShape ns, Long extractedShapesId) {
         if(nodeShapeList.size() == 0)
@@ -55,5 +56,13 @@ public class ComparisionTreeViewItem {
 
     public void setShapesEqual(Boolean shapesEqual) {
         this.shapesEqual = shapesEqual;
+    }
+
+    public ComparisonTreeViewItem getParentShape() {
+        return parentShape;
+    }
+
+    public void setParentShape(ComparisonTreeViewItem parentShape) {
+        this.parentShape = parentShape;
     }
 }

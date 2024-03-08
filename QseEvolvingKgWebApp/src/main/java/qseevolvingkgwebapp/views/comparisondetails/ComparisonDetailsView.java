@@ -11,10 +11,9 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
-import org.eclipse.rdf4j.model.IRI;
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.NodeShape;
-import qseevolvingkgwebapp.services.ComparisionTreeViewItem;
+import qseevolvingkgwebapp.services.ComparisonTreeViewItem;
 import qseevolvingkgwebapp.services.ShapesService;
 import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.views.MainLayout;
@@ -30,7 +29,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
     private Select<Utils.ComboBoxItem> selectItemNew;
     private String oldText;
     private String newText;
-    private ComparisionTreeViewItem treeViewItem;
+    private ComparisonTreeViewItem treeViewItem;
 
     @Autowired
     ShapesService shapesService;
@@ -51,7 +50,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         layoutRow.getStyle().set("justify-content", "space-between");
         layoutRow.add(selectItemOld);
         layoutRow.add(selectItemNew);
-        treeViewItem = (ComparisionTreeViewItem)VaadinSession.getCurrent().getAttribute("currentCompareObject");
+        treeViewItem = (ComparisonTreeViewItem)VaadinSession.getCurrent().getAttribute("currentCompareObject");
 
         var comboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
         if(comboBoxItems != null) {
