@@ -104,11 +104,10 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 Notification.show("Caution, the compared items were not analyzed for the same classes!");
 
             setTreeViewData();
-
+            VaadinSession.getCurrent().setAttribute("currentComboBoxItems", multiSelectShapes.getSelectedItems());
         });
         treeViewComparision.addItemClickListener(event -> {
             VaadinSession.getCurrent().setAttribute("currentCompareObject", event.getItem());
-            VaadinSession.getCurrent().setAttribute("currentComboBoxItems", multiSelectShapes.getSelectedItems());
             getUI().ifPresent(ui -> ui.navigate(ComparisonDetailsView.class));
         });
 
@@ -168,8 +167,14 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         }
         multiSelectShapes.setItems(comboBoxItems);
         multiSelectShapes.setItemLabelGenerator(item -> item.label);
-        if (comboBoxItems.size() > 1) {
-            multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));
+
+        var currentComboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
+        if(currentComboBoxItems != null) {
+            multiSelectShapes.setValue(currentComboBoxItems);
+        }else {
+            if (comboBoxItems.size() > 1) {
+                multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));
+            }
         }
     }
 
