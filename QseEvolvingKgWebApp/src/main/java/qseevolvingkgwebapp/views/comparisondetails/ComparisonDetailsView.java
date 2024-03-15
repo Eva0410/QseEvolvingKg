@@ -143,6 +143,8 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
 
     @Override
     public String getPageTitle() {
+        if(treeViewItem == null)
+            return "Comparison Detail";
         return "Comparison Detail - " + treeViewItem.getShapeName();
     }
 }

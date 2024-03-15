@@ -74,6 +74,12 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         treeViewComparision.setHeight("70vh");
         radioGroupFilter.setItems(Arrays.stream(FilterEnum.values()).map(FilterEnum::getLabel).collect(Collectors.toList()));
         radioGroupFilter.setValue(FilterEnum.ALL.getLabel());
+        var currentSearchFilter = (String)VaadinSession.getCurrent().getAttribute("comparison_searchValue");
+        if(currentSearchFilter != null)
+            filterField.setValue(currentSearchFilter);
+        var currentFilter = (String)VaadinSession.getCurrent().getAttribute("comparison_filterValue");
+        if(currentFilter != null)
+            radioGroupFilter.setValue(currentFilter);
         layoutRowFilter.setAlignItems(FlexComponent.Alignment.BASELINE);
         getContent().add(layoutRowComboBox);
         layoutRowComboBox.add(multiSelectShapes);
@@ -111,8 +117,9 @@ public class CompareShapesView extends Composite<VerticalLayout> {
             getUI().ifPresent(ui -> ui.navigate(ComparisonDetailsView.class));
         });
 
-        addAttachListener(e ->{
+        addAttachListener(e -> {
             fillComboBox();
+            applyFilters();
         });
     }
 
@@ -122,6 +129,8 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         // Get values from filter components
         String searchValue = filterField.getValue();
         String selectedRadioGroupFilter = radioGroupFilter.getValue();
+        VaadinSession.getCurrent().setAttribute("comparison_searchValue", searchValue);
+        VaadinSession.getCurrent().setAttribute("comparison_filterValue", selectedRadioGroupFilter);
 
         // Define filter predicate based on filter values
         if (searchValue == null && selectedRadioGroupFilter == null) {
@@ -141,7 +150,6 @@ public class CompareShapesView extends Composite<VerticalLayout> {
             treeViewComparision.expandRecursively(dataProvider.getTreeData().getRootItems(),
                     99);
         }
-
         treeViewComparision.expandRecursively(dataProvider.getTreeData().getRootItems(), 99);
     }
 
@@ -168,8 +176,9 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         multiSelectShapes.setItems(comboBoxItems);
         multiSelectShapes.setItemLabelGenerator(item -> item.label);
 
+        //TODO test
         var currentComboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
-        if(currentComboBoxItems != null) {
+        if(currentComboBoxItems != null && currentComboBoxItems.size() > 0 && comboBoxItems.containsAll(currentComboBoxItems)) {
             for (var cbi :
                     currentComboBoxItems) {
                 var newComboBoxItem = comboBoxItems.stream().filter(c -> c.id.equals(cbi.id)).findFirst();
@@ -184,11 +193,8 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     }
 
     private void setTreeViewData() {
-        long startTime = System.nanoTime();
-
         var nodeShapesToShow = new ArrayList<ComparisonTreeViewItem>();
         treeViewComparision.removeAllColumns();
-        boolean first = true;
         for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
             var extractedShapes = shapeService.get(comboBoxItem.id).get();
             var nodeShapes = extractedShapes.getNodeShapes();
@@ -207,20 +213,14 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                     nodeShapesToShow.add(newItem);
                 }
             }
-            if(first) {
-                treeViewComparision.addHierarchyColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id))
-                    .setHeader(comboBoxItem.label);
-                first = false;
-            }
-            else {
-                treeViewComparision.addColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id)).setHeader(comboBoxItem.label);
-            }
+            treeViewComparision.addHierarchyColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id))
+                .setHeader(comboBoxItem.label);
+
         }
 
         addEqualInformationNS(nodeShapesToShow);
 
         treeViewComparision.setItems(nodeShapesToShow, this::getPropertyShapes);
-        System.out.println("Method execution time: " + (System.nanoTime()-startTime)/ 1_000_000_000.0 + " seconds");
 
         treeViewComparision.expand(nodeShapesToShow);
         treeViewComparision.setClassNameGenerator(e -> !e.areShapesEqual() ? "warn" : null);
