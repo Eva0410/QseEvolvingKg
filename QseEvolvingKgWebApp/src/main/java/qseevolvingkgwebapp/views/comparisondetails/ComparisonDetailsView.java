@@ -63,7 +63,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             selectItemNew.setItems(comboBoxItems);
             selectItemNew.setItemLabelGenerator(item -> item.label);
 
-            var list = selectItemOld.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+            var list = selectItemOld.getDataProvider().fetch(new Query<>()).toList();
             selectItemOld.setValue(list.get(0));
             selectItemNew.setValue(list.get(list.size() - 1));
             if(treeViewItem != null) {
@@ -86,37 +86,24 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
 
         getContent().addAttachListener(e -> {
             layout.add(new H2("All SHACL shapes"));
-            for(var key : getKeySetFromTreeViewItem()) {
-                layout.add(new H4(Utils.getComboBoxLabelForExtractedShapes(shapesService.get(key).get())));
+
+            for (var extractedShapes : selectItemOld.getDataProvider().fetch(new Query<>()).toList()) {
+                layout.add(new H4(Utils.getComboBoxLabelForExtractedShapes(shapesService.get(extractedShapes.id).get())));
                 Div div = new Div();
-                div.getElement().setProperty("innerHTML", convertNewlinesToHtmlBreaks(getText(key)));
-                layout.add(div);
+                if(treeViewItem.isNodeShapeLine()) {
+                    if(treeViewItem.getNodeShapeList().containsKey(extractedShapes.id)) {
+                        div.getElement().setProperty("innerHTML", convertNewlinesToHtmlBreaks(getText(extractedShapes.id)));
+                        layout.add(div);
+                    }
+                }
+                else {
+                    if(treeViewItem.getPropertyShapeList().containsKey(extractedShapes.id)) {
+                        div.getElement().setProperty("innerHTML", convertNewlinesToHtmlBreaks(getText(extractedShapes.id)));
+                        layout.add(div);
+                    }
+                }
             }
         });
-    }
-
-    private List<Long> getKeySetFromTreeViewItem() {
-        if(treeViewItem.isNodeShapeLine())
-        {
-            var nsComparator = Comparator
-                    .comparing(ns -> ((NodeShape)ns).getExtractedShapes().getGraphCreationTime())
-                    .thenComparing(ns -> ((NodeShape)ns).getExtractedShapes().getVersionCreationTime())
-                    .thenComparing(ns -> ((NodeShape)ns).getExtractedShapes().getCreatedAt());
-
-            return treeViewItem.getNodeShapeList().values().stream()
-                    .sorted(nsComparator)
-                    .map(ns -> ns.getExtractedShapes().getId()).collect(Collectors.toList());
-        }
-        else {
-            var psComparator = Comparator
-                    .comparing(ps -> ((PropertyShape)ps).getNodeShape().getExtractedShapes().getGraphCreationTime())
-                    .thenComparing(ps -> ((PropertyShape)ps).getNodeShape().getExtractedShapes().getVersionCreationTime())
-                    .thenComparing(ps -> ((PropertyShape)ps).getNodeShape().getExtractedShapes().getCreatedAt());
-
-            return treeViewItem.getPropertyShapeList().values().stream()
-                    .sorted(psComparator).collect(Collectors.toList())
-                    .stream().map(ps -> ps.getNodeShape().getExtractedShapes().getId()).collect(Collectors.toList());
-        }
     }
 
     private String getText(Long extractedShapesId) {

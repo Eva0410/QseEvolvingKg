@@ -178,9 +178,9 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
         var currentComboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
         if(currentComboBoxItems != null && currentComboBoxItems.size() > 0
-                && comboBoxItems.stream()
+                && currentComboBoxItems.stream()
                 .map(item -> item.id)
-                .allMatch(id -> currentComboBoxItems.stream()
+                .allMatch(id -> comboBoxItems.stream()
                         .map(comboBoxItem -> comboBoxItem.id)
                         .collect(Collectors.toSet())
                         .contains(id))) {
