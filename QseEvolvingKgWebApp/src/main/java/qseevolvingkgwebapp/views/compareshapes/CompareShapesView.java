@@ -176,9 +176,14 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         multiSelectShapes.setItems(comboBoxItems);
         multiSelectShapes.setItemLabelGenerator(item -> item.label);
 
-        //TODO test
         var currentComboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
-        if(currentComboBoxItems != null && currentComboBoxItems.size() > 0 && comboBoxItems.containsAll(currentComboBoxItems)) {
+        if(currentComboBoxItems != null && currentComboBoxItems.size() > 0
+                && comboBoxItems.stream()
+                .map(item -> item.id)
+                .allMatch(id -> currentComboBoxItems.stream()
+                        .map(comboBoxItem -> comboBoxItem.id)
+                        .collect(Collectors.toSet())
+                        .contains(id))) {
             for (var cbi :
                     currentComboBoxItems) {
                 var newComboBoxItem = comboBoxItems.stream().filter(c -> c.id.equals(cbi.id)).findFirst();
