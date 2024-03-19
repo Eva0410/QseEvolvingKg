@@ -42,8 +42,16 @@ public class ExtractedShapes extends AbstractEntity{
     @Column(name = "fileContent", columnDefinition = "BLOB")
     byte[] fileContent;
 
+    //Need to be generated for delete reason during comparison
+    @Lob
+    @Column(name = "fileContentDefault", columnDefinition = "BLOB")
+    byte[] fileContentDefaultShapes;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     List<NodeShape> nodeShapes;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    List<NodeShape> nodeShapesDefault;
 
     @Transient
     Model model;
@@ -82,6 +90,14 @@ public class ExtractedShapes extends AbstractEntity{
         this.nodeShapes = list;
     }
 
+    public void setNodeShapesDefault(List<NS> ns) {
+        var list = new ArrayList<NodeShape>();
+        for(var item : ns) {
+            list.add(new NodeShape(item, this));
+        }
+        this.nodeShapesDefault = list;
+    }
+
     public String getClassesAsString() {
         if (classes != null && !classes.isEmpty()) {
             var shortenedList = new ArrayList<>(classes);
@@ -91,9 +107,6 @@ public class ExtractedShapes extends AbstractEntity{
             return String.join(", ", shortenedList.stream().sorted().collect(Collectors.toList()));
         }
         return "";
-    }
-    public byte[] getFileContent() {
-        return fileContent;
     }
 
     public void setFileContent(byte[] fileContent) {
@@ -144,10 +157,6 @@ public class ExtractedShapes extends AbstractEntity{
         this.confidence = confidence;
     }
 
-    public List<String> getClasses() {
-        return classes;
-    }
-
     public void setClasses(List<String> classes) {
         this.classes = classes;
     }
@@ -167,5 +176,17 @@ public class ExtractedShapes extends AbstractEntity{
 
     public String getComboBoxString() {
         return comboBoxString;
+    }
+
+    public byte[] getFileContentDefaultShapes() {
+        return fileContentDefaultShapes;
+    }
+
+    public void setFileContentDefaultShapes(byte[] fileContentDefaultShapes) {
+        this.fileContentDefaultShapes = fileContentDefaultShapes;
+    }
+
+    public List<NodeShape> getNodeShapesDefault() {
+        return nodeShapesDefault;
     }
 }

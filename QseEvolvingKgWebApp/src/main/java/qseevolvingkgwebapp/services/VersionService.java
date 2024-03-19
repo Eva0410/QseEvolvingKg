@@ -1,7 +1,5 @@
 package qseevolvingkgwebapp.services;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +10,6 @@ import qseevolvingkgwebapp.data.Version;
 import qseevolvingkgwebapp.data.VersionRepository;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,8 +26,8 @@ public class VersionService {
         return repository.findById(id);
     }
 
-    public Version update(Version entity) {
-        return repository.save(entity);
+    public void update(Version entity) {
+        repository.save(entity);
     }
 
     public void delete(Long id) {
@@ -68,8 +65,7 @@ public class VersionService {
         newVersion.setGraph(graph);
         newVersion.setCreatedAt(LocalDateTime.now());
         newVersion.setVersionNumber(getLastVersionNumber(graph.getId()));
-        Version savedVersion = repository.save(newVersion);
-        return savedVersion;
+        return repository.save(newVersion);
     }
 
     private int getLastVersionNumber(Long graphId) {

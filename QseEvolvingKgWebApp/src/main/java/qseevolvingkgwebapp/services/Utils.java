@@ -6,10 +6,8 @@ import com.vaadin.flow.server.VaadinSession;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.jena.riot.RDFDataMgr;
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import qseevolvingkgwebapp.data.ExtractedShapes;
@@ -103,7 +101,13 @@ public class Utils {
     public static String generateTTLFromIRIInModel(IRI iri, Model model) {
         if(usePrettyFormatting) {
             var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
+            SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
+            IRI iriSupport = valueFactory.createIRI("http://shaclshapes.org/support");
+            IRI iriConfidence = valueFactory.createIRI("http://shaclshapes.org/confidence");
+
             var filteredModelWithBlankNodes = addBlankNodesToModel(filteredModel, model);
+            filteredModelWithBlankNodes = filteredModelWithBlankNodes.stream().filter(statement -> !statement.getPredicate().equals(iriSupport)
+                    && !statement.getPredicate().equals(iriConfidence)).collect(Collectors.toSet());
 
             //need to write to file to load as jena model
             var tmpPath = System.getProperty("user.dir")+"\\tmp.ttl";

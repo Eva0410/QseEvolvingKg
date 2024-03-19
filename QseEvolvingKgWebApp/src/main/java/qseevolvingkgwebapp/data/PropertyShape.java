@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
 import qseevolvingkgwebapp.services.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class PropertyShape {
     @Id
@@ -18,7 +21,9 @@ public class PropertyShape {
     String dataTypeOrClass;
     Integer support;
     Double confidence;
-//    List<ShaclOrListItem> shaclOrListItems;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    List<ShaclOrListItem> shaclOrListItems;
 
     @Lob
     String generatedText;
@@ -33,7 +38,14 @@ public class PropertyShape {
         dataTypeOrClass = ps.getDataTypeOrClass();
         support = ps.getSupport();
         confidence = ps.getConfidence();
-//        shaclOrListItems = ps.getShaclOrListItems();
+        if(ps.getShaclOrListItems() != null){
+            var shaclOrListItems = new ArrayList<ShaclOrListItem>();
+            for (var item:
+                    ps.getShaclOrListItems()) {
+                shaclOrListItems.add(new ShaclOrListItem(item.getNodeKind(),item.getDataTypeOrClass(), item.getSupport(), item.getConfidence()));
+            }
+            shaclOrListItems = shaclOrListItems;
+        }
     }
 
     public PropertyShape(PS ps, NodeShape ns) {
@@ -99,13 +111,13 @@ public class PropertyShape {
         this.confidence = confidence;
     }
 
-//    public List<ShaclOrListItem> getShaclOrListItems() {
-//        return shaclOrListItems;
-//    }
-//
-//    public void setShaclOrListItems(List<ShaclOrListItem> shaclOrListItems) {
-//        this.shaclOrListItems = shaclOrListItems;
-//    }
+    public List<ShaclOrListItem> getShaclOrListItems() {
+        return shaclOrListItems;
+    }
+
+    public void setShaclOrListItems(List<ShaclOrListItem> shaclOrListItems) {
+        this.shaclOrListItems = shaclOrListItems;
+    }
 
     public Long getId() {
         return id;
@@ -125,6 +137,6 @@ public class PropertyShape {
 
     public void generateText() {
         var model = this.nodeShape.extractedShapes.getModel();
-        this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);;
+        this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);
     }
 }

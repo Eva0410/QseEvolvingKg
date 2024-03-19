@@ -72,7 +72,7 @@ public class ComparisonDiv extends Div {
         return input.replaceAll("<", "&lt;")
                 .replaceAll(">", "&gt;")
                 .replaceAll("\\{", "&#123;")
-                .replaceAll("\\}", "&#125;");
+                .replaceAll("}", "&#125;");
         // Add more replacements as needed for other characters
     }
 }

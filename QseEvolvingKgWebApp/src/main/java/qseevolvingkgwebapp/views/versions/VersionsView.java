@@ -76,7 +76,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
                 fillGrid();
             });
             button.setIcon(new Icon(VaadinIcon.TRASH));
-        })).setHeader("").setAutoWidth(true).setFlexGrow(0);;
+        })).setHeader("").setAutoWidth(true).setFlexGrow(0);
         gridVersions.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
         buttonNewVersion.setText("New Version");
         buttonNewVersion.setWidth("min-content");

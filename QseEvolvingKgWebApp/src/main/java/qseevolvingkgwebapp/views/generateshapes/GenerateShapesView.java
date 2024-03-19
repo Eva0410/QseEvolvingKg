@@ -71,7 +71,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
     Set<Integer> chosenClassesEncoded;
     Button buttonPrimary;
     String prunedFileAddress = "";
-    Checkbox checkbox;
+    Checkbox checkboxUseDefaultShapes;
     NumberField confidence;
     IntegerField support;
     Graph currentGraph;
@@ -92,9 +92,9 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         classesGrid = new Grid(Type.class,false);
         support = new IntegerField();
         confidence = new NumberField();
-        checkbox = new Checkbox();
-        checkbox.setLabel("Use default shapes");
-        checkbox.setValue(true);
+        checkboxUseDefaultShapes = new Checkbox();
+        checkboxUseDefaultShapes.setLabel("Use default shapes");
+        checkboxUseDefaultShapes.setValue(true);
         buttonPrimary = new Button();
         graphInfo = new H5();
         searchField = new TextField();
@@ -143,7 +143,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         getContent().add(graphInfo);
         getContent().add(searchField);
         getContent().add(classesGrid);
-        getContent().add(checkbox);
+        getContent().add(checkboxUseDefaultShapes);
         getContent().add(support);
         getContent().add(confidence);
         getContent().add(buttonPrimary);
@@ -164,7 +164,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
                 Main.setDataSetNameForJar(currentGraph.getName() + "-" + event.getValue().label.replace(" ",""));
             }
         });
-        checkbox.addValueChangeListener(event -> {
+        checkboxUseDefaultShapes.addValueChangeListener(event -> {
             if(event.getValue().booleanValue()) {
                 support.setEnabled(false);
                 confidence.setEnabled(false);
@@ -231,10 +231,13 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         System.out.println(chosenClasses);
         String outputAddress = parser.extractSHACLShapes(chosenClasses.size()>0, chosenClasses);
         List<NS> nodeShapes = parser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
 
-        if(!checkbox.getValue().booleanValue()) {
+        if(!checkboxUseDefaultShapes.getValue()) {
             int supportValue = support.getValue();
             double confidenceValue = confidence.getValue()/100;
+            extractedShapes.setFileContentDefaultShapes(Files.readAllBytes(Paths.get(outputAddress)));
+            extractedShapes.setNodeShapesDefault(nodeShapes);
 
             outputAddress = parser.extractSHACLShapesWithPruning(!chosenClasses.isEmpty(), confidenceValue, supportValue, chosenClasses); // extract shapes with pruning
             System.out.println(prunedFileAddress);
@@ -248,7 +251,6 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             pruningUtil.getStatsByBoth(nodeShapes);
         }
 
-        ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.setVersionEntity(currentVersion);
         var classes = new ArrayList<String>();
         for (var i: classesGrid.getSelectedItems()) {

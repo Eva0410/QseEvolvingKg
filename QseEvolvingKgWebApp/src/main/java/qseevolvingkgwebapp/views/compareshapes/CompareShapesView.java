@@ -156,9 +156,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     private Boolean filterParentNodeShape(ComparisonTreeViewItem child) {
         if(!child.isNodeShapeLine() && child != null) {
             var parent = child.getParentShape();
-            if(parent != null && parent.areShapesEqual())
-                return true;
-            return false;
+            return parent != null && parent.areShapesEqual();
         }
         return true;
     }
@@ -331,7 +329,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
         private final String label;
 
-        private FilterEnum(String label) {
+        FilterEnum(String label) {
             this.label = label;
         }public String getLabel() {
             return label;

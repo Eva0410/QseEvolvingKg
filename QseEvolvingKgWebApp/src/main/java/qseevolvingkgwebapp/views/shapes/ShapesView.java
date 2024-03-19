@@ -117,7 +117,7 @@ public class ShapesView extends Composite<VerticalLayout>{
                 setGridData();
             });
             button.setIcon(new Icon(VaadinIcon.TRASH));
-        })).setHeader("").setAutoWidth(true).setFlexGrow(0);;
+        })).setHeader("").setAutoWidth(true).setFlexGrow(0);
         var items = shapeService.listByVersionId(currentVersionId);
 
         if(items != null)

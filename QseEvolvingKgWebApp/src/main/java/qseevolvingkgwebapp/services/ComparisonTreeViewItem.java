@@ -46,10 +46,6 @@ public class ComparisonTreeViewItem {
         return shapeName;
     }
 
-    public void setShapeName(String shapeName) {
-        this.shapeName = shapeName;
-    }
-
     public Boolean areShapesEqual() {
         return shapesEqual;
     }
