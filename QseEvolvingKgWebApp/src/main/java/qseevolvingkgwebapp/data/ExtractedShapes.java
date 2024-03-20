@@ -100,7 +100,7 @@ public class ExtractedShapes extends AbstractEntity{
             for (int i = 0; i < classes.size(); i++) {
                 shortenedList.set(i, shortenedList.get(i).split("#")[1]);
             }
-            return String.join(", ", shortenedList.stream().sorted().collect(Collectors.toList()));
+            return shortenedList.stream().sorted().collect(Collectors.joining(", "));
         }
         return "";
     }

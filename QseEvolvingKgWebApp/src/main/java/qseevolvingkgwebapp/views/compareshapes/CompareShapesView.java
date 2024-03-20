@@ -39,22 +39,18 @@ import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
         value = "themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css"
 )
 public class CompareShapesView extends Composite<VerticalLayout> {
-
-    @Autowired()
-    private VersionService versionService;
-    @Autowired()
-    private GraphService graphService;
     @Autowired()
     private ShapesService shapeService;
+
     MultiSelectComboBox<Utils.ComboBoxItem> multiSelectShapes;
-    TreeGrid<ComparisonTreeViewItem> treeViewComparision;
+    TreeGrid<ComparisonTreeViewItem> treeViewComparison;
     TextField filterField = new TextField("Filter");
     RadioButtonGroup<String> radioGroupFilter = new RadioButtonGroup<>();
     public CompareShapesView() {
         HorizontalLayout layoutRowComboBox = new HorizontalLayout();
         HorizontalLayout layoutRowFilter = new HorizontalLayout();
         multiSelectShapes = new MultiSelectComboBox();
-        treeViewComparision = new TreeGrid<>();
+        treeViewComparison = new TreeGrid<>();
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
         getContent().setSpacing(false);
@@ -67,11 +63,11 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         filterField.setHeight("min-content");
         multiSelectShapes.setLabel("Shapes");
         multiSelectShapes.setWidthFull();
-        treeViewComparision.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER,
+        treeViewComparison.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER,
                 GridVariant.LUMO_NO_ROW_BORDERS);
-        treeViewComparision.setWidth("100%");
-        treeViewComparision.getStyle().set("flex-grow", "0");
-        treeViewComparision.setHeight("70vh");
+        treeViewComparison.setWidth("100%");
+        treeViewComparison.getStyle().set("flex-grow", "0");
+        treeViewComparison.setHeight("70vh");
         radioGroupFilter.setItems(Arrays.stream(FilterEnum.values()).map(FilterEnum::getLabel).collect(Collectors.toList()));
         radioGroupFilter.setValue(FilterEnum.ALL.getLabel());
         var currentSearchFilter = (String)VaadinSession.getCurrent().getAttribute("comparison_searchValue");
@@ -86,33 +82,29 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         getContent().add(layoutRowFilter);
         layoutRowFilter.add(filterField);
         layoutRowFilter.add(radioGroupFilter);
-        getContent().add(treeViewComparision);
+        getContent().add(treeViewComparison);
 
         filterField.setValueChangeMode(ValueChangeMode.EAGER);
-        filterField.addValueChangeListener(event -> {
-            applyFilters();
-        });
+        filterField.addValueChangeListener(event -> applyFilters());
 
-        radioGroupFilter.addValueChangeListener(event -> {
-            applyFilters();
-        });
+        radioGroupFilter.addValueChangeListener(event -> applyFilters());
 
         multiSelectShapes.addValueChangeListener(e -> {
             var extractedShapes = new ArrayList<ExtractedShapes>();
             for(var i : multiSelectShapes.getSelectedItems()) {
                 extractedShapes.add(shapeService.get(i.id).get());
             }
-            if(extractedShapes.stream().map(o -> o.getSupport()).distinct().count() > 1)
+            if(extractedShapes.stream().map(ExtractedShapes::getSupport).distinct().count() > 1)
                 Notification.show("Caution, the compared items do not have the same support-value!");
-            if(extractedShapes.stream().map(o -> o.getConfidence()).distinct().count() > 1)
+            if(extractedShapes.stream().map(ExtractedShapes::getConfidence).distinct().count() > 1)
                 Notification.show("Caution, the compared items do not have the same confidence-value!");
-            if(extractedShapes.stream().map(o -> o.getClassesAsString()).distinct().count() > 1)
+            if(extractedShapes.stream().map(ExtractedShapes::getClassesAsString).distinct().count() > 1)
                 Notification.show("Caution, the compared items were not analyzed for the same classes!");
 
             setTreeViewData();
             VaadinSession.getCurrent().setAttribute("currentComboBoxItems", multiSelectShapes.getSelectedItems());
         });
-        treeViewComparision.addItemClickListener(event -> {
+        treeViewComparison.addItemClickListener(event -> {
             VaadinSession.getCurrent().setAttribute("currentCompareObject", event.getItem());
             getUI().ifPresent(ui -> ui.navigate(ComparisonDetailsView.class));
         });
@@ -124,7 +116,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     }
 
     private void applyFilters() {
-        var dataProvider = (TreeDataProvider<ComparisonTreeViewItem>) treeViewComparision.getDataProvider();
+        var dataProvider = (TreeDataProvider<ComparisonTreeViewItem>) treeViewComparison.getDataProvider();
 
         // Get values from filter components
         String searchValue = filterField.getValue();
@@ -140,23 +132,23 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 boolean filterFieldPass = searchValue == null || item.getShapeName().toLowerCase().contains(searchValue.toLowerCase());
 
                 boolean radioGroupPass = selectedRadioGroupFilter == null ||
-                        (selectedRadioGroupFilter == FilterEnum.IDENTICALPS.getLabel() && item.areShapesEqual()) ||
-                        (selectedRadioGroupFilter == FilterEnum.IDENTICALNS.getLabel() && item.areShapesEqual() && filterParentNodeShape(item)) ||
-                        (selectedRadioGroupFilter == FilterEnum.DIFFERENT.getLabel() && !item.areShapesEqual()) ||
-                        (selectedRadioGroupFilter == FilterEnum.ALL.getLabel());
+                        (selectedRadioGroupFilter.equals(FilterEnum.IDENTICAL_PS.getLabel()) && item.areShapesEqual()) ||
+                        (selectedRadioGroupFilter.equals(FilterEnum.IDENTICAL_NS.getLabel()) && item.areShapesEqual() && filterParentNodeShape(item)) ||
+                        (selectedRadioGroupFilter.equals(FilterEnum.DIFFERENT.getLabel()) && !item.areShapesEqual()) ||
+                        (selectedRadioGroupFilter.equals(FilterEnum.ALL.getLabel()));
 
                 return filterFieldPass && radioGroupPass;
             });
-            treeViewComparision.expandRecursively(dataProvider.getTreeData().getRootItems(),
+            treeViewComparison.expandRecursively(dataProvider.getTreeData().getRootItems(),
                     99);
         }
-        treeViewComparision.expandRecursively(dataProvider.getTreeData().getRootItems(), 99);
+        treeViewComparison.expandRecursively(dataProvider.getTreeData().getRootItems(), 99);
     }
 
     private Boolean filterParentNodeShape(ComparisonTreeViewItem child) {
-        if(!child.isNodeShapeLine() && child != null) {
+        if(!child.isNodeShapeLine()) {
             var parent = child.getParentShape();
-            return parent != null && parent.areShapesEqual();
+            return parent.areShapesEqual();
         }
         return true;
     }
@@ -185,8 +177,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
             for (var cbi :
                     currentComboBoxItems) {
                 var newComboBoxItem = comboBoxItems.stream().filter(c -> c.id.equals(cbi.id)).findFirst();
-                if(newComboBoxItem.isPresent())
-                    multiSelectShapes.select(newComboBoxItem.get());
+                newComboBoxItem.ifPresent(comboBoxItem -> multiSelectShapes.select(comboBoxItem));
             }
         } else {
             if (comboBoxItems.size() > 1) {
@@ -197,13 +188,12 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
     private void setTreeViewData() {
         var nodeShapesToShow = new ArrayList<ComparisonTreeViewItem>();
-        treeViewComparision.removeAllColumns();
+        treeViewComparison.removeAllColumns();
         for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
             var extractedShapes = shapeService.get(comboBoxItem.id).get();
             var nodeShapes = extractedShapes.getNodeShapes();
-            var nodeShapesToShowMap =  nodeShapesToShow
-                    .stream().map(ns -> ns.getShapeName())
-                    .collect(Collectors.toList());
+            var nodeShapesToShowMap = nodeShapesToShow
+                    .stream().map(ComparisonTreeViewItem::getShapeName).toList();
             for(var ns : nodeShapes) {
                 if(nodeShapesToShowMap.contains(ns.getIri().getLocalName())) {
                     var nodeShapeToShow = nodeShapesToShow.stream().filter(n -> n.getShapeName()
@@ -216,28 +206,28 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                     nodeShapesToShow.add(newItem);
                 }
             }
-            treeViewComparision.addHierarchyColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id))
+            treeViewComparison.addHierarchyColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id))
                 .setHeader(comboBoxItem.label);
 
         }
 
         addEqualInformationNS(nodeShapesToShow);
 
-        treeViewComparision.setItems(nodeShapesToShow, this::getPropertyShapes);
+        treeViewComparison.setItems(nodeShapesToShow, this::getPropertyShapes);
 
-        treeViewComparision.expand(nodeShapesToShow);
-        treeViewComparision.setClassNameGenerator(e -> !e.areShapesEqual() ? "warn" : null);
+        treeViewComparison.expand(nodeShapesToShow);
+        treeViewComparison.setClassNameGenerator(e -> !e.areShapesEqual() ? "warn" : null);
     }
 
     private String getTreeViewTextFromViewItem(ComparisonTreeViewItem o, Long extractedShapesId) {
         if(o.isNodeShapeLine()) {
-            if(o.getNodeShapeList().keySet().contains(extractedShapesId))
+            if(o.getNodeShapeList().containsKey(extractedShapesId))
                 return o.getShapeName();
             else
                 return "-";
         }
         else {
-            if(o.getPropertyShapeList().keySet().contains(extractedShapesId))
+            if(o.getPropertyShapeList().containsKey(extractedShapesId))
                 return o.getShapeName();
             else
                 return "-";
@@ -252,8 +242,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                         .stream().filter(n -> n.getIri().getLocalName().equals(item.getShapeName())).findFirst();
                 if (extractedShapes.isPresent()) {
                     var propertyShapesToShowMap = propertyShapesToShow
-                            .stream().map(ns -> ns.getShapeName())
-                            .collect(Collectors.toList());
+                            .stream().map(ComparisonTreeViewItem::getShapeName).toList();
                     for (var ps : extractedShapes.get().getPropertyShapeList()) {
                         if (propertyShapesToShowMap.contains(ps.getIri().getLocalName())) {
                             var propertyShapeToShow = propertyShapesToShow.stream().filter(n -> n.getShapeName()
@@ -278,7 +267,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         for (var comparisonTreeViewItem:
              propertyShapesToShow) {
             for (var ps : comparisonTreeViewItem.getPropertyShapeList().values()) {
-                if(ps.getGeneratedText() == null || ps.getGeneratedText().isEmpty()) {
+                if(ps.getGeneratedText().isEmpty()) {
                     ps.generateText();
                     System.out.println("Text not generated for shape " + ps.getIri().getLocalName() + ", " + ps.getNodeShape().getIri().getLocalName());
                     shapeService.update(ps.getNodeShape().getExtractedShapes());
@@ -288,7 +277,6 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                     areAllStringsEqual(
                             comparisonTreeViewItem.getPropertyShapeList().values().stream()
                                     .map(PropertyShape::getGeneratedText).collect(Collectors.toList())));
-
         }
     }
 
@@ -296,7 +284,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         for (var comparisonTreeViewItem:
                 propertyShapesToShow) {
             for (var ps : comparisonTreeViewItem.getNodeShapeList().values()) {
-                if(ps.getGeneratedText() == null || ps.getGeneratedText().isEmpty()) {
+                if(ps.getGeneratedText().isEmpty()) {
                     ps.generateText();
                     shapeService.update(ps.getExtractedShapes());
                 }
@@ -323,8 +311,8 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
     public enum FilterEnum {
         ALL("All"),
-        IDENTICALNS("Identical node shapes"),
-        IDENTICALPS("Identical property shapes"),
+        IDENTICAL_NS("Identical node shapes"),
+        IDENTICAL_PS("Identical property shapes"),
         DIFFERENT("Different shapes");
 
         private final String label;

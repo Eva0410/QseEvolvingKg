@@ -64,7 +64,7 @@ public class Utils {
         var firstItem = graphs.stream().findFirst();
 
 
-        if(selectedGraphId != null && !selectedGraphId.equals(0)) {
+        if(selectedGraphId != null) {
             var graphItem = selectItemGraph.getDataProvider().fetch(new Query<>()).filter(g -> g.id.equals(selectedGraphId)).findFirst();
             if(graphItem.isPresent())
                 selectItemGraph.setValue(graphItem.get());
@@ -84,7 +84,7 @@ public class Utils {
         var currentVersionId = (Long) VaadinSession.getCurrent().getAttribute("shapes_currentVersionId");
         var firstItem = versions.stream().findFirst();
 
-        if(currentVersionId != null && !currentVersionId.equals(0)) {
+        if(currentVersionId != null) {
             var graphItem = selectItemVersion.getDataProvider().fetch(new Query<>()).filter(v -> v.id.equals(currentVersionId)).findFirst();
             if(graphItem.isPresent())
                 selectItemVersion.setValue(graphItem.get());
@@ -153,17 +153,17 @@ public class Utils {
         var blankNodeQueue = filteredModel.stream().filter(statement -> statement.getObject() instanceof BNode).collect(Collectors.toList());
         while(blankNodeQueue.size() != 0) {
             var nextStatement = blankNodeQueue.get(0);
-            var modelToAdd = model.stream().filter(statement -> statement.getSubject().equals(nextStatement.getObject())).collect(Collectors.toList());
+            var modelToAdd = model.stream().filter(statement -> statement.getSubject().equals(nextStatement.getObject())).toList();
             filteredModel.addAll(modelToAdd);
             blankNodeQueue.remove(nextStatement);
-            var tmp = modelToAdd.stream().filter(statement -> statement.getObject() instanceof BNode).collect(Collectors.toList());
+            var tmp = modelToAdd.stream().filter(statement -> statement.getObject() instanceof BNode).toList();
             blankNodeQueue.addAll(tmp);
         }
         return filteredModel;
     }
 
     public static String getComboBoxLabelForExtractedShapes(ExtractedShapes shape) {
-        if(shape.getComboBoxString()== null|| shape.getComboBoxString().isEmpty())
+        if(shape.getComboBoxString().isEmpty())
             shape.generateComboBoxString();
         return shape.getComboBoxString();
     }

@@ -3,7 +3,6 @@ package qseevolvingkgwebapp.services;
 import qseevolvingkgwebapp.data.NodeShape;
 import qseevolvingkgwebapp.data.PropertyShape;
 
-import java.util.Comparator;
 import java.util.HashMap;
 
 //represents one line in the tree view. This can be either be a line of 2+ node shapes, or of 2+ property shapes

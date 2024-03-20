@@ -34,8 +34,7 @@ public class ComparisonDiv extends Div {
         else {
             for (int i = 0; i < arraySize; i++) {
                 JsonValue jsonValue = diffArray.get(i);
-                if (jsonValue instanceof JsonObject) {
-                    JsonObject diffObj = (JsonObject) jsonValue;
+                if (jsonValue instanceof JsonObject diffObj) {
                     String value = diffObj.getString("value");
                     String added = diffObj.hasKey("added") && diffObj.getBoolean("added") ? "added" : "";
                     String removed = diffObj.hasKey("removed") && diffObj.getBoolean("removed") ? "removed" : "";
@@ -45,7 +44,7 @@ public class ComparisonDiv extends Div {
 
                     if (!added.isEmpty() || !removed.isEmpty()) {
                         fontWeight = "font-weight:bold;";
-                        color = added.isEmpty() ? removed.isEmpty() ? "" : "color:red;" : "color:green;";
+                        color = added.isEmpty() ? "color:red;" : "color:green;";
                     }
                     diffText.append("<span style=\"").append(color).append(fontWeight).append("\">").append(escapeHtmlCharacters(value)).append("</span>");
                 }
@@ -60,7 +59,7 @@ public class ComparisonDiv extends Div {
     }
 
     public void updateTextDifferences(String t1, String t2) {
-        if(t1 == null || t1 == "" || t2 == null || t2 == "") {
+        if(t1 == null || t1.equals("") || t2 == null || t2.equals("")) {
             getElement().removeAllChildren();
             return;
         }

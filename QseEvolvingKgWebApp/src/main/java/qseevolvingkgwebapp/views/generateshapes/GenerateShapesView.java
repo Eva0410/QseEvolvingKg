@@ -40,7 +40,6 @@ import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.shapes.ShapesView;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -120,9 +119,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         classesGrid.addColumn("name").setHeader("Class IRI").setSortable(true);
         classesGrid.addColumn("instanceCount").setHeader("Class Instance Count").setSortable(true);
         classesGrid.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
-        classesGrid.addSelectionListener(selection -> {
-            buttonPrimary.setEnabled(selection.getAllSelectedItems().size() > 0);
-        });
+        classesGrid.addSelectionListener(selection -> buttonPrimary.setEnabled(selection.getAllSelectedItems().size() > 0));
         support.setLabel("Support");
         support.setWidth("min-content");
         support.setMin(0);
@@ -168,7 +165,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             }
         });
         checkboxUseDefaultShapes.addValueChangeListener(event -> {
-            if(event.getValue().booleanValue()) {
+            if(event.getValue()) {
                 support.setEnabled(false);
                 confidence.setEnabled(false);
             }

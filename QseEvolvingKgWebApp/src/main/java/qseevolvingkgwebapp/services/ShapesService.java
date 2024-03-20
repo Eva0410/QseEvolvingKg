@@ -57,7 +57,6 @@ public class ShapesService {
     }
 
     public List<ExtractedShapes> listByVersionId(Long versionId) {
-        return repository.findAll().stream().filter(s -> s.getVersionObject() != null &&
-                s.getVersionObject().getId().equals(versionId)).collect(Collectors.toList());
+        return repository.findAll().stream().filter(s -> s.getVersionObject().getId().equals(versionId)).collect(Collectors.toList());
     }
 }

@@ -1,9 +1,7 @@
 package qseevolvingkgwebapp.data;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -52,7 +50,7 @@ public class Version extends AbstractEntity {
         return path;
     }
     public String getPathWithSpacesForTooltip() {
-        if(this.path == null || this.path == "")
+        if(this.path == null || this.path.equals(""))
             return "";
         StringBuilder builder = new StringBuilder(this.path);
         int interval = 35;

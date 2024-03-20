@@ -121,7 +121,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
     }
 
     private void updateInfoParagraph() {
-        if(oldText == null || oldText == "" || newText == null || newText == "") {
+        if(oldText == null || oldText.equals("") || newText == null || newText.equals("")) {
             infoParagraph.getElement().getStyle().setDisplay(Style.Display.BLOCK);
             int supportThreshold = treeViewItem.getSupportThreshold();
             int confidenceThreshold = treeViewItem.getConfidenceThreshold();
@@ -130,7 +130,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             comparisonDiv.getElement().getStyle().setDisplay(Style.Display.NONE);
 
             //shape has been deleted
-            if(oldText != null && oldText != "" && (newText == null || newText == "")) {
+            if(oldText != null && !oldText.equals("") && (newText == null || newText.equals(""))) {
                 if(treeViewItem.usesDefaultShapes()) {
                     infoParagraph.setText("This shape was deleted because there were no nodes of this class found (default shapes were compared)");
                 }
@@ -162,7 +162,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
                 }
             }
             //shape was added
-            else if(oldText == null || oldText == "") {
+            else if(oldText == null || oldText.equals("")) {
                     infoParagraph.setText("This shape was newly added!");
             }
         }
@@ -186,13 +186,9 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             var ps = treeViewItem.getPropertyShapeList().get(extractedShapes.id);
             if(ps != null) {
                 int confidence;
-                if (ps.getConfidence() != null) {
-                    confidence = (int) Math.round(ps.getConfidence() * 100);
-                } else {
-                    confidence = -1;
-                }
+                confidence = (int) Math.round(ps.getConfidence() * 100);
                 supportText = String.format("Support: %d, Confidence: %s", ps.getSupport(),
-                        (ps.getConfidence() != null) ? confidence + "%" : "-");
+                        confidence + "%");
                 allText =  ps.getGeneratedText();
             }
         }

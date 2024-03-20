@@ -25,7 +25,6 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import qseevolvingkgwebapp.data.Version;
-import qseevolvingkgwebapp.services.ComparisonTreeViewItem;
 import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
 import qseevolvingkgwebapp.services.GraphService;
@@ -81,9 +80,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
         buttonNewVersion.setText("New Version");
         buttonNewVersion.setWidth("min-content");
         buttonNewVersion.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonNewVersion.addClickListener(event -> {
-            getUI().ifPresent(ui -> ui.navigate(NewVersionView.class,comboBoxGraphs.getValue().id));
-        });
+        buttonNewVersion.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate(NewVersionView.class,comboBoxGraphs.getValue().id)));
 
         Binder<Version> binder = new Binder<>(Version.class);
         Editor<Version> editor = gridVersions.getEditor();
@@ -108,12 +105,8 @@ public class VersionsView extends Composite<VerticalLayout>  {
             }
         });
 
-        editor.addCancelListener(e -> {
-            nameValidationMessage.setText("");
-        });
-        editor.addCloseListener(e -> {
-            versionService.update(e.getItem());
-        });
+        editor.addCancelListener(e -> nameValidationMessage.setText(""));
+        editor.addCloseListener(e -> versionService.update(e.getItem()));
 
         getContent().add(horizontalLayout);
         horizontalLayout.add(comboBoxGraphs);
@@ -128,9 +121,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
             }
         });
 
-        addAttachListener(event -> {
-            setGraphs(comboBoxGraphs);
-        });
+        addAttachListener(event -> setGraphs(comboBoxGraphs));
     }
 
     private static void addCloseHandler(Component textField,
@@ -144,7 +135,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
                 .map(graph -> new ComboBoxItem(graph.getName(),graph.getId()))
                 .collect(Collectors.toList());
         comboBox.setItems(comboBoxItemList);
-        comboBox.setItemLabelGenerator(item -> ((ComboBoxItem)item).label);
+        comboBox.setItemLabelGenerator(item -> item.label);
         if (comboBoxItemList.size() > 0) {
             var currentGraphId = (Long)VaadinSession.getCurrent().getAttribute("versions_currentGraphId");
             var selectedGraph = comboBoxItemList.stream().filter(c -> c.id.equals(currentGraphId)).findFirst();

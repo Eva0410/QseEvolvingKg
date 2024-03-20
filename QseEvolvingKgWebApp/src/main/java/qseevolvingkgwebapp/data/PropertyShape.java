@@ -56,7 +56,7 @@ public class PropertyShape {
             }
             support = maxConfidenceItem.getSupport();
             confidence = maxConfidenceItem.getConfidence();
-            shaclOrListItems = shaclOrListItems;
+            this.shaclOrListItems = shaclOrListItems;
         }
     }
 
