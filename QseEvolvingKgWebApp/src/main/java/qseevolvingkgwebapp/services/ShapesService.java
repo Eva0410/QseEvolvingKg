@@ -23,8 +23,8 @@ public class ShapesService {
         return repository.findById(id);
     }
 
-    public ExtractedShapes update(ExtractedShapes entity) {
-        return repository.save(entity);
+    public void update(ExtractedShapes entity) {
+        repository.save(entity);
     }
 
     public void delete(Long id) {
@@ -51,14 +51,12 @@ public class ShapesService {
         return (int) repository.count();
     }
 
-    public ExtractedShapes insert(ExtractedShapes extractedShapes) {
+    public void insert(ExtractedShapes extractedShapes) {
         ExtractedShapes s = repository.save(extractedShapes);
         repository.flush();
-        return s;
     }
 
     public List<ExtractedShapes> listByVersionId(Long versionId) {
-        return repository.findAll().stream().filter(s -> s.getVersionObject() != null &&
-                s.getVersionObject().getId().equals(versionId)).collect(Collectors.toList());
+        return repository.findAll().stream().filter(s -> s.getVersionObject().getId().equals(versionId)).collect(Collectors.toList());
     }
 }

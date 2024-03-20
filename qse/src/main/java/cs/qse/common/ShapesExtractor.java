@@ -269,6 +269,7 @@ public class ShapesExtractor {
             if (conn != null) {
                 try {
                     conn.close();
+                    db.shutDown();
                 } catch (Throwable var12) {
                     var13.addSuppressed(var12);
                 }
@@ -279,6 +280,7 @@ public class ShapesExtractor {
 
         if (conn != null) {
             conn.close();
+            db.shutDown();
         }
 
     }

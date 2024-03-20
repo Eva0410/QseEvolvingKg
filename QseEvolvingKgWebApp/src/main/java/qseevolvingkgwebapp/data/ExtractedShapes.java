@@ -2,18 +2,13 @@ package qseevolvingkgwebapp.data;
 
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.w3c.dom.Node;
 
-import javax.xml.stream.Location;
 import java.io.ByteArrayInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -42,8 +37,16 @@ public class ExtractedShapes extends AbstractEntity{
     @Column(name = "fileContent", columnDefinition = "BLOB")
     byte[] fileContent;
 
+    //Need to be generated for delete reason during comparison
+    @Lob
+    @Column(name = "fileContentDefault", columnDefinition = "BLOB")
+    byte[] fileContentDefaultShapes;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     List<NodeShape> nodeShapes;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    List<NodeShape> nodeShapesDefault;
 
     @Transient
     Model model;
@@ -77,9 +80,18 @@ public class ExtractedShapes extends AbstractEntity{
     public void setNodeShapes(List<NS> ns) {
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
-            list.add(new NodeShape(item, this));
+            if(item.getSupport() > this.support)
+                list.add(new NodeShape(item, this, true));
         }
         this.nodeShapes = list;
+    }
+
+    public void setNodeShapesDefault(List<NS> ns) {
+        var list = new ArrayList<NodeShape>();
+        for(var item : ns) {
+            list.add(new NodeShape(item, this, false));
+        }
+        this.nodeShapesDefault = list;
     }
 
     public String getClassesAsString() {
@@ -88,12 +100,9 @@ public class ExtractedShapes extends AbstractEntity{
             for (int i = 0; i < classes.size(); i++) {
                 shortenedList.set(i, shortenedList.get(i).split("#")[1]);
             }
-            return String.join(", ", shortenedList.stream().sorted().collect(Collectors.toList()));
+            return shortenedList.stream().sorted().collect(Collectors.joining(", "));
         }
         return "";
-    }
-    public byte[] getFileContent() {
-        return fileContent;
     }
 
     public void setFileContent(byte[] fileContent) {
@@ -144,10 +153,6 @@ public class ExtractedShapes extends AbstractEntity{
         this.confidence = confidence;
     }
 
-    public List<String> getClasses() {
-        return classes;
-    }
-
     public void setClasses(List<String> classes) {
         this.classes = classes;
     }
@@ -167,5 +172,17 @@ public class ExtractedShapes extends AbstractEntity{
 
     public String getComboBoxString() {
         return comboBoxString;
+    }
+
+    public byte[] getFileContentDefaultShapes() {
+        return fileContentDefaultShapes;
+    }
+
+    public void setFileContentDefaultShapes(byte[] fileContentDefaultShapes) {
+        this.fileContentDefaultShapes = fileContentDefaultShapes;
+    }
+
+    public List<NodeShape> getNodeShapesDefault() {
+        return nodeShapesDefault;
     }
 }

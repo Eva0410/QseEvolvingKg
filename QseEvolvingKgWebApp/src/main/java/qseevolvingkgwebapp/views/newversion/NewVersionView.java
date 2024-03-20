@@ -6,14 +6,11 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.Graph;
 import qseevolvingkgwebapp.data.Version;
@@ -23,7 +20,6 @@ import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
 
 import java.io.*;
-import java.time.LocalDateTime;
 
 @Route(value = "new-version", layout = MainLayout.class)
 @Uses(Icon.class)

@@ -3,7 +3,6 @@ package qseevolvingkgwebapp.views.graphs;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
@@ -55,9 +54,7 @@ public class GraphsView extends Composite<VerticalLayout> {
         buttonNewGraph.setText("New Graph");
         buttonNewGraph.setWidth("min-content");
         buttonNewGraph.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonNewGraph.addClickListener(event -> {
-            getUI().ifPresent(ui -> ui.navigate(NewGraphView.class));
-        });
+        buttonNewGraph.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate(NewGraphView.class)));
         gridGraphs.setWidth("100%");
         gridGraphs.setHeight("80vh");
         gridGraphs.getStyle().set("flex-grow", "0");
@@ -96,12 +93,8 @@ public class GraphsView extends Composite<VerticalLayout> {
                 ((Focusable) editorComponent).focus();
             }
         });
-        editor.addCancelListener(e -> {
-            nameValidationMessage.setText("");
-        });
-        editor.addCloseListener(e -> {
-            graphService.update(e.getItem());
-        });
+        editor.addCancelListener(e -> nameValidationMessage.setText(""));
+        editor.addCloseListener(e -> graphService.update(e.getItem()));
 
 
         setGraphsData();

@@ -1,7 +1,5 @@
 package qseevolvingkgwebapp.services;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,8 +23,8 @@ public class GraphService {
         return repository.findById(id);
     }
 
-    public Graph update(Graph entity) {
-        return repository.save(entity);
+    public void update(Graph entity) {
+        repository.save(entity);
     }
 
     public void delete(Long id) {

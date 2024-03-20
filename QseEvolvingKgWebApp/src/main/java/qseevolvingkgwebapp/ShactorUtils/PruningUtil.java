@@ -20,11 +20,8 @@ public class PruningUtil implements Serializable {
 
     HashMap<String, String> statsBySupport = new HashMap<>();
     HashMap<String, String> statsByConfidence = new HashMap<>();
-    ;
     HashMap<String, String> statsByBoth = new HashMap<>();
-    ;
     HashMap<String, String> statsDefault = new HashMap<>();
-    ;
 
     public HashMap<String, String> getStatsBySupport() {
         return statsBySupport;

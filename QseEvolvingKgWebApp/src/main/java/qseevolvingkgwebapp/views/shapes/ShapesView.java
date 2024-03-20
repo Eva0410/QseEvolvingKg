@@ -94,9 +94,7 @@ public class ShapesView extends Composite<VerticalLayout>{
 
         buttonGenerateShapes.addClickListener(buttonClickEvent -> getUI().ifPresent(ui -> ui.navigate(GenerateShapesView.class)));
 
-        addAttachListener(event -> {
-            Utils.setComboBoxGraphData(graphService, selectItemGraph);
-        });
+        addAttachListener(event -> Utils.setComboBoxGraphData(graphService, selectItemGraph));
     }
 
     private void setGridData() {
@@ -117,10 +115,9 @@ public class ShapesView extends Composite<VerticalLayout>{
                 setGridData();
             });
             button.setIcon(new Icon(VaadinIcon.TRASH));
-        })).setHeader("").setAutoWidth(true).setFlexGrow(0);;
+        })).setHeader("").setAutoWidth(true).setFlexGrow(0);
         var items = shapeService.listByVersionId(currentVersionId);
 
-        if(items != null)
-            gridShapes.setItems(items);
+        gridShapes.setItems(items);
     }
 }

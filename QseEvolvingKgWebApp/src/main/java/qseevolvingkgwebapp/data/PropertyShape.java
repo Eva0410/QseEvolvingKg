@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
 import qseevolvingkgwebapp.services.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class PropertyShape {
     @Id
@@ -18,7 +21,9 @@ public class PropertyShape {
     String dataTypeOrClass;
     Integer support;
     Double confidence;
-//    List<ShaclOrListItem> shaclOrListItems;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    List<ShaclOrListItem> shaclOrListItems;
 
     @Lob
     String generatedText;
@@ -33,10 +38,29 @@ public class PropertyShape {
         dataTypeOrClass = ps.getDataTypeOrClass();
         support = ps.getSupport();
         confidence = ps.getConfidence();
-//        shaclOrListItems = ps.getShaclOrListItems();
+
+        //set shaclOrItems (copied from Shactor)
+        //Also resets support and confidence to the maximum confidence if ShaclOrItems are used (copied from Shactor)
+        if(ps.getShaclOrListItems() != null && ps.getShaclOrListItems().size() != 0){
+            cs.qse.common.structure.ShaclOrListItem maxConfidenceItem = null;
+            var shaclOrListItems = new ArrayList<ShaclOrListItem>();
+            for (var item:
+                    ps.getShaclOrListItems()) {
+                shaclOrListItems.add(new ShaclOrListItem(item.getNodeKind(),item.getDataTypeOrClass(), item.getSupport(), item.getConfidence()));
+                if (maxConfidenceItem == null) {
+                    maxConfidenceItem = item;
+                }
+                if (item.getConfidence() > maxConfidenceItem.getConfidence()) {
+                    maxConfidenceItem = item;
+                }
+            }
+            support = maxConfidenceItem.getSupport();
+            confidence = maxConfidenceItem.getConfidence();
+            this.shaclOrListItems = shaclOrListItems;
+        }
     }
 
-    public PropertyShape(PS ps, NodeShape ns) {
+    public PropertyShape(PS ps, NodeShape ns, boolean shouldGenerateText) {
         this(ps);
         this.nodeShape = ns;
         this.generateText();
@@ -99,13 +123,13 @@ public class PropertyShape {
         this.confidence = confidence;
     }
 
-//    public List<ShaclOrListItem> getShaclOrListItems() {
-//        return shaclOrListItems;
-//    }
-//
-//    public void setShaclOrListItems(List<ShaclOrListItem> shaclOrListItems) {
-//        this.shaclOrListItems = shaclOrListItems;
-//    }
+    public List<ShaclOrListItem> getShaclOrListItems() {
+        return shaclOrListItems;
+    }
+
+    public void setShaclOrListItems(List<ShaclOrListItem> shaclOrListItems) {
+        this.shaclOrListItems = shaclOrListItems;
+    }
 
     public Long getId() {
         return id;
@@ -124,7 +148,9 @@ public class PropertyShape {
     }
 
     public void generateText() {
-        var model = this.nodeShape.extractedShapes.getModel();
-        this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);;
+        if(this.nodeShape.shouldGenerateText) {
+            var model = this.nodeShape.extractedShapes.getModel();
+            this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);
+        }
     }
 }

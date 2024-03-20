@@ -28,16 +28,24 @@ public class NodeShape {
     @ManyToOne
     ExtractedShapes extractedShapes;
 
+    Boolean shouldGenerateText;
+
     public NodeShape() {}
 
-    public NodeShape(NS ns, ExtractedShapes es) {
+    public NodeShape(NS ns, ExtractedShapes es, boolean shouldGenerateText) {
         this.iri = ns.getIri();
         this.targetClass = ns.getTargetClass();
         this.support = ns.getSupport();
         this.propertyShapeList = new ArrayList<>();
         this.extractedShapes = es;
+        this.shouldGenerateText = shouldGenerateText;
         for (var ps : ns.getPropertyShapes()) {
-            propertyShapeList.add(new PropertyShape(ps, this));
+            //Bug in Shactor...
+            var propertyShape = new PropertyShape(ps, this, shouldGenerateText);
+            if(propertyShape.getSupport() > extractedShapes.getSupport() && propertyShape.getConfidence()*100 > extractedShapes.getConfidence())
+                propertyShapeList.add(propertyShape);
+            else
+                System.out.println(ps.getIri() + " dropped");
         }
         this.generateText();
     }
@@ -99,7 +107,9 @@ public class NodeShape {
     }
 
     public void generateText() {
-        var model = extractedShapes.getModel();
-        this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);
+        if(shouldGenerateText) {
+            var model = extractedShapes.getModel();
+            this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);
+        }
     }
 }

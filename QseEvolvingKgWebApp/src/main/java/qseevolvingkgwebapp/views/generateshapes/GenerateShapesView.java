@@ -9,6 +9,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -39,7 +40,6 @@ import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.shapes.ShapesView;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -71,7 +71,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
     Set<Integer> chosenClassesEncoded;
     Button buttonPrimary;
     String prunedFileAddress = "";
-    Checkbox checkbox;
+    Checkbox checkboxUseDefaultShapes;
     NumberField confidence;
     IntegerField support;
     Graph currentGraph;
@@ -92,9 +92,9 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         classesGrid = new Grid(Type.class,false);
         support = new IntegerField();
         confidence = new NumberField();
-        checkbox = new Checkbox();
-        checkbox.setLabel("Use default shapes");
-        checkbox.setValue(true);
+        checkboxUseDefaultShapes = new Checkbox();
+        checkboxUseDefaultShapes.setLabel("Use default shapes");
+        checkboxUseDefaultShapes.setValue(true);
         buttonPrimary = new Button();
         graphInfo = new H5();
         searchField = new TextField();
@@ -119,16 +119,16 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         classesGrid.addColumn("name").setHeader("Class IRI").setSortable(true);
         classesGrid.addColumn("instanceCount").setHeader("Class Instance Count").setSortable(true);
         classesGrid.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
-        classesGrid.addSelectionListener(selection -> {
-            buttonPrimary.setEnabled(selection.getAllSelectedItems().size() > 0);
-        });
+        classesGrid.addSelectionListener(selection -> buttonPrimary.setEnabled(selection.getAllSelectedItems().size() > 0));
         support.setLabel("Support");
         support.setWidth("min-content");
         support.setMin(0);
         support.setValue(10);
+        support.setTooltipText("Only shapes will be generated, which have a higher support (>), not higher or equal (>=)");
         confidence.setLabel("Confidence (in %)");
         confidence.setValue(25.0);
         confidence.setWidth("min-content");
+        confidence.setTooltipText("Only shapes will be generated, which have a higher confidence (>), not higher or equal (>=)");
         confidence.setMin(0);
         confidence.setMax(100);
         support.setEnabled(false);
@@ -143,7 +143,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         getContent().add(graphInfo);
         getContent().add(searchField);
         getContent().add(classesGrid);
-        getContent().add(checkbox);
+        getContent().add(checkboxUseDefaultShapes);
         getContent().add(support);
         getContent().add(confidence);
         getContent().add(buttonPrimary);
@@ -164,8 +164,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
                 Main.setDataSetNameForJar(currentGraph.getName() + "-" + event.getValue().label.replace(" ",""));
             }
         });
-        checkbox.addValueChangeListener(event -> {
-            if(event.getValue().booleanValue()) {
+        checkboxUseDefaultShapes.addValueChangeListener(event -> {
+            if(event.getValue()) {
                 support.setEnabled(false);
                 confidence.setEnabled(false);
             }
@@ -178,10 +178,10 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         buttonPrimary.addClickListener(buttonClickEvent -> {
             try {
                 completeFileBasedShapesExtraction();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                getUI().ifPresent(ui -> ui.navigate(ShapesView.class));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            getUI().ifPresent(ui -> ui.navigate(ShapesView.class));
         });
 
         addAttachListener(event -> {
@@ -214,7 +214,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         classes.forEach(item -> classesGrid.select(item));
     }
 
-    private void completeFileBasedShapesExtraction() throws IOException {
+    private void completeFileBasedShapesExtraction() throws Exception {
         chosenClasses = new ArrayList<>();
         chosenClassesEncoded = new HashSet<>();
 
@@ -231,10 +231,13 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         System.out.println(chosenClasses);
         String outputAddress = parser.extractSHACLShapes(chosenClasses.size()>0, chosenClasses);
         List<NS> nodeShapes = parser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
 
-        if(!checkbox.getValue().booleanValue()) {
+        if(!checkboxUseDefaultShapes.getValue()) {
             int supportValue = support.getValue();
             double confidenceValue = confidence.getValue()/100;
+            extractedShapes.setFileContentDefaultShapes(Files.readAllBytes(Paths.get(outputAddress)));
+            extractedShapes.setNodeShapesDefault(nodeShapes);
 
             outputAddress = parser.extractSHACLShapesWithPruning(!chosenClasses.isEmpty(), confidenceValue, supportValue, chosenClasses); // extract shapes with pruning
             System.out.println(prunedFileAddress);
@@ -248,7 +251,6 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             pruningUtil.getStatsByBoth(nodeShapes);
         }
 
-        ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.setVersionEntity(currentVersion);
         var classes = new ArrayList<String>();
         for (var i: classesGrid.getSelectedItems()) {
@@ -260,6 +262,10 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
         extractedShapes.setCreatedAt(LocalDateTime.now());
         extractedShapes.setFileContent(Files.readAllBytes(Paths.get(outputAddress)));
+        if(extractedShapes.getModel().size() == 0) {
+            Notification.show("Caution, there were no shapes extracted. Please try lower values for support or confidence.");
+            throw new Exception("Noting exported");
+        }
         extractedShapes.setNodeShapes(nodeShapes);
         extractedShapes.generateComboBoxString();
         shapeService.insert(extractedShapes);
