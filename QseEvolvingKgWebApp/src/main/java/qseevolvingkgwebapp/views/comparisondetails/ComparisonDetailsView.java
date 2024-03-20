@@ -16,7 +16,6 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.data.NodeShape;
 import qseevolvingkgwebapp.services.ComparisonTreeViewItem;
 import qseevolvingkgwebapp.services.ShapesService;
@@ -122,42 +121,50 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
     }
 
     private void updateInfoParagraph() {
-        //shape has been deleted
-        if(oldText != null && oldText != "" && (newText == null || newText == "")) {
+        if(oldText == null || oldText == "" || newText == null || newText == "") {
             infoParagraph.getElement().getStyle().setDisplay(Style.Display.BLOCK);
-            if(treeViewItem.usesDefaultShapes()) {
-                infoParagraph.setText("This shape was deleted because there were no nodes of this class found (default shapes were compared)");
-            }
-            else {
-                int supportThreshold = treeViewItem.getSupportThreshold();
-                int confidenceThreshold = treeViewItem.getConfidenceThreshold();
-                var extractedShapes = shapesService.get(newSelectItemIdExtractedShapes).get();
-                int support = 0;
-                int confidence = 0;
-                if(treeViewItem.isNodeShapeLine()) {
-                    var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst();
-                    support = nodeShape.isPresent() ? nodeShape.get().getSupport() : 0;
+            int supportThreshold = treeViewItem.getSupportThreshold();
+            int confidenceThreshold = treeViewItem.getConfidenceThreshold();
+            int support = 0;
+            int confidence = 0;
+            comparisonDiv.getElement().getStyle().setDisplay(Style.Display.NONE);
+
+            //shape has been deleted
+            if(oldText != null && oldText != "" && (newText == null || newText == "")) {
+                if(treeViewItem.usesDefaultShapes()) {
+                    infoParagraph.setText("This shape was deleted because there were no nodes of this class found (default shapes were compared)");
                 }
                 else {
-                    try {
-                        var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getParentShape().getShapeName())).findFirst().get();
-                        var propertyShape = nodeShape.getPropertyShapeList()
-                                .stream().filter(ps -> ps.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst().get();
-                        support = propertyShape.getSupport();
-                        confidence = (int)Math.round(propertyShape.getConfidence()*100);
-                    } catch (Exception ex) {
-                        //ignore, values are 0 anyways
+                    var extractedShapes = shapesService.get(newSelectItemIdExtractedShapes).get();
+
+                    if(treeViewItem.isNodeShapeLine()) {
+                        var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst();
+                        support = nodeShape.isPresent() ? nodeShape.get().getSupport() : 0;
+                    }
+                    else {
+                        try {
+                            var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getParentShape().getShapeName())).findFirst().get();
+                            var propertyShape = nodeShape.getPropertyShapeList()
+                                    .stream().filter(ps -> ps.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst().get();
+                            support = propertyShape.getSupport();
+                            confidence = (int)Math.round(propertyShape.getConfidence()*100);
+                        } catch (Exception ex) {
+                            //ignore, values are 0 anyways
+                        }
+                    }
+
+                    if(supportThreshold != 0 && support <= supportThreshold) {
+                        infoParagraph.setText(String.format("This shape was deleted because there were less shapes (%d) than defined by the support-parameter (%d)", support, supportThreshold));
+                    }
+                    else if (confidenceThreshold != 0 && confidence <= confidenceThreshold) {
+                        infoParagraph.setText(String.format("This shape was deleted because the confidence (%d %%) was less than defined by the confidence-parameter (%d %%)", confidence, confidenceThreshold));
                     }
                 }
-
-                if(supportThreshold != 0 && support <= supportThreshold) {
-                    infoParagraph.setText(String.format("This shape was deleted because there were less shapes (%d) than defined by the support-parameter (%d)", support, supportThreshold));
-                }
-                else if (confidenceThreshold != 0 && confidence <= confidenceThreshold) {
-                    infoParagraph.setText(String.format("This shape was deleted because the confidence (%d %%) was less than defined by the confidence-parameter (%d %%)", confidence, confidenceThreshold));
-                }
             }
-            comparisonDiv.getElement().getStyle().setDisplay(Style.Display.NONE);
+            //shape was added
+            else if(oldText == null || oldText == "") {
+                    infoParagraph.setText("This shape was newly added!");
+            }
         }
         else {
             infoParagraph.getElement().getStyle().setDisplay(Style.Display.NONE);

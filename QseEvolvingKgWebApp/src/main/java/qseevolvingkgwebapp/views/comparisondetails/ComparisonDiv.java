@@ -29,25 +29,29 @@ public class ComparisonDiv extends Div {
         int arraySize = diffArray.length();
         StringBuilder diffText = new StringBuilder();
 
-        for (int i = 0; i < arraySize; i++) {
-            JsonValue jsonValue = diffArray.get(i);
-            if (jsonValue instanceof JsonObject) {
-                JsonObject diffObj = (JsonObject) jsonValue;
-                String value = diffObj.getString("value");
-                String added = diffObj.hasKey("added") && diffObj.getBoolean("added") ? "added" : "";
-                String removed = diffObj.hasKey("removed") && diffObj.getBoolean("removed") ? "removed" : "";
+        if(arraySize == 1)
+            diffText.append("The compared shapes are equal!");
+        else {
+            for (int i = 0; i < arraySize; i++) {
+                JsonValue jsonValue = diffArray.get(i);
+                if (jsonValue instanceof JsonObject) {
+                    JsonObject diffObj = (JsonObject) jsonValue;
+                    String value = diffObj.getString("value");
+                    String added = diffObj.hasKey("added") && diffObj.getBoolean("added") ? "added" : "";
+                    String removed = diffObj.hasKey("removed") && diffObj.getBoolean("removed") ? "removed" : "";
 
-                String color = "";
-                String fontWeight = "";
+                    String color = "";
+                    String fontWeight = "";
 
-                if (!added.isEmpty() || !removed.isEmpty()) {
-                    fontWeight = "font-weight:bold;";
-                    color = added.isEmpty() ? removed.isEmpty() ? "" : "color:red;" : "color:green;";
+                    if (!added.isEmpty() || !removed.isEmpty()) {
+                        fontWeight = "font-weight:bold;";
+                        color = added.isEmpty() ? removed.isEmpty() ? "" : "color:red;" : "color:green;";
+                    }
+                    diffText.append("<span style=\"").append(color).append(fontWeight).append("\">").append(escapeHtmlCharacters(value)).append("</span>");
                 }
-                diffText.append("<span style=\"").append(color).append(fontWeight).append("\">").append(escapeHtmlCharacters(value)).append("</span>");
             }
-
         }
+
         getElement().removeAllChildren();
         Div diffDiv = new Div();
         String s = diffText.toString().replaceAll("\\\\n", "<br>");

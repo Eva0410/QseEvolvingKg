@@ -188,7 +188,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 if(newComboBoxItem.isPresent())
                     multiSelectShapes.select(newComboBoxItem.get());
             }
-        }else {
+        } else {
             if (comboBoxItems.size() > 1) {
                 multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));
             }
