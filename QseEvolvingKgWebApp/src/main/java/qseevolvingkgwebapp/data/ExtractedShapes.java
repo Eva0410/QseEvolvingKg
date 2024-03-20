@@ -2,18 +2,13 @@ package qseevolvingkgwebapp.data;
 
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.w3c.dom.Node;
 
-import javax.xml.stream.Location;
 import java.io.ByteArrayInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -85,7 +80,8 @@ public class ExtractedShapes extends AbstractEntity{
     public void setNodeShapes(List<NS> ns) {
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
-            list.add(new NodeShape(item, this));
+            if(item.getSupport() > this.support)
+                list.add(new NodeShape(item, this, true));
         }
         this.nodeShapes = list;
     }
@@ -93,7 +89,7 @@ public class ExtractedShapes extends AbstractEntity{
     public void setNodeShapesDefault(List<NS> ns) {
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
-            list.add(new NodeShape(item, this));
+            list.add(new NodeShape(item, this, false));
         }
         this.nodeShapesDefault = list;
     }

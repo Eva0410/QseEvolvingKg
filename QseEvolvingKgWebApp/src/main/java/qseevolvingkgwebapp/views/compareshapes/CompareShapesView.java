@@ -280,9 +280,9 @@ public class CompareShapesView extends Composite<VerticalLayout> {
             for (var ps : comparisonTreeViewItem.getPropertyShapeList().values()) {
                 if(ps.getGeneratedText() == null || ps.getGeneratedText().isEmpty()) {
                     ps.generateText();
+                    System.out.println("Text not generated for shape " + ps.getIri().getLocalName() + ", " + ps.getNodeShape().getIri().getLocalName());
                     shapeService.update(ps.getNodeShape().getExtractedShapes());
                 }
-
             }
             comparisonTreeViewItem.setShapesEqual(
                     areAllStringsEqual(

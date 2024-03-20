@@ -3,6 +3,7 @@ package qseevolvingkgwebapp.services;
 import qseevolvingkgwebapp.data.NodeShape;
 import qseevolvingkgwebapp.data.PropertyShape;
 
+import java.util.Comparator;
 import java.util.HashMap;
 
 //represents one line in the tree view. This can be either be a line of 2+ node shapes, or of 2+ property shapes
@@ -13,6 +14,7 @@ public class ComparisonTreeViewItem {
     }
 
     String shapeName;
+    //Long represents the id of the Extracted shapes
     HashMap<Long,NodeShape> nodeShapeList = new HashMap<>();
     HashMap<Long,PropertyShape> propertyShapeList = new HashMap<>();
     Boolean shapesEqual = null;
@@ -28,6 +30,27 @@ public class ComparisonTreeViewItem {
         if(nodeShapeList.size() == 0)
             shapeName = ps.getIri().getLocalName();
         propertyShapeList.put(extractedShapesId, ps);
+    }
+
+    public boolean usesDefaultShapes() {
+        if(isNodeShapeLine())
+            return nodeShapeList.values().stream().anyMatch(ns -> ns.getExtractedShapes().isDefaultshape());
+        else
+            return propertyShapeList.values().stream().anyMatch(ps -> ps.getNodeShape().getExtractedShapes().isDefaultshape());
+    }
+
+    public int getSupportThreshold() {
+        if(isNodeShapeLine())
+            return nodeShapeList.values().stream().mapToInt(ns -> ns.getExtractedShapes().getSupport()).max().orElse(0);
+        else
+            return propertyShapeList.values().stream().mapToInt(ps -> ps.getNodeShape().getExtractedShapes().getSupport()).max().orElse(0);
+    }
+
+    public int getConfidenceThreshold() {
+        if(isNodeShapeLine())
+            return 0;
+        else
+            return (int)Math.round(propertyShapeList.values().stream().mapToDouble(ps -> ps.getNodeShape().getExtractedShapes().getConfidence()).max().orElse(0));
     }
 
     public boolean isNodeShapeLine() {

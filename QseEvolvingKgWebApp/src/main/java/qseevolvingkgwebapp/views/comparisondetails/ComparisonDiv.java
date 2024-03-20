@@ -56,6 +56,10 @@ public class ComparisonDiv extends Div {
     }
 
     public void updateTextDifferences(String t1, String t2) {
+        if(t1 == null || t1 == "" || t2 == null || t2 == "") {
+            getElement().removeAllChildren();
+            return;
+        }
         var js = "    const originalText = '" + t1 + "';" +
                 "    const modifiedText = '" + t2 + "';" +
                 "    const diff = Diff.diffWords(originalText, modifiedText);" +

@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Version extends AbstractEntity {
@@ -15,6 +16,9 @@ public class Version extends AbstractEntity {
 
     @ManyToOne()
     private Graph graph;
+
+    @OneToMany(cascade=CascadeType.ALL, mappedBy = "versionEntity")
+    private List<ExtractedShapes> extractedShapesList;
 
     String path;
 
@@ -48,6 +52,8 @@ public class Version extends AbstractEntity {
         return path;
     }
     public String getPathWithSpacesForTooltip() {
+        if(this.path == null || this.path == "")
+            return "";
         StringBuilder builder = new StringBuilder(this.path);
         int interval = 35;
         for (int i = interval; i < builder.length(); i += interval + 1) {

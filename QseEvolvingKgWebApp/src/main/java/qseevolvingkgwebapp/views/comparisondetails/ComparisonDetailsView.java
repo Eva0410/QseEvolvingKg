@@ -11,10 +11,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.data.NodeShape;
 import qseevolvingkgwebapp.services.ComparisonTreeViewItem;
 import qseevolvingkgwebapp.services.ShapesService;
@@ -32,6 +34,10 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
     private String oldText;
     private String newText;
     private ComparisonTreeViewItem treeViewItem;
+    private Paragraph infoParagraph;
+    private Long oldSelectItemIdExtractedShapes;
+    private Long newSelectItemIdExtractedShapes;
+
 
     @Autowired
     ShapesService shapesService;
@@ -63,23 +69,34 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
 
             var list = selectItemOld.getDataProvider().fetch(new Query<>()).toList();
             selectItemOld.setValue(list.get(0));
+            oldSelectItemIdExtractedShapes = list.get(0).id;
             selectItemNew.setValue(list.get(list.size() - 1));
+            newSelectItemIdExtractedShapes = list.get(list.size() - 1).id;
             if(treeViewItem != null) {
                 oldText = Utils.escapeNew(getText(list.get(0).id));
                 newText = Utils.escapeNew(getText(list.get(list.size() - 1).id));
             }
         }
-
+        infoParagraph = new Paragraph();
+        infoParagraph.getElement().getStyle().set("font-style", "italic");
+        infoParagraph.getElement().getStyle().set("padding", "0");
+        infoParagraph.getElement().getStyle().setDisplay(Style.Display.NONE);
+        layout.add(infoParagraph);
         comparisonDiv = new ComparisonDiv(oldText, newText);
+
         layout.add(comparisonDiv);
 
         selectItemOld.addValueChangeListener(e -> {
             oldText = Utils.escapeNew(getText(e.getValue().id));
+            oldSelectItemIdExtractedShapes = e.getValue().id;
             comparisonDiv.updateTextDifferences(oldText,newText);
+            updateInfoParagraph();
         });
         selectItemNew.addValueChangeListener(e -> {
             newText = Utils.escapeNew(getText(e.getValue().id));
+            newSelectItemIdExtractedShapes = e.getValue().id;
             comparisonDiv.updateTextDifferences(oldText,newText);
+            updateInfoParagraph();
         });
 
         getContent().addAttachListener(e -> {
@@ -99,8 +116,53 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
                         }
                     }
                 }
+                updateInfoParagraph();
             }
         });
+    }
+
+    private void updateInfoParagraph() {
+        //shape has been deleted
+        if(oldText != null && oldText != "" && (newText == null || newText == "")) {
+            infoParagraph.getElement().getStyle().setDisplay(Style.Display.BLOCK);
+            if(treeViewItem.usesDefaultShapes()) {
+                infoParagraph.setText("This shape was deleted because there were no nodes of this class found (default shapes were compared)");
+            }
+            else {
+                int supportThreshold = treeViewItem.getSupportThreshold();
+                int confidenceThreshold = treeViewItem.getConfidenceThreshold();
+                var extractedShapes = shapesService.get(newSelectItemIdExtractedShapes).get();
+                int support = 0;
+                int confidence = 0;
+                if(treeViewItem.isNodeShapeLine()) {
+                    var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst();
+                    support = nodeShape.isPresent() ? nodeShape.get().getSupport() : 0;
+                }
+                else {
+                    try {
+                        var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getParentShape().getShapeName())).findFirst().get();
+                        var propertyShape = nodeShape.getPropertyShapeList()
+                                .stream().filter(ps -> ps.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst().get();
+                        support = propertyShape.getSupport();
+                        confidence = (int)Math.round(propertyShape.getConfidence()*100);
+                    } catch (Exception ex) {
+                        //ignore, values are 0 anyways
+                    }
+                }
+
+                if(supportThreshold != 0 && support <= supportThreshold) {
+                    infoParagraph.setText(String.format("This shape was deleted because there were less shapes (%d) than defined by the support-parameter (%d)", support, supportThreshold));
+                }
+                else if (confidenceThreshold != 0 && confidence <= confidenceThreshold) {
+                    infoParagraph.setText(String.format("This shape was deleted because the confidence (%d %%) was less than defined by the confidence-parameter (%d %%)", confidence, confidenceThreshold));
+                }
+            }
+            comparisonDiv.getElement().getStyle().setDisplay(Style.Display.NONE);
+        }
+        else {
+            infoParagraph.getElement().getStyle().setDisplay(Style.Display.NONE);
+            comparisonDiv.getElement().getStyle().setDisplay(Style.Display.BLOCK);
+        }
     }
 
     private void addText(VerticalLayout layout, Utils.ComboBoxItem extractedShapes, Div div) {

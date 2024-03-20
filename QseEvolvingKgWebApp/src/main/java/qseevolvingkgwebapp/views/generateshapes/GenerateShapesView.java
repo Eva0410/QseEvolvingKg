@@ -9,6 +9,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -126,9 +127,11 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         support.setWidth("min-content");
         support.setMin(0);
         support.setValue(10);
+        support.setTooltipText("Only shapes will be generated, which have a higher support (>), not higher or equal (>=)");
         confidence.setLabel("Confidence (in %)");
         confidence.setValue(25.0);
         confidence.setWidth("min-content");
+        confidence.setTooltipText("Only shapes will be generated, which have a higher confidence (>), not higher or equal (>=)");
         confidence.setMin(0);
         confidence.setMax(100);
         support.setEnabled(false);
@@ -178,10 +181,10 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         buttonPrimary.addClickListener(buttonClickEvent -> {
             try {
                 completeFileBasedShapesExtraction();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                getUI().ifPresent(ui -> ui.navigate(ShapesView.class));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            getUI().ifPresent(ui -> ui.navigate(ShapesView.class));
         });
 
         addAttachListener(event -> {
@@ -214,7 +217,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         classes.forEach(item -> classesGrid.select(item));
     }
 
-    private void completeFileBasedShapesExtraction() throws IOException {
+    private void completeFileBasedShapesExtraction() throws Exception {
         chosenClasses = new ArrayList<>();
         chosenClassesEncoded = new HashSet<>();
 
@@ -262,6 +265,10 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
         extractedShapes.setCreatedAt(LocalDateTime.now());
         extractedShapes.setFileContent(Files.readAllBytes(Paths.get(outputAddress)));
+        if(extractedShapes.getModel().size() == 0) {
+            Notification.show("Caution, there were no shapes extracted. Please try lower values for support or confidence.");
+            throw new Exception("Noting exported");
+        }
         extractedShapes.setNodeShapes(nodeShapes);
         extractedShapes.generateComboBoxString();
         shapeService.insert(extractedShapes);
