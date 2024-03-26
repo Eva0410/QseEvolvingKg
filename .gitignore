@@ -1,6 +1,5 @@
 .metadata
 bin/
-tmp/
 *.tmp
 *.bak
 *.swp
@@ -24,7 +23,6 @@ qse/build/*
 !qse/build/libs
 qse/build/libs/*
 !qse/build/libs/qse-1.0-QSE-all.jar
-QseEvolvingKgWebApp/src/main/dev-bundle/webapp/VAADIN/build/
 
 gradle/
 gradlew
