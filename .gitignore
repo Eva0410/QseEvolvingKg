@@ -20,6 +20,8 @@ Logs/
 .target
 target/
 build/
+#include generated jar
+!build/libs/qse-1.0-QSE-all.jar
 gradle/
 gradlew
 gradlew.bat
