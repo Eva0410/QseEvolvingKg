@@ -19,9 +19,13 @@ Logs/
 # sbteclipse plugin
 .target
 target/
-build/
-#include generated jar
-!build/libs/qse-1.0-QSE-all.jar
+
+qse/build/*
+!qse/build/libs
+qse/build/libs/*
+!qse/build/libs/qse-1.0-QSE-all.jar
+QseEvolvingKgWebApp/src/main/dev-bundle/webapp/VAADIN/build/
+
 gradle/
 gradlew
 gradlew.bat
