@@ -110,7 +110,7 @@ public class Utils {
                     && !statement.getPredicate().equals(iriConfidence)).collect(Collectors.toSet());
 
             //need to write to file to load as jena model
-            var tmpPath = System.getProperty("user.dir")+"\\tmp.ttl";
+            var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
             FileWriter fileWriter = null;
             try {
                 fileWriter = new FileWriter(tmpPath, false);
