@@ -11,6 +11,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import qseevolvingkgwebapp.data.ExtractedShapes;
+import qseevolvingkgwebapp.data.Version;
 
 import java.io.*;
 import java.time.format.DateTimeFormatter;
@@ -166,5 +167,34 @@ public class Utils {
         if(shape.getComboBoxString().isEmpty())
             shape.generateComboBoxString();
         return shape.getComboBoxString();
+    }
+
+    public static void handleSaveFile(String graphName, VersionService versionService, InputStream inputStream, String versionName) {
+        Version version = versionService.generateNewVersion(graph);
+        var dir = Utils.getGraphDirectory();
+        String directory = dir+graphName+File.separator;
+        String generatedFileName = graphName + "_" + version.getVersionNumber() +".nt";
+        String filePath = directory+generatedFileName;
+        version.setPath(filePath);
+        version.setName(versionName);
+        versionService.update(version);
+        File file = new File(directory);
+
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        File outputFile = new File(directory, generatedFileName);
+
+        try (OutputStream outputStream = new FileOutputStream(outputFile)) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

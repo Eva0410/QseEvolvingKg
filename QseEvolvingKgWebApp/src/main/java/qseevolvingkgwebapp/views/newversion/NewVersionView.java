@@ -75,27 +75,7 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
 
     private void saveFile(InputStream inputStream, String versionName) throws IOException {
         Graph graph = graphService.get(this.graphId).get();
-
-        var dir = Utils.getGraphDirectory();
-        Version version = versionService.generateNewVersion(graph);
-        version.setName(versionName);
-
-        String directory = dir+graph.getName()+File.separator;
-        String generatedFileName = graph.getName() + "_" + version.getVersionNumber() +".nt";
-        String filePath = directory+generatedFileName;
-        version.setPath(filePath);
-        versionService.update(version);
-        File file = new File(directory);
-
-        File outputFile = new File(directory, generatedFileName);
-
-        try (OutputStream outputStream = new FileOutputStream(outputFile)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-        }
+        Utils.handleSaveFile(graph.getName(), versionService,inputStream, versionName);
     }
 
     @Override

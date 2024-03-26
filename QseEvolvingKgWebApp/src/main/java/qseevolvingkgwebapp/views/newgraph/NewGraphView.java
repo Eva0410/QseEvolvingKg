@@ -86,30 +86,8 @@ public class NewGraphView extends Composite<VerticalLayout> {
         graph.setName(graphName);
         graph.setCreatedAt(LocalDateTime.now());
         graph = graphService.insert(graph);
-
-        var dir = Utils.getGraphDirectory();
         Version version = versionService.generateNewVersion(graph);
 
-        String directory = dir+graphName+File.separator;
-        String generatedFileName = graphName + "_" + version.getVersionNumber() +".nt";
-        String filePath = directory+generatedFileName;
-        version.setPath(filePath);
-        version.setName("Original");
-        versionService.update(version);
-        File file = new File(directory);
-
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-
-        File outputFile = new File(directory, generatedFileName);
-
-        try (OutputStream outputStream = new FileOutputStream(outputFile)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-        }
+        Utils.handleSaveFile(graph.getName(), versionService, inputStream, "Original");
     }
 }
