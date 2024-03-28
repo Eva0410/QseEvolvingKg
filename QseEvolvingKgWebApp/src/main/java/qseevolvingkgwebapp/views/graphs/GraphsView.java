@@ -31,6 +31,12 @@ import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.Utils.ValidationMessage;
 import qseevolvingkgwebapp.views.newgraph.NewGraphView;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @PageTitle("Graphs")
 @Route(value = "graphs", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
@@ -65,6 +71,17 @@ public class GraphsView extends Composite<VerticalLayout> {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener(e -> {
                 Graph graph = (Graph) gr;
+                try {
+                    Path directory = Path.of(Utils.getGraphDirectory()+graph.getName());
+                    if(Files.exists(directory)) {
+                        Files.walk(directory)
+                                .map(Path::toFile)
+                                .forEach(File::delete);
+                        Files.delete(directory);
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
                 graphService.delete(graph.getId());
                 setGraphsData();
             });
@@ -87,7 +104,8 @@ public class GraphsView extends Composite<VerticalLayout> {
 
         gridGraphs.addItemDoubleClickListener(e -> {
             var event = (ItemDoubleClickEvent)e;
-            editor.editItem((Graph)event.getItem());
+            if(event.getItem() != null)
+                editor.editItem((Graph)event.getItem());
             Component editorComponent = event.getColumn().getEditorComponent();
             if (editorComponent instanceof Focusable) {
                 ((Focusable) editorComponent).focus();

@@ -74,10 +74,12 @@ public class VersionsView extends Composite<VerticalLayout>  {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener(e -> {
                 Version version = (Version) ver;
-                try {
-                    Files.delete(Paths.get(version.getPath()));
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                if(!version.getPath().contains(Utils.preconfiguredFolderName)) {
+                    try {
+                        Files.delete(Paths.get(version.getPath()));
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
                 versionService.delete(version.getId());
                 fillGrid();

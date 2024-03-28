@@ -7,6 +7,7 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
@@ -41,33 +42,44 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
         buttonPrimary.setText("Upload Graph Version");
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
-        Utils.setGraphOrVersionGuiFields(textField, buttonPrimary, upload);
+        Select<String> preconfiguredGraphs = new Select<>();
+        Utils.setGraphOrVersionGuiFields(textField, buttonPrimary, upload, preconfiguredGraphs);
 
         buttonPrimary.addClickListener(event -> {
+            //duplicate code from new graph view
             if (textField.getValue().isEmpty()) {
                 Notification.show("Name field cannot be empty");
             }
-            else if(buffer.getFileName().isEmpty()) {
-                Notification.show("Please upload a file");
-            }else {
-                try (InputStream inputStream = buffer.getInputStream()) {
-                    saveFile(inputStream, textField.getValue());
-                    Notification.show("Graph saved!");
-                    getUI().ifPresent(ui -> ui.navigate("versions"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            else if(buffer.getFileName().isEmpty() && Utils.isEmptyItemSelected(preconfiguredGraphs)) {
+                Notification.show("Please choose a pre-configured graph or upload a file");
             }
+            else if(!buffer.getFileName().isEmpty() && !Utils.isEmptyItemSelected(preconfiguredGraphs))
+                Notification.show("Please either deselect the pre-configured graph or remove the uploaded .nt file");
+            else if (!buffer.getFileName().isEmpty() || !Utils.isEmptyItemSelected(preconfiguredGraphs)) {
+                if (!buffer.getFileName().isEmpty()) {
+                    try (InputStream inputStream = buffer.getInputStream()) {
+                        saveFile(inputStream, textField.getValue(), "");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    saveFile(null, textField.getValue(), preconfiguredGraphs.getValue());
+                }
+                Notification.show("Graph saved!");
+            }
+            getUI().ifPresent(ui -> ui.navigate("versions"));
+
         });
 
         getContent().add(textField);
+        getContent().add(preconfiguredGraphs);
         getContent().add(upload);
         getContent().add(buttonPrimary);
     }
 
-    private void saveFile(InputStream inputStream, String versionName) throws IOException {
+    private void saveFile(InputStream inputStream, String versionName, String preConfiguredGraphPath) {
         Graph graph = graphService.get(this.graphId).get();
-        Utils.handleSaveFile(graph, versionService,inputStream, versionName);
+        Utils.handleSaveFile(graph, versionService,inputStream, versionName, preConfiguredGraphPath);
     }
 
     @Override
