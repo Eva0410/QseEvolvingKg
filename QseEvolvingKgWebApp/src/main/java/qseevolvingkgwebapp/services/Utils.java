@@ -22,7 +22,11 @@ import qseevolvingkgwebapp.data.Graph;
 import qseevolvingkgwebapp.data.Version;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -177,36 +181,41 @@ public class Utils {
         return shape.getComboBoxString();
     }
 
-    public static void handleSaveFile(Graph graph, VersionService versionService, InputStream inputStream, String versionName) {
+    public static void handleSaveFile(Graph graph, VersionService versionService, InputStream inputStream, String versionName, String preConfiguredGraphPath) {
         Version version = versionService.generateNewVersion(graph);
-        var dir = Utils.getGraphDirectory();
-        String directory = dir+graph.getName()+File.separator;
-        String generatedFileName = graph.getName() + "_" + version.getVersionNumber() +".nt";
-        String filePath = directory+generatedFileName;
-        version.setPath(filePath);
-        version.setName(versionName);
-        versionService.update(version);
-        File file = new File(directory);
+        if(preConfiguredGraphPath.isEmpty()) {
+            var dir = Utils.getGraphDirectory();
+            String directory = dir+graph.getName()+File.separator;
+            String generatedFileName = graph.getName() + "_" + version.getVersionNumber() +".nt";
+            String filePath = directory+generatedFileName;
+            version.setPath(filePath);
+            File file = new File(directory);
 
-        if (!file.exists()) {
-            file.mkdirs();
-        }
+            if (!file.exists()) {
+                file.mkdirs();
+            }
 
-        File outputFile = new File(directory, generatedFileName);
+            File outputFile = new File(directory, generatedFileName);
 
-        try (OutputStream outputStream = new FileOutputStream(outputFile)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
+            try (OutputStream outputStream = new FileOutputStream(outputFile)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
-        catch (Exception ex) {
-            ex.printStackTrace();
+        else {
+            version.setPath(preConfiguredGraphPath);
         }
+        version.setName(versionName);
+        versionService.update(version);
     }
 
-    public static void setGraphOrVersionGuiFields(TextField textFieldGraphName, Button buttonSave, Upload uploadGraphFile) {
+    public static void setGraphOrVersionGuiFields(TextField textFieldGraphName, Button buttonSave, Upload uploadGraphFile, Select<String> preconfiguredGraphs) {
         textFieldGraphName.setHeight("min-content");
 
         textFieldGraphName.setLabel("Name");
@@ -215,10 +224,34 @@ public class Utils {
         buttonSave.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         textFieldGraphName.setRequiredIndicatorVisible(true);
-        uploadGraphFile.setUploadButton(new Button("Upload .nt file"));
+        uploadGraphFile.setUploadButton(new Button("Or upload .nt file"));
         buttonSave.setTooltipText("This will copy the file to the project directory");
 
         uploadGraphFile.setAcceptedFileTypes(".nt");
 
+        var files = Utils.listFilesInStaticGraphDirectory();
+        preconfiguredGraphs.setItems(files);
+        preconfiguredGraphs.setItemLabelGenerator(item -> item == null ? "" : item.substring(item.indexOf(Utils.preconfiguredFolderName) + Utils.preconfiguredFolderName.length()+1));
+        preconfiguredGraphs.setLabel("Select pre-configured graph");
+        preconfiguredGraphs.setEmptySelectionAllowed(true);
+    }
+
+    public static Boolean isEmptyItemSelected(Select<String> preconfiguredGraphs) {
+        var vasdf = preconfiguredGraphs.getValue();
+        return preconfiguredGraphs.getValue() == null || preconfiguredGraphs.getValue().isEmpty();
+    }
+    public static final String preconfiguredFolderName = "pre_configured";
+
+    public static List<String> listFilesInStaticGraphDirectory() {
+        Path projectDirectory = Paths.get("").toAbsolutePath().resolve("graphs" + File.separator + preconfiguredFolderName);
+        try {
+            return Files.walk(projectDirectory)
+                    .filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".nt"))
+                    .map(Path::toString)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }
