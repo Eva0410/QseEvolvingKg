@@ -5,10 +5,12 @@ import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import qseevolvingkgwebapp.services.Utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,14 +35,17 @@ public class ExtractedShapes extends AbstractEntity{
     @CollectionTable(name = "ExtractedShapesClasses")
     List<String> classes;
 
-    @Lob
-    @Column(name = "fileContent", columnDefinition = "BLOB")
-    byte[] fileContent;
+//    @Lob
+//    @Column(name = "fileContent", columnDefinition = "BLOB")
+//    byte[] fileContent;
+
+    String fileContentPath;
 
     //Need to be generated for delete reason during comparison
-    @Lob
-    @Column(name = "fileContentDefault", columnDefinition = "BLOB")
-    byte[] fileContentDefaultShapes;
+//    @Lob
+//    @Column(name = "fileContentDefault", columnDefinition = "BLOB")
+//    byte[] fileContentDefaultShapes;
+    String fileContentDefaultShapesPath;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     List<NodeShape> nodeShapes;
@@ -63,8 +68,7 @@ public class ExtractedShapes extends AbstractEntity{
 
     public Model getModel() {
         if(model == null) {
-            InputStream inputStream = new ByteArrayInputStream(fileContent);
-            try {
+            try(FileInputStream inputStream = new FileInputStream(fileContentPath)) {
                 this.model = Rio.parse(inputStream, "", RDFFormat.TURTLE);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -108,9 +112,9 @@ public class ExtractedShapes extends AbstractEntity{
         return "";
     }
 
-    public void setFileContent(byte[] fileContent) {
-        this.fileContent = fileContent;
-    }
+//    public void setFileContent(byte[] fileContent) {
+//        this.fileContent = fileContent;
+//    }
 
     public Version getVersionObject() {
         return versionEntity;
@@ -177,15 +181,57 @@ public class ExtractedShapes extends AbstractEntity{
         return comboBoxString;
     }
 
-    public byte[] getFileContentDefaultShapes() {
-        return fileContentDefaultShapes;
-    }
-
-    public void setFileContentDefaultShapes(byte[] fileContentDefaultShapes) {
-        this.fileContentDefaultShapes = fileContentDefaultShapes;
-    }
+//    public byte[] getFileContentDefaultShapes() {
+//        return fileContentDefaultShapes;
+//    }
+//
+//    public void setFileContentDefaultShapes(byte[] fileContentDefaultShapes) {
+//        this.fileContentDefaultShapes = fileContentDefaultShapes;
+//    }
 
     public List<NodeShape> getNodeShapesDefault() {
         return nodeShapesDefault;
+    }
+
+    public String getFileContentPath() {
+        return fileContentPath;
+    }
+
+    public void setFileContentPath(String fileContentPath) {
+        if(!fileContentPath.contains(shapesPath)) {
+            try {
+                Path sourcePath = Paths.get(fileContentPath);
+                String fileName = this.getId()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+"_default.ttl";
+                Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+shapesPath+File.separator+fileName);
+                Files.copy(sourcePath, destinationPath);
+                this.fileContentPath = destinationPath.toString();
+            } catch (IOException e) {
+                System.err.println("Error copying file: " + e.getMessage());
+            }
+        }
+        else
+            this.fileContentPath = fileContentPath;
+    }
+
+    public String getFileContentDefaultShapesPath() {
+        return fileContentDefaultShapesPath;
+    }
+
+    public static final String shapesPath = "shapes";
+
+    public void setFileContentDefaultShapesPath(String fileContentDefaultShapesPath) {
+        if(!fileContentDefaultShapesPath.contains(shapesPath)) {
+            try {
+                Path sourcePath = Paths.get(fileContentDefaultShapesPath);
+                String fileName = this.getId()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+".ttl";
+                Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+shapesPath+File.separator+fileName);
+                Files.copy(sourcePath, destinationPath);
+                this.fileContentDefaultShapesPath = destinationPath.toString();
+            } catch (IOException e) {
+                System.err.println("Error copying file: " + e.getMessage());
+            }
+        }
+        else
+            this.fileContentDefaultShapesPath = fileContentDefaultShapesPath;
     }
 }

@@ -28,6 +28,10 @@ import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.generateshapes.GenerateShapesView;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 @PageTitle("Shapes")
 @Route(value = "shapes", layout = MainLayout.class)
 @Uses(Icon.class)
@@ -111,6 +115,12 @@ public class ShapesView extends Composite<VerticalLayout>{
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener(e -> {
                 ExtractedShapes extractedShapes = (ExtractedShapes)es;
+                try {
+                    Files.delete(Paths.get(extractedShapes.getFileContentPath()));
+                    Files.delete(Paths.get(extractedShapes.getFileContentDefaultShapesPath()));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
                 shapeService.delete(extractedShapes.getId());
                 setGridData();
             });

@@ -236,7 +236,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         if(!checkboxUseDefaultShapes.getValue()) {
             int supportValue = support.getValue();
             double confidenceValue = confidence.getValue()/100;
-            extractedShapes.setFileContentDefaultShapes(Files.readAllBytes(Paths.get(outputAddress)));
+            extractedShapes.setFileContentDefaultShapesPath(outputAddress);
             extractedShapes.setNodeShapesDefault(nodeShapes);
 
             outputAddress = parser.extractSHACLShapesWithPruning(!chosenClasses.isEmpty(), confidenceValue, supportValue, chosenClasses); // extract shapes with pruning
@@ -261,7 +261,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setSupport(support.isEnabled() ? support.getValue() : 0);
         extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
         extractedShapes.setCreatedAt(LocalDateTime.now());
-        extractedShapes.setFileContent(Files.readAllBytes(Paths.get(outputAddress)));
+        extractedShapes.setFileContentPath(outputAddress);
         if(extractedShapes.getModel().size() == 0) {
             Notification.show("Caution, there were no shapes extracted. Please try lower values for support or confidence.");
             throw new Exception("Noting exported");
