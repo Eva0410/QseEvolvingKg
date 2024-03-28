@@ -33,6 +33,9 @@ import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.Utils.ValidationMessage;
 import qseevolvingkgwebapp.views.newversion.NewVersionView;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,6 +74,11 @@ public class VersionsView extends Composite<VerticalLayout>  {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener(e -> {
                 Version version = (Version) ver;
+                try {
+                    Files.delete(Paths.get(version.getPath()));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
                 versionService.delete(version.getId());
                 fillGrid();
             });
