@@ -98,7 +98,10 @@ public class ExtractedShapes extends AbstractEntity{
         if (classes != null && !classes.isEmpty()) {
             var shortenedList = new ArrayList<>(classes);
             for (int i = 0; i < classes.size(); i++) {
-                shortenedList.set(i, shortenedList.get(i).split("#")[1]);
+                if(shortenedList.get(i).contains("#"))
+                    shortenedList.set(i, shortenedList.get(i).split("#")[1]);
+                else
+                    shortenedList.set(i, shortenedList.get(i));
             }
             return shortenedList.stream().sorted().collect(Collectors.joining(", "));
         }
