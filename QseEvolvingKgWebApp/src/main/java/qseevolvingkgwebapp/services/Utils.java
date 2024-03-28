@@ -1,6 +1,13 @@
 package qseevolvingkgwebapp.services;
 
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.server.VaadinSession;
 import de.atextor.turtle.formatter.FormattingStyle;
@@ -11,6 +18,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import qseevolvingkgwebapp.data.ExtractedShapes;
+import qseevolvingkgwebapp.data.Graph;
 import qseevolvingkgwebapp.data.Version;
 
 import java.io.*;
@@ -169,11 +177,11 @@ public class Utils {
         return shape.getComboBoxString();
     }
 
-    public static void handleSaveFile(String graphName, VersionService versionService, InputStream inputStream, String versionName) {
+    public static void handleSaveFile(Graph graph, VersionService versionService, InputStream inputStream, String versionName) {
         Version version = versionService.generateNewVersion(graph);
         var dir = Utils.getGraphDirectory();
-        String directory = dir+graphName+File.separator;
-        String generatedFileName = graphName + "_" + version.getVersionNumber() +".nt";
+        String directory = dir+graph.getName()+File.separator;
+        String generatedFileName = graph.getName() + "_" + version.getVersionNumber() +".nt";
         String filePath = directory+generatedFileName;
         version.setPath(filePath);
         version.setName(versionName);
@@ -196,5 +204,21 @@ public class Utils {
         catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public static void setGraphOrVersionGuiFields(TextField textFieldGraphName, Button buttonSave, Upload uploadGraphFile) {
+        textFieldGraphName.setHeight("min-content");
+
+        textFieldGraphName.setLabel("Name");
+        textFieldGraphName.setWidth("min-content");
+        buttonSave.setWidth("min-content");
+        buttonSave.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        textFieldGraphName.setRequiredIndicatorVisible(true);
+        uploadGraphFile.setUploadButton(new Button("Upload .nt file"));
+        buttonSave.setTooltipText("This will copy the file to the project directory");
+
+        uploadGraphFile.setAcceptedFileTypes(".nt");
+
     }
 }

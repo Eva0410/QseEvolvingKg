@@ -39,15 +39,9 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
         buttonPrimary.setText("Upload Graph Version");
-        buttonPrimary.setWidth("min-content");
-        buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        textField.setLabel("Name");
-        textField.setWidth("min-content");
-        textField.setHeight("min-content");
-        textField.setRequiredIndicatorVisible(true);
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
-        upload.setUploadButton(new Button("Upload .nt file"));
+        Utils.setGraphOrVersionGuiFields(textField, buttonPrimary, upload);
 
         buttonPrimary.addClickListener(event -> {
             if (textField.getValue().isEmpty()) {
@@ -65,9 +59,7 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
                 }
             }
         });
-        buttonPrimary.setTooltipText("This will copy the file to the project directory");
 
-        upload.setAcceptedFileTypes(".nt");
         getContent().add(textField);
         getContent().add(upload);
         getContent().add(buttonPrimary);
@@ -75,7 +67,7 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
 
     private void saveFile(InputStream inputStream, String versionName) throws IOException {
         Graph graph = graphService.get(this.graphId).get();
-        Utils.handleSaveFile(graph.getName(), versionService,inputStream, versionName);
+        Utils.handleSaveFile(graph, versionService,inputStream, versionName);
     }
 
     @Override

@@ -40,23 +40,14 @@ public class NewGraphView extends Composite<VerticalLayout> {
 
     public NewGraphView() {
         textFieldGraphName = new TextField();
-        textFieldGraphName.setHeight("min-content");
         buttonSave = new Button();
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
-        textFieldGraphName.setLabel("Name");
-        textFieldGraphName.setWidth("min-content");
         buttonSave.setText("Save Graph");
-        buttonSave.setWidth("min-content");
-        buttonSave.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         getContent().add(textFieldGraphName);
-
-        textFieldGraphName.setRequiredIndicatorVisible(true);
         MemoryBuffer buffer = new MemoryBuffer();
         uploadGraphFile = new Upload(buffer);
-        uploadGraphFile.setUploadButton(new Button("Upload .nt file"));
-        buttonSave.setTooltipText("This will copy the file to the project directory");
-
+        Utils.setGraphOrVersionGuiFields(textFieldGraphName,buttonSave,uploadGraphFile);
 
         buttonSave.addClickListener(event -> {
             if (textFieldGraphName.getValue().isEmpty()) {
@@ -76,7 +67,6 @@ public class NewGraphView extends Composite<VerticalLayout> {
             }
         });
 
-        uploadGraphFile.setAcceptedFileTypes(".nt");
         getContent().add(uploadGraphFile);
         getContent().add(buttonSave);
     }
@@ -86,8 +76,7 @@ public class NewGraphView extends Composite<VerticalLayout> {
         graph.setName(graphName);
         graph.setCreatedAt(LocalDateTime.now());
         graph = graphService.insert(graph);
-        Version version = versionService.generateNewVersion(graph);
 
-        Utils.handleSaveFile(graph.getName(), versionService, inputStream, "Original");
+        Utils.handleSaveFile(graph, versionService, inputStream, "Original");
     }
 }

@@ -62,3 +62,6 @@ error-screenshots/
 webpack.generated.js
 
 /graphs/
+
+#dont save db
+/QseEvolvingKgWebApp/localdb/
