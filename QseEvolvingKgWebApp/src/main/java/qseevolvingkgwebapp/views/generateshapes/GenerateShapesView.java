@@ -269,6 +269,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setNodeShapes(nodeShapes);
         extractedShapes.generateComboBoxString();
         shapeService.insert(extractedShapes);
+        System.out.println("Shapes inserted");
     }
 
     private static List<Type> getClasses(Map<Integer, Integer> classEntityCountMap, StringEncoder stringEncoder) {

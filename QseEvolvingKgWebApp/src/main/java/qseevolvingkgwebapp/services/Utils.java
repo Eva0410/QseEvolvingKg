@@ -76,7 +76,6 @@ public class Utils {
         var selectedGraphId = (Long) VaadinSession.getCurrent().getAttribute("shapes_currentGraphId");
         var firstItem = graphs.stream().findFirst();
 
-
         if(selectedGraphId != null) {
             var graphItem = selectItemGraph.getDataProvider().fetch(new Query<>()).filter(g -> g.id.equals(selectedGraphId)).findFirst();
             if(graphItem.isPresent())
