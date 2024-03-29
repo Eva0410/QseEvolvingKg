@@ -2,9 +2,12 @@ package qseevolvingkgwebapp.data;
 
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
 import qseevolvingkgwebapp.services.Utils;
 
 import java.io.*;
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Entity
@@ -47,16 +51,18 @@ public class ExtractedShapes extends AbstractEntity{
 //    byte[] fileContentDefaultShapes;
     String fileContentDefaultShapesPath;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<NodeShape> nodeShapes;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<NodeShape> nodeShapesDefault;
 
     @Transient
     Model model;
 
     String comboBoxString;
+    @Transient
+    Random random = new Random();
 
     public LocalDateTime getGraphCreationTime() {
         return this.getVersionEntity().getGraph().getCreatedAt();
@@ -78,6 +84,8 @@ public class ExtractedShapes extends AbstractEntity{
     }
 
     public List<NodeShape> getNodeShapes() {
+        if(!Hibernate.isInitialized(nodeShapes))
+            Hibernate.initialize(nodeShapes);
         return nodeShapes;
     }
 
@@ -198,15 +206,16 @@ public class ExtractedShapes extends AbstractEntity{
     }
 
     public void setFileContentPath(String fileContentPath) {
-        if(!fileContentPath.contains(shapesPath)) {
+        if(!fileContentPath.contains(Utils.shapesPath)) {
             try {
+                checkIfShapesDirExists();
                 Path sourcePath = Paths.get(fileContentPath);
-                String fileName = this.getId()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+"_default.ttl";
-                Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+shapesPath+File.separator+fileName);
+                String fileName = random.nextInt()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+"_default.ttl";
+                Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+Utils.shapesPath+File.separator+fileName);
                 Files.copy(sourcePath, destinationPath);
                 this.fileContentPath = destinationPath.toString();
             } catch (IOException e) {
-                System.err.println("Error copying file: " + e.getMessage());
+                e.printStackTrace();
             }
         }
         else
@@ -217,14 +226,25 @@ public class ExtractedShapes extends AbstractEntity{
         return fileContentDefaultShapesPath;
     }
 
-    public static final String shapesPath = "shapes";
+    private static void checkIfShapesDirExists() {
+        Path path = Paths.get(Utils.getGraphDirectory()+File.separator+Utils.shapesPath);
+
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectories(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     public void setFileContentDefaultShapesPath(String fileContentDefaultShapesPath) {
-        if(!fileContentDefaultShapesPath.contains(shapesPath)) {
+        if(!fileContentDefaultShapesPath.contains(Utils.shapesPath)) {
+            checkIfShapesDirExists();
             try {
                 Path sourcePath = Paths.get(fileContentDefaultShapesPath);
-                String fileName = this.getId()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+".ttl";
-                Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+shapesPath+File.separator+fileName);
+                String fileName = random.nextInt()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+".ttl";
+                Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+Utils.shapesPath+File.separator+fileName);
                 Files.copy(sourcePath, destinationPath);
                 this.fileContentDefaultShapesPath = destinationPath.toString();
             } catch (IOException e) {

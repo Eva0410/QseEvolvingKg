@@ -232,6 +232,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         String outputAddress = parser.extractSHACLShapes(chosenClasses.size()>0, chosenClasses);
         List<NS> nodeShapes = parser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setVersionEntity(currentVersion);
 
         if(!checkboxUseDefaultShapes.getValue()) {
             int supportValue = support.getValue();
@@ -251,7 +252,6 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             pruningUtil.getStatsByBoth(nodeShapes);
         }
 
-        extractedShapes.setVersionEntity(currentVersion);
         var classes = new ArrayList<String>();
         for (var i: classesGrid.getSelectedItems()) {
             classes.add(((Type)i).className);
@@ -264,7 +264,13 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setFileContentPath(outputAddress);
         if(extractedShapes.getModel().size() == 0) {
             Notification.show("Caution, there were no shapes extracted. Please try lower values for support or confidence.");
-            throw new Exception("Noting exported");
+            try {
+                Files.delete(Paths.get(extractedShapes.getFileContentPath()));
+                Files.delete(Paths.get(extractedShapes.getFileContentDefaultShapesPath()));
+            } catch (Exception ex) {
+                //ignore
+            }
+            throw new Exception("Nothing exported");
         }
         extractedShapes.setNodeShapes(nodeShapes);
         extractedShapes.generateComboBoxString();

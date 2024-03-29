@@ -118,8 +118,8 @@ public class ShapesView extends Composite<VerticalLayout>{
                 try {
                     Files.delete(Paths.get(extractedShapes.getFileContentPath()));
                     Files.delete(Paths.get(extractedShapes.getFileContentDefaultShapesPath()));
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                } catch (Exception ex) {
+                    //ignore
                 }
                 shapeService.delete(extractedShapes.getId());
                 setGridData();

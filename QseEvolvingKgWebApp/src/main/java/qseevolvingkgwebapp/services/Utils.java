@@ -33,8 +33,10 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
-    static String graphDirectory;
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final String preconfiguredFolderName = "pre_configured";
+    public static final String shapesPath = "shapes";
+
 
 
     public static String getGraphDirectory() {
@@ -112,14 +114,30 @@ public class Utils {
     public static Boolean usePrettyFormatting = true; //debugging
     public static String generateTTLFromIRIInModel(IRI iri, Model model) {
         if(usePrettyFormatting) {
-            var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
+            var startMillis =  System.currentTimeMillis();
+
             SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
             IRI iriSupport = valueFactory.createIRI("http://shaclshapes.org/support");
             IRI iriConfidence = valueFactory.createIRI("http://shaclshapes.org/confidence");
+            var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
 
             var filteredModelWithBlankNodes = addBlankNodesToModel(filteredModel, model);
             filteredModelWithBlankNodes = filteredModelWithBlankNodes.stream().filter(statement -> !statement.getPredicate().equals(iriSupport)
                     && !statement.getPredicate().equals(iriConfidence)).collect(Collectors.toSet());
+
+            var tmp = System.currentTimeMillis() - startMillis;
+            System.out.println("after filtering "+tmp);
+
+            //Faster but bug with blank nodes,  TODO investigate
+//            org.apache.jena.rdf.model.Model jenaModel = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+//            filteredModelWithBlankNodes.forEach(statement -> {
+//                jenaModel.add(
+//                        jenaModel.createResource(statement.getSubject().stringValue()),
+//                        jenaModel.createProperty(statement.getPredicate().stringValue()),
+//                        jenaModel.createResource(statement.getObject().stringValue())
+//                );
+//            });
+
 
             //need to write to file to load as jena model
             var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
@@ -133,6 +151,9 @@ public class Utils {
             }
             org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(tmpPath);
 
+            tmp = System.currentTimeMillis() - startMillis;
+            System.out.println("after writing "+tmp);
+
             File file = new File(tmpPath);
             if (file.exists()) {
                 file.delete();
@@ -141,6 +162,8 @@ public class Utils {
             TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
             OutputStream outputStream = new ByteArrayOutputStream();
             formatter.accept(jenaModel, outputStream);
+            tmp = System.currentTimeMillis() - startMillis;
+            System.out.println("after loading "+tmp);
             return outputStream.toString().replaceAll("\n+$", "");
         }
         else {
@@ -239,7 +262,6 @@ public class Utils {
         var vasdf = preconfiguredGraphs.getValue();
         return preconfiguredGraphs.getValue() == null || preconfiguredGraphs.getValue().isEmpty();
     }
-    public static final String preconfiguredFolderName = "pre_configured";
 
     public static List<String> listFilesInStaticGraphDirectory() {
         Path projectDirectory = Paths.get("").toAbsolutePath().resolve("graphs" + File.separator + preconfiguredFolderName);

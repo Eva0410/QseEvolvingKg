@@ -23,6 +23,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.data.NodeShape;
@@ -180,17 +182,19 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 newComboBoxItem.ifPresent(comboBoxItem -> multiSelectShapes.select(comboBoxItem));
             }
         } else {
-            if (comboBoxItems.size() > 1) {
-                multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));
-            }
+//            if (comboBoxItems.size() > 1) {
+//                multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));
+//            }
         }
     }
 
+    @Transactional
     private void setTreeViewData() {
         var nodeShapesToShow = new ArrayList<ComparisonTreeViewItem>();
         treeViewComparison.removeAllColumns();
         for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
-            var extractedShapes = shapeService.get(comboBoxItem.id).get();
+//            var extractedShapes = shapeService.get(comboBoxItem.id).get();
+            var extractedShapes = shapeService.getWithNodeShapes(comboBoxItem.id);
             var nodeShapes = extractedShapes.getNodeShapes();
             var nodeShapesToShowMap = nodeShapesToShow
                     .stream().map(ComparisonTreeViewItem::getShapeName).toList();

@@ -22,7 +22,7 @@ public class PropertyShape {
     Integer support;
     Double confidence;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<ShaclOrListItem> shaclOrListItems;
 
     @Lob
@@ -149,7 +149,7 @@ public class PropertyShape {
 
     public void generateText() {
         if(this.nodeShape.shouldGenerateText) {
-            var model = this.nodeShape.extractedShapes.getModel();
+            var model = this.nodeShape.getExtractedShapes().getModel();
             this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);
         }
     }
