@@ -84,8 +84,6 @@ public class ExtractedShapes extends AbstractEntity{
     }
 
     public List<NodeShape> getNodeShapes() {
-        if(!Hibernate.isInitialized(nodeShapes))
-            Hibernate.initialize(nodeShapes);
         return nodeShapes;
     }
 

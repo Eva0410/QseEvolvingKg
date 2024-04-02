@@ -38,7 +38,7 @@ import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
 @Uses(Icon.class)
 @CssImport(
         themeFor = "vaadin-grid",
-        value = "themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css"
+        value = "./themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css"
 )
 public class CompareShapesView extends Composite<VerticalLayout> {
     @Autowired()
