@@ -132,8 +132,8 @@ public class NodeShape {
 
     public void generateText() {
         if(shouldGenerateText) {
-            var model = this.getExtractedShapes().getModel();
-            this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);
+            var model = this.getExtractedShapes().getModelJena();
+            this.generatedText = Utils.generateTTLFromIRIInModelJena(iri, model);
         }
     }
 }

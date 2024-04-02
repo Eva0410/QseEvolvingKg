@@ -169,7 +169,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         multiSelectShapes.setItemLabelGenerator(item -> item.label);
 
         var currentComboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
-        if(currentComboBoxItems != null && currentComboBoxItems.size() > 0
+        if(currentComboBoxItems != null && !currentComboBoxItems.isEmpty()
                 && currentComboBoxItems.stream()
                 .map(item -> item.id)
                 .allMatch(id -> comboBoxItems.stream()
@@ -182,18 +182,18 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 newComboBoxItem.ifPresent(comboBoxItem -> multiSelectShapes.select(comboBoxItem));
             }
         } else {
+            //Default init leads to perfomance issues
 //            if (comboBoxItems.size() > 1) {
 //                multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));
 //            }
         }
     }
 
-    @Transactional
+
     private void setTreeViewData() {
         var nodeShapesToShow = new ArrayList<ComparisonTreeViewItem>();
         treeViewComparison.removeAllColumns();
         for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
-//            var extractedShapes = shapeService.get(comboBoxItem.id).get();
             var extractedShapes = shapeService.getWithNodeShapes(comboBoxItem.id);
             var nodeShapes = extractedShapes.getNodeShapes();
             var nodeShapesToShowMap = nodeShapesToShow
@@ -240,9 +240,10 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
     private List<ComparisonTreeViewItem> getPropertyShapes(ComparisonTreeViewItem item) {
         var propertyShapesToShow = new ArrayList<ComparisonTreeViewItem>();
-        if(item.getPropertyShapeList().size() == 0) { //important for performance
+        if(item.getPropertyShapeList().isEmpty()) { //important for performance
             for (var comboBoxItem : multiSelectShapes.getSelectedItems()) {
-                var extractedShapes = shapeService.get(comboBoxItem.id).get().getNodeShapes()
+                var extractedShapes_full = shapeService.getWithNodeShapes(comboBoxItem.id);
+                var extractedShapes = extractedShapes_full.getNodeShapes()
                         .stream().filter(n -> n.getIri().getLocalName().equals(item.getShapeName())).findFirst();
                 if (extractedShapes.isPresent()) {
                     var propertyShapesToShowMap = propertyShapesToShow

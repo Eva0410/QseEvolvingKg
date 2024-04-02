@@ -229,7 +229,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
 
         //default shapes must be computed first
         System.out.println(chosenClasses);
-        String outputAddress = parser.extractSHACLShapes(chosenClasses.size()>0, chosenClasses);
+        String outputAddress = parser.extractSHACLShapes(!chosenClasses.isEmpty(), chosenClasses);
         List<NS> nodeShapes = parser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.setVersionEntity(currentVersion);

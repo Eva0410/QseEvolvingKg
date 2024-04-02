@@ -12,6 +12,10 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.server.VaadinSession;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.riot.RDFDataMgr;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -129,36 +133,36 @@ public class Utils {
             System.out.println("after filtering "+tmp);
 
             //Faster but bug with blank nodes,  TODO investigate
-//            org.apache.jena.rdf.model.Model jenaModel = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
-//            filteredModelWithBlankNodes.forEach(statement -> {
-//                jenaModel.add(
-//                        jenaModel.createResource(statement.getSubject().stringValue()),
-//                        jenaModel.createProperty(statement.getPredicate().stringValue()),
-//                        jenaModel.createResource(statement.getObject().stringValue())
-//                );
-//            });
+            org.apache.jena.rdf.model.Model jenaModel = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+            filteredModelWithBlankNodes.forEach(statement -> {
+                jenaModel.add(
+                        jenaModel.createResource(statement.getSubject().stringValue()),
+                        jenaModel.createProperty(statement.getPredicate().stringValue()),
+                        jenaModel.createResource(statement.getObject().stringValue())
+                );
+            });
 
 
             //need to write to file to load as jena model
-            var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
-            FileWriter fileWriter = null;
-            try {
-                fileWriter = new FileWriter(tmpPath, false);
-                Rio.write(filteredModelWithBlankNodes, fileWriter, RDFFormat.TURTLE);
-                fileWriter.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(tmpPath);
-
-            tmp = System.currentTimeMillis() - startMillis;
-            System.out.println("after writing "+tmp);
-
-            File file = new File(tmpPath);
-            if (file.exists()) {
-                file.delete();
-            }
-
+//            var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
+//            FileWriter fileWriter = null;
+//            try {
+//                fileWriter = new FileWriter(tmpPath, false);
+//                Rio.write(filteredModelWithBlankNodes, fileWriter, RDFFormat.TURTLE);
+//                fileWriter.close();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//            org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(tmpPath);
+//
+//            tmp = System.currentTimeMillis() - startMillis;
+//            System.out.println("after writing "+tmp);
+//
+//            File file = new File(tmpPath);
+//            if (file.exists()) {
+//                file.delete();
+//            }
+//
             TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
             OutputStream outputStream = new ByteArrayOutputStream();
             formatter.accept(jenaModel, outputStream);
@@ -171,6 +175,80 @@ public class Utils {
             Model filteredModel = model.filter(iri, null, null); //filters current propertyshape
             Rio.write(filteredModel, out, RDFFormat.TURTLE);
             return escapeNew(out.toString());
+        }
+    }
+
+    public static String generateTTLFromIRIInModelJena(IRI iri, org.apache.jena.rdf.model.Model model) {
+        if(usePrettyFormatting) {
+            var startMillis =  System.currentTimeMillis();
+            String queryString = String.format("CONSTRUCT {<%s> ?p ?o}.", iri);
+
+            var query = QueryFactory.create(queryString);
+            try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+                org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
+                TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+                OutputStream outputStream = new ByteArrayOutputStream();
+                formatter.accept(jenaModel, outputStream);
+                var tmp = System.currentTimeMillis() - startMillis;
+                System.out.println("after loading "+tmp);
+                return outputStream.toString().replaceAll("\n+$", "");
+            }
+//            SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
+//            IRI iriSupport = valueFactory.createIRI("http://shaclshapes.org/support");
+//            IRI iriConfidence = valueFactory.createIRI("http://shaclshapes.org/confidence");
+//            var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
+//
+//            var filteredModelWithBlankNodes = addBlankNodesToModel(filteredModel, model);
+//            filteredModelWithBlankNodes = filteredModelWithBlankNodes.stream().filter(statement -> !statement.getPredicate().equals(iriSupport)
+//                    && !statement.getPredicate().equals(iriConfidence)).collect(Collectors.toSet());
+
+//            var tmp = System.currentTimeMillis() - startMillis;
+//            System.out.println("after filtering "+tmp);
+
+            //Faster but bug with blank nodes,  TODO investigate
+//            org.apache.jena.rdf.model.Model jenaModel = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+//            filteredModelWithBlankNodes.forEach(statement -> {
+//                jenaModel.add(
+//                        jenaModel.createResource(statement.getSubject().stringValue()),
+//                        jenaModel.createProperty(statement.getPredicate().stringValue()),
+//                        jenaModel.createResource(statement.getObject().stringValue())
+//                );
+//            });
+
+
+            //need to write to file to load as jena model
+//            var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
+//            FileWriter fileWriter = null;
+//            try {
+//                fileWriter = new FileWriter(tmpPath, false);
+//                Rio.write(filteredModelWithBlankNodes, fileWriter, RDFFormat.TURTLE);
+//                fileWriter.close();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//            org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(tmpPath);
+//
+//            tmp = System.currentTimeMillis() - startMillis;
+//            System.out.println("after writing "+tmp);
+//
+//            File file = new File(tmpPath);
+//            if (file.exists()) {
+//                file.delete();
+//            }
+//
+//            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+//            OutputStream outputStream = new ByteArrayOutputStream();
+//            formatter.accept(jenaModel, outputStream);
+//            tmp = System.currentTimeMillis() - startMillis;
+//            System.out.println("after loading "+tmp);
+//            return outputStream.toString().replaceAll("\n+$", "");
+        }
+        else {
+//            StringWriter out = new StringWriter();
+////            Model filteredModel = model.filter(iri, null, null); //filters current propertyshape
+//            Rio.write(filteredModel, out, RDFFormat.TURTLE);
+//            return escapeNew(out.toString());
+            return "";
         }
     }
 

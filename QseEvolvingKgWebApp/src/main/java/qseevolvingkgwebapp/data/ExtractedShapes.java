@@ -3,6 +3,9 @@ package qseevolvingkgwebapp.data;
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.util.FileManager;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
@@ -60,6 +63,9 @@ public class ExtractedShapes extends AbstractEntity{
     @Transient
     Model model;
 
+    @Transient
+    org.apache.jena.rdf.model.Model jenaModel;
+
     String comboBoxString;
     @Transient
     Random random = new Random();
@@ -81,6 +87,23 @@ public class ExtractedShapes extends AbstractEntity{
             }
         }
         return this.model;
+    }
+
+    public org.apache.jena.rdf.model.Model getModelJena() {
+        if(jenaModel == null) {
+            try(FileInputStream inputStream = new FileInputStream(fileContentPath)) {
+                var jenaModel = ModelFactory.createDefaultModel();
+//                FileManager.get().readModel(jenaModel, filePath);
+                RDFDataMgr.read(jenaModel, inputStream, null);
+                this.jenaModel = jenaModel;
+
+
+//                this.model = Rio.parse(inputStream, "", RDFFormat.TURTLE);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return this.jenaModel;
     }
 
     public List<NodeShape> getNodeShapes() {
