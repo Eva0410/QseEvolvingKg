@@ -16,6 +16,7 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -33,6 +34,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -178,6 +181,38 @@ public class Utils {
         }
     }
 
+    public static String generateTTLFromRegex(IRI iri, String fileContent, String prefixLines) {
+        //TODO maybe also replace other characters
+        String iriWithEscapedChars = iri.toString().replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+        String regexPattern = String.format("\n<%s>.*? \\.", iriWithEscapedChars);
+        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
+
+        Matcher matcher = pattern.matcher(fileContent);
+
+        if(!matcher.find()) {
+            System.out.println("No text generated for " +iri.getLocalName());
+            return "";
+        }
+        String match = matcher.group();
+
+        var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+        model.read(new java.io.StringReader(prefixLines+match), null, "TURTLE"); // Assuming Turtle format, change as needed
+
+        org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
+        org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
+
+
+        String queryString = String.format("CONSTRUCT {?s ?p ?o} WHERE { ?s ?p ?o. FILTER (?p != <%s> && ?p != <%s>)}", iriSupport, iriConfidence);
+
+        var query = QueryFactory.create(queryString);
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+            org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
+            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+            OutputStream outputStream = new ByteArrayOutputStream();
+            formatter.accept(jenaModel, outputStream);
+            return outputStream.toString().replaceAll("\n+$", "");
+        }
+    }
     public static String generateTTLFromIRIInModelJena(IRI iri, org.apache.jena.rdf.model.Model model) {
         if(usePrettyFormatting) {
             var startMillis =  System.currentTimeMillis();

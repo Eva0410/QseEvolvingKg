@@ -53,8 +53,6 @@ public class NodeShape {
     public NodeShape() {}
 
     public NodeShape(NS ns, ExtractedShapes es, boolean shouldGenerateText) {
-        long startTimeMillis = System.currentTimeMillis();
-
         this.iri = ns.getIri();
         this.targetClass = ns.getTargetClass();
         this.support = ns.getSupport();
@@ -70,8 +68,6 @@ public class NodeShape {
                 System.out.println(ps.getIri() + " dropped");
         }
         this.generateText();
-        long durationMillis = System.currentTimeMillis() - startTimeMillis;
-        System.out.println(this.getIri().getLocalName()+" "+durationMillis);
     }
 
     public ExtractedShapes getExtractedShapes() {
@@ -132,8 +128,8 @@ public class NodeShape {
 
     public void generateText() {
         if(shouldGenerateText) {
-            var model = this.getExtractedShapes().getModelJena();
-            this.generatedText = Utils.generateTTLFromIRIInModelJena(iri, model);
+//            var model = this.getExtractedShapes().getModelJena();
+            this.generatedText = Utils.generateTTLFromRegex(iri, this.extractedShapes.getFileAsString(), this.extractedShapes.prefixLines);
         }
     }
 }

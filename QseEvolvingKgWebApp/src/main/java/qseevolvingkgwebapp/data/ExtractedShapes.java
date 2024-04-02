@@ -106,6 +106,31 @@ public class ExtractedShapes extends AbstractEntity{
         return this.jenaModel;
     }
 
+    @Transient
+    String fileAsString;
+
+    @Transient
+    public String prefixLines;
+    public String getFileAsString() {
+        if(fileAsString == null) {
+            StringBuilder fileContent = new StringBuilder();
+            StringBuilder prefixLines = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new FileReader(fileContentPath))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    fileContent.append(line).append("\n");
+                    if(line.contains("@prefix"))
+                        prefixLines.append(line).append("\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.fileAsString = fileContent.toString();
+            this.prefixLines = prefixLines.toString();
+        }
+        return fileAsString;
+    }
+
     public List<NodeShape> getNodeShapes() {
         return nodeShapes;
     }

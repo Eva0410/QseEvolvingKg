@@ -252,6 +252,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             pruningUtil.getStatsByBoth(nodeShapes);
         }
 
+        long startTimeMillis = System.currentTimeMillis();
+
         var classes = new ArrayList<String>();
         for (var i: classesGrid.getSelectedItems()) {
             classes.add(((Type)i).className);
@@ -262,7 +264,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
         extractedShapes.setCreatedAt(LocalDateTime.now());
         extractedShapes.setFileContentPath(outputAddress);
-        if(extractedShapes.getModel().size() == 0) {
+        if(extractedShapes.getModel().isEmpty()) {
             Notification.show("Caution, there were no shapes extracted. Please try lower values for support or confidence.");
             try {
                 Files.delete(Paths.get(extractedShapes.getFileContentPath()));
@@ -275,7 +277,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setNodeShapes(nodeShapes);
         extractedShapes.generateComboBoxString();
         shapeService.insert(extractedShapes);
-        System.out.println("Shapes inserted");
+        long durationMillis = System.currentTimeMillis() - startTimeMillis;
+        System.out.println("Shapes inserted, duration: "+durationMillis);
     }
 
     private static List<Type> getClasses(Map<Integer, Integer> classEntityCountMap, StringEncoder stringEncoder) {

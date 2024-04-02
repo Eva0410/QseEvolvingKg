@@ -149,8 +149,8 @@ public class PropertyShape {
 
     public void generateText() {
         if(this.nodeShape.shouldGenerateText) {
-            var model = this.nodeShape.getExtractedShapes().getModelJena();
-            this.generatedText = Utils.generateTTLFromIRIInModelJena(iri, model);
+//            var model = this.nodeShape.getExtractedShapes().getModelJena();
+            this.generatedText = Utils.generateTTLFromRegex(iri, this.nodeShape.extractedShapes.getFileAsString(), this.nodeShape.extractedShapes.prefixLines);
         }
     }
 }

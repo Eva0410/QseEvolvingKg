@@ -271,13 +271,13 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     private void addEqualInformationPS(ArrayList<ComparisonTreeViewItem> propertyShapesToShow) {
         for (var comparisonTreeViewItem:
              propertyShapesToShow) {
-            for (var ps : comparisonTreeViewItem.getPropertyShapeList().values()) {
-                if(ps.getGeneratedText().isEmpty()) {
-                    ps.generateText();
-                    System.out.println("Text not generated for shape " + ps.getIri().getLocalName() + ", " + ps.getNodeShape().getIri().getLocalName());
-                    shapeService.update(ps.getNodeShape().getExtractedShapes());
-                }
-            }
+//            for (var ps : comparisonTreeViewItem.getPropertyShapeList().values()) {
+//                if(ps.getGeneratedText().isEmpty()) {
+//                    ps.generateText();
+//                    System.out.println("Text not generated for shape " + ps.getIri().getLocalName() + ", " + ps.getNodeShape().getIri().getLocalName());
+//                    shapeService.update(ps.getNodeShape().getExtractedShapes());
+//                }
+//            }
             comparisonTreeViewItem.setShapesEqual(
                     areAllStringsEqual(
                             comparisonTreeViewItem.getPropertyShapeList().values().stream()
