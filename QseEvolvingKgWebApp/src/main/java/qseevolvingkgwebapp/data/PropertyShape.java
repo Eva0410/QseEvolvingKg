@@ -63,8 +63,15 @@ public class PropertyShape {
     public PropertyShape(PS ps, NodeShape ns, boolean shouldGenerateText) {
         this(ps);
         this.nodeShape = ns;
-        this.generateText();
+        if(willPSbeAdded())
+            this.generateText();
     }
+
+    public Boolean willPSbeAdded() {
+        //Bug in Shactor that all shapes are passed, no mather if support and confidence are correct
+        return this.getSupport() > this.getNodeShape().getExtractedShapes().getSupport() && this.getConfidence()*100 > this.getNodeShape().getExtractedShapes().getConfidence();
+    }
+
     public PropertyShape() {}
 
     public NodeShape getNodeShape() {
@@ -149,7 +156,6 @@ public class PropertyShape {
 
     public void generateText() {
         if(this.nodeShape.shouldGenerateText) {
-//            var model = this.nodeShape.getExtractedShapes().getModelJena();
             this.generatedText = Utils.generateTTLFromRegex(iri, this.nodeShape.extractedShapes.getFileAsString(), this.nodeShape.extractedShapes.prefixLines);
         }
     }

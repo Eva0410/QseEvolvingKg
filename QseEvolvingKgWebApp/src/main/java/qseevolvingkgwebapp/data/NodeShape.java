@@ -62,7 +62,7 @@ public class NodeShape {
         for (var ps : ns.getPropertyShapes()) {
             //Bug in Shactor...
             var propertyShape = new PropertyShape(ps, this, shouldGenerateText);
-            if(propertyShape.getSupport() > extractedShapes.getSupport() && propertyShape.getConfidence()*100 > extractedShapes.getConfidence())
+            if(propertyShape.willPSbeAdded())
                 propertyShapeList.add(propertyShape);
             else
                 System.out.println(ps.getIri() + " dropped");
