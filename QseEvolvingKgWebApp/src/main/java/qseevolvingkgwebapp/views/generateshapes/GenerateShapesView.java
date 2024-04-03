@@ -111,6 +111,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         radioGroupQseType.setItems(Arrays.stream(QseType.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
+        radioGroupQseType.setEnabled(false);
         radioGroupQseType.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroupQseType.setValue(QseType.EXACT.toString());
         classesGrid.setSelectionMode(Grid.SelectionMode.MULTI);
@@ -212,6 +213,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         });
 
         classes.forEach(item -> classesGrid.select(item));
+        if(classes == null || classes.isEmpty())
+            Notification.show("Something went wrong! Please check, if the graph file contains data. Comments and empty lines will lead to errors.");
     }
 
     private void completeFileBasedShapesExtraction() throws Exception {

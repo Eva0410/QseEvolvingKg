@@ -50,6 +50,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     RadioButtonGroup<String> radioGroupFilter = new RadioButtonGroup<>();
     List<ExtractedShapes> shapesCache;
     public CompareShapesView() {
+        shapesCache = new ArrayList<>();
         HorizontalLayout layoutRowComboBox = new HorizontalLayout();
         HorizontalLayout layoutRowFilter = new HorizontalLayout();
         multiSelectShapes = new MultiSelectComboBox();
@@ -106,6 +107,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
             setTreeViewData();
             VaadinSession.getCurrent().setAttribute("currentComboBoxItems", multiSelectShapes.getSelectedItems());
+            applyFilters();
         });
         treeViewComparison.addItemClickListener(event -> {
             VaadinSession.getCurrent().setAttribute("currentCompareObject", event.getItem());
@@ -192,11 +194,18 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
     private void setTreeViewData() {
         var nodeShapesToShow = new ArrayList<ComparisonTreeViewItem>();
-        shapesCache = new ArrayList<ExtractedShapes>();
         treeViewComparison.removeAllColumns();
         for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
-            var extractedShapes = shapeService.getWithNodeShapes(comboBoxItem.id);
-            shapesCache.add(extractedShapes);
+            var cacheItem = shapesCache.stream().filter(es -> es.getId().equals(comboBoxItem.id)).findFirst();
+            ExtractedShapes extractedShapes;
+
+            if(cacheItem.isPresent())
+                extractedShapes = cacheItem.get();
+            else {
+                extractedShapes = shapeService.getWithNodeShapes(comboBoxItem.id);
+                shapesCache.add(extractedShapes);
+            }
+
             var nodeShapes = extractedShapes.getNodeShapes();
             var nodeShapesToShowMap = nodeShapesToShow
                     .stream().map(ComparisonTreeViewItem::getShapeName).toList();

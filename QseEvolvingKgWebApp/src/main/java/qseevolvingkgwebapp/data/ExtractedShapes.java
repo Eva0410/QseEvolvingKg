@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.util.FileManager;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -78,6 +79,7 @@ public class ExtractedShapes extends AbstractEntity{
         return this.getVersionEntity().getCreatedAt();
     }
 
+    //not used, would be used for alternative with rdf4j model and jena model
     public Model getModel() {
         if(model == null) {
             try(FileInputStream inputStream = new FileInputStream(fileContentPath)) {
@@ -89,16 +91,13 @@ public class ExtractedShapes extends AbstractEntity{
         return this.model;
     }
 
+    //not used, needed for alternative with Jena Model
     public org.apache.jena.rdf.model.Model getModelJena() {
         if(jenaModel == null) {
             try(FileInputStream inputStream = new FileInputStream(fileContentPath)) {
                 var jenaModel = ModelFactory.createDefaultModel();
-//                FileManager.get().readModel(jenaModel, filePath);
-                RDFDataMgr.read(jenaModel, inputStream, null);
+                RDFDataMgr.read(jenaModel, inputStream, RDFLanguages.TTL);
                 this.jenaModel = jenaModel;
-
-
-//                this.model = Rio.parse(inputStream, "", RDFFormat.TURTLE);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -138,7 +137,9 @@ public class ExtractedShapes extends AbstractEntity{
     public void setNodeShapes(List<NS> ns) {
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
-            if(item.getSupport() > this.support)
+            //Bug in QSE...
+            var nsAlreadyExists = list.stream().anyMatch(li -> li.iri.equals(item.getIri()));
+            if(item.getSupport() > this.support && !nsAlreadyExists)
                 list.add(new NodeShape(item, this, true));
         }
         this.nodeShapes = list;
@@ -147,7 +148,9 @@ public class ExtractedShapes extends AbstractEntity{
     public void setNodeShapesDefault(List<NS> ns) {
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
-            list.add(new NodeShape(item, this, false));
+            var nsAlreadyExists = list.stream().anyMatch(li -> li.iri.equals(item.getIri()));
+            if(!nsAlreadyExists)
+                list.add(new NodeShape(item, this, false));
         }
         this.nodeShapesDefault = list;
     }

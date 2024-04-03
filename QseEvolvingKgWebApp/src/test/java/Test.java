@@ -106,7 +106,6 @@ public class Test {
     }
 
     public void test() {
-
         StringBuilder fileContent = new StringBuilder();
         StringBuilder prefixLines = new StringBuilder();
 

@@ -31,9 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -210,79 +208,64 @@ public class Utils {
             TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
             OutputStream outputStream = new ByteArrayOutputStream();
             formatter.accept(jenaModel, outputStream);
-            return outputStream.toString().replaceAll("\n+$", "");
+            String cleanedString = reorderShaclInItems(outputStream.toString());
+            return cleanedString.replaceAll("\n+$", "");
         }
     }
-    public static String generateTTLFromIRIInModelJena(IRI iri, org.apache.jena.rdf.model.Model model) {
-        if(usePrettyFormatting) {
-            var startMillis =  System.currentTimeMillis();
-            String queryString = String.format("CONSTRUCT {<%s> ?p ?o}.", iri);
 
-            var query = QueryFactory.create(queryString);
-            try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
-                org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
-                TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
-                OutputStream outputStream = new ByteArrayOutputStream();
-                formatter.accept(jenaModel, outputStream);
-                var tmp = System.currentTimeMillis() - startMillis;
-                System.out.println("after loading "+tmp);
-                return outputStream.toString().replaceAll("\n+$", "");
+    private static String reorderShaclInItems(String input) {
+        String searchString = "shacl#in";
+        if(input.contains(searchString) && input.indexOf(searchString)!=input.lastIndexOf(searchString)) {
+            String[] lines = input.split("\n");
+            List<String> inLines = new ArrayList<>();
+            for (String line : lines) {
+                if (line.contains(searchString))
+                    inLines.add(line.trim());
             }
-//            SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
-//            IRI iriSupport = valueFactory.createIRI("http://shaclshapes.org/support");
-//            IRI iriConfidence = valueFactory.createIRI("http://shaclshapes.org/confidence");
-//            var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
-//
-//            var filteredModelWithBlankNodes = addBlankNodesToModel(filteredModel, model);
-//            filteredModelWithBlankNodes = filteredModelWithBlankNodes.stream().filter(statement -> !statement.getPredicate().equals(iriSupport)
-//                    && !statement.getPredicate().equals(iriConfidence)).collect(Collectors.toSet());
+            Collections.sort(inLines);
+            List<String> orderedLines = new ArrayList<>();
+            int remainingIndex = 0;
+            for (String line : lines) {
+                if (line.contains(searchString)) {
+                    orderedLines.add(inLines.get(remainingIndex));
+                    remainingIndex++;
+                }
+                else
+                    orderedLines.add(line);
+            }
+            StringBuilder orderedText = new StringBuilder();
+            orderedText.append(String.join("\n", orderedLines));
 
-//            var tmp = System.currentTimeMillis() - startMillis;
-//            System.out.println("after filtering "+tmp);
-
-            //Faster but bug with blank nodes,  TODO investigate
-//            org.apache.jena.rdf.model.Model jenaModel = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
-//            filteredModelWithBlankNodes.forEach(statement -> {
-//                jenaModel.add(
-//                        jenaModel.createResource(statement.getSubject().stringValue()),
-//                        jenaModel.createProperty(statement.getPredicate().stringValue()),
-//                        jenaModel.createResource(statement.getObject().stringValue())
-//                );
-//            });
-
-
-            //need to write to file to load as jena model
-//            var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
-//            FileWriter fileWriter = null;
-//            try {
-//                fileWriter = new FileWriter(tmpPath, false);
-//                Rio.write(filteredModelWithBlankNodes, fileWriter, RDFFormat.TURTLE);
-//                fileWriter.close();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//            org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(tmpPath);
-//
-//            tmp = System.currentTimeMillis() - startMillis;
-//            System.out.println("after writing "+tmp);
-//
-//            File file = new File(tmpPath);
-//            if (file.exists()) {
-//                file.delete();
-//            }
-//
-//            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
-//            OutputStream outputStream = new ByteArrayOutputStream();
-//            formatter.accept(jenaModel, outputStream);
-//            tmp = System.currentTimeMillis() - startMillis;
-//            System.out.println("after loading "+tmp);
-//            return outputStream.toString().replaceAll("\n+$", "");
+            return orderedText.toString();
         }
-        else {
-//            StringWriter out = new StringWriter();
-////            Model filteredModel = model.filter(iri, null, null); //filters current propertyshape
-//            Rio.write(filteredModel, out, RDFFormat.TURTLE);
-//            return escapeNew(out.toString());
+        else
+            return input;
+    }
+
+    //not used. Alternative to filtering with rdf4j-model, writing to file and reading jena file from file.
+    //Not tested
+    public static String generateTTLFromIRIInModelJena(IRI iri, org.apache.jena.rdf.model.Model model) {
+        org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
+        org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
+        String iriWithEscapedChars = iri.toString().replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+
+        String queryString = String.format("CONSTRUCT {?s ?p ?o} WHERE { " +
+                "    <%s> (rdf:type|!rdf:type)* ?s ." +
+                "    ?s ?p ?o " +
+                "    FILTER ((?s = <%s> || isBlank(?s)) && ?p != <%s> && ?p != <%s>) " +
+                "    }", iriWithEscapedChars,iriWithEscapedChars, iriSupport, iriConfidence);
+
+        var query = QueryFactory.create(queryString);
+
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+            org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
+            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+            OutputStream outputStream = new ByteArrayOutputStream();
+            formatter.accept(jenaModel, outputStream);
+            return outputStream.toString().replaceAll("\n+$", "");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
             return "";
         }
     }

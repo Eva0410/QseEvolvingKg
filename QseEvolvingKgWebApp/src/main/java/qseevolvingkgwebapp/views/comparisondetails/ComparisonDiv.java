@@ -67,9 +67,7 @@ public class ComparisonDiv extends Div {
                 "    const modifiedText = '" + t2 + "';" +
                 "    const diff = Diff.diffWords(originalText, modifiedText);" +
                 "    return diff;";
-        UI.getCurrent().getPage().executeJs(
-                js
-        ).then(response -> {
+        UI.getCurrent().getPage().executeJs(js).then(response -> {
             if (response instanceof JsonArray) {
                 displayDiffOnUI((JsonArray) response);
             }
