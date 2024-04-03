@@ -1,5 +1,7 @@
+import com.vaadin.flow.component.UI;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
+import elemental.json.JsonArray;
 import org.apache.jena.iri.IRI;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -195,4 +197,19 @@ public class Test {
 //        }
 //        return filteredModel;
 //    }
+
+    @org.junit.Test
+    public void testJSError() {
+        //string too long, not testable
+//        var js = "    const originalText = '" + t1 + "';" +
+//                "    const modifiedText = '" + t2 + "';" +
+//                "    const diff = Diff.diffWords(originalText, modifiedText);" +
+//                "    return diff;";
+//        UI.getCurrent().getPage().executeJs(js).then(response -> {
+//            if (response instanceof JsonArray) {
+//                System.out.println("worked");
+//            }
+//        });
+    }
+
 }

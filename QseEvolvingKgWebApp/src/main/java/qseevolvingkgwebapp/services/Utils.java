@@ -272,7 +272,7 @@ public class Utils {
 
     public static String escapeNew(String input) {
         if(usePrettyFormatting) {
-            return input.replaceAll("\r","").replaceAll("\n","\\\\\\\\n");
+            return input.replaceAll("\r","").replaceAll("\n","\\\\n");
         }
         else {
             input = input.replaceFirst("\r\n", "");
