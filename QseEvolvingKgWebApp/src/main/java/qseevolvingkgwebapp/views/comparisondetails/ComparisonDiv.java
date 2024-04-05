@@ -53,7 +53,7 @@ public class ComparisonDiv extends Div {
 
         getElement().removeAllChildren();
         Div diffDiv = new Div();
-        String s = diffText.toString().replaceAll("\\\\n", "<br>");
+        String s = diffText.toString().replaceAll("\\n", "<br>");
         diffDiv.getElement().setProperty("innerHTML", s);
         add(diffDiv);
     }

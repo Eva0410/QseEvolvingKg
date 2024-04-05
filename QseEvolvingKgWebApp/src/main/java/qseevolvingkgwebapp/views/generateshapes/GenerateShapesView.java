@@ -94,7 +94,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         confidence = new NumberField();
         checkboxUseDefaultShapes = new Checkbox();
         checkboxUseDefaultShapes.setLabel("Use default shapes");
-        checkboxUseDefaultShapes.setValue(true);
+        checkboxUseDefaultShapes.setValue(false);
         buttonPrimary = new Button();
         graphInfo = new H5();
         searchField = new TextField();
@@ -131,8 +131,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         confidence.setTooltipText("Only shapes will be generated, which have a higher confidence (>), not higher or equal (>=)");
         confidence.setMin(0);
         confidence.setMax(100);
-        support.setEnabled(false);
-        confidence.setEnabled(false);
+        support.setEnabled(true);
+        confidence.setEnabled(true);
         buttonPrimary.setText("Generate");
         buttonPrimary.setWidth("min-content");
         buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
