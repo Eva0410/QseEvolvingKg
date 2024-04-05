@@ -4,6 +4,8 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
@@ -59,10 +61,24 @@ public class ComparisonDiv extends Div {
     }
 
     public void updateTextDifferences(String t1, String t2) {
-        if(t1 == null || t1.equals("") || t2 == null || t2.equals("")) {
+        if(t1 == null || t1.isEmpty() || t2 == null || t2.isEmpty()) {
             getElement().removeAllChildren();
             return;
         }
+        //TODO
+        //This works for all shapes but causes UI freeze
+//        var js = "const originalText = $0;" +
+//                "const modifiedText = $1;" +
+//                "const diff = Diff.diffWords(originalText, modifiedText);" +
+//                "return diff;";
+//
+//        UI.getCurrent().getPage().executeJs(js, t1, t2).then(response -> {
+//                if (response instanceof JsonArray) {
+//                    displayDiffOnUI((JsonArray) response);
+//                }
+//        });
+
+        //Works nice but only for short texts
         var js = "    const originalText = '" + t1 + "';" +
                 "    const modifiedText = '" + t2 + "';" +
                 "    const diff = Diff.diffWords(originalText, modifiedText);" +
@@ -75,6 +91,7 @@ public class ComparisonDiv extends Div {
             }
         });
     }
+
     public static String escapeHtmlCharacters(String input) {
         return input.replaceAll("<", "&lt;")
                 .replaceAll(">", "&gt;")

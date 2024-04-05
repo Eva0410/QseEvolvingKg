@@ -23,6 +23,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.data.ExtractedShapes;
 import qseevolvingkgwebapp.data.NodeShape;
@@ -36,7 +38,7 @@ import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
 @Uses(Icon.class)
 @CssImport(
         themeFor = "vaadin-grid",
-        value = "themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css"
+        value = "./themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css"
 )
 public class CompareShapesView extends Composite<VerticalLayout> {
     @Autowired()
@@ -46,7 +48,9 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     TreeGrid<ComparisonTreeViewItem> treeViewComparison;
     TextField filterField = new TextField("Filter");
     RadioButtonGroup<String> radioGroupFilter = new RadioButtonGroup<>();
+    List<ExtractedShapes> shapesCache;
     public CompareShapesView() {
+        shapesCache = new ArrayList<>();
         HorizontalLayout layoutRowComboBox = new HorizontalLayout();
         HorizontalLayout layoutRowFilter = new HorizontalLayout();
         multiSelectShapes = new MultiSelectComboBox();
@@ -103,6 +107,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
             setTreeViewData();
             VaadinSession.getCurrent().setAttribute("currentComboBoxItems", multiSelectShapes.getSelectedItems());
+            applyFilters();
         });
         treeViewComparison.addItemClickListener(event -> {
             VaadinSession.getCurrent().setAttribute("currentCompareObject", event.getItem());
@@ -167,7 +172,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         multiSelectShapes.setItemLabelGenerator(item -> item.label);
 
         var currentComboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
-        if(currentComboBoxItems != null && currentComboBoxItems.size() > 0
+        if(currentComboBoxItems != null && !currentComboBoxItems.isEmpty()
                 && currentComboBoxItems.stream()
                 .map(item -> item.id)
                 .allMatch(id -> comboBoxItems.stream()
@@ -180,9 +185,10 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 newComboBoxItem.ifPresent(comboBoxItem -> multiSelectShapes.select(comboBoxItem));
             }
         } else {
-            if (comboBoxItems.size() > 1) {
-                multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));
-            }
+            //Default init leads to perfomance issues
+//            if (comboBoxItems.size() > 1) {
+//                multiSelectShapes.setValue(comboBoxItems.get(0), comboBoxItems.get(1));
+//            }
         }
     }
 
@@ -190,7 +196,16 @@ public class CompareShapesView extends Composite<VerticalLayout> {
         var nodeShapesToShow = new ArrayList<ComparisonTreeViewItem>();
         treeViewComparison.removeAllColumns();
         for(var comboBoxItem : multiSelectShapes.getSelectedItems()) {
-            var extractedShapes = shapeService.get(comboBoxItem.id).get();
+            var cacheItem = shapesCache.stream().filter(es -> es.getId().equals(comboBoxItem.id)).findFirst();
+            ExtractedShapes extractedShapes;
+
+            if(cacheItem.isPresent())
+                extractedShapes = cacheItem.get();
+            else {
+                extractedShapes = shapeService.getWithNodeShapes(comboBoxItem.id);
+                shapesCache.add(extractedShapes);
+            }
+
             var nodeShapes = extractedShapes.getNodeShapes();
             var nodeShapesToShowMap = nodeShapesToShow
                     .stream().map(ComparisonTreeViewItem::getShapeName).toList();
@@ -208,12 +223,11 @@ public class CompareShapesView extends Composite<VerticalLayout> {
             }
             treeViewComparison.addHierarchyColumn(o -> getTreeViewTextFromViewItem(o, comboBoxItem.id))
                 .setHeader(comboBoxItem.label);
-
         }
 
         addEqualInformationNS(nodeShapesToShow);
 
-        treeViewComparison.setItems(nodeShapesToShow, this::getPropertyShapes);
+        treeViewComparison.setItems(nodeShapesToShow, item -> getPropertyShapes(item));
 
         treeViewComparison.expand(nodeShapesToShow);
         treeViewComparison.setClassNameGenerator(e -> !e.areShapesEqual() ? "warn" : null);
@@ -236,14 +250,15 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
     private List<ComparisonTreeViewItem> getPropertyShapes(ComparisonTreeViewItem item) {
         var propertyShapesToShow = new ArrayList<ComparisonTreeViewItem>();
-        if(item.getPropertyShapeList().size() == 0) { //important for performance
+        if(item.getPropertyShapeList().isEmpty()) { //important for performance -> only execute this for NodeShapes
             for (var comboBoxItem : multiSelectShapes.getSelectedItems()) {
-                var extractedShapes = shapeService.get(comboBoxItem.id).get().getNodeShapes()
+                var extractedShapes = shapesCache.stream().filter(es -> es.getId().equals(comboBoxItem.id)).findFirst().get();
+                var nodeShape = extractedShapes.getNodeShapes()
                         .stream().filter(n -> n.getIri().getLocalName().equals(item.getShapeName())).findFirst();
-                if (extractedShapes.isPresent()) {
+                if (nodeShape.isPresent()) {
                     var propertyShapesToShowMap = propertyShapesToShow
                             .stream().map(ComparisonTreeViewItem::getShapeName).toList();
-                    for (var ps : extractedShapes.get().getPropertyShapeList()) {
+                    for (var ps : nodeShape.get().getPropertyShapeList()) {
                         if (propertyShapesToShowMap.contains(ps.getIri().getLocalName())) {
                             var propertyShapeToShow = propertyShapesToShow.stream().filter(n -> n.getShapeName()
                                     .equals(ps.getIri().getLocalName())).findFirst().get();
@@ -266,13 +281,14 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     private void addEqualInformationPS(ArrayList<ComparisonTreeViewItem> propertyShapesToShow) {
         for (var comparisonTreeViewItem:
              propertyShapesToShow) {
-            for (var ps : comparisonTreeViewItem.getPropertyShapeList().values()) {
-                if(ps.getGeneratedText().isEmpty()) {
-                    ps.generateText();
-                    System.out.println("Text not generated for shape " + ps.getIri().getLocalName() + ", " + ps.getNodeShape().getIri().getLocalName());
-                    shapeService.update(ps.getNodeShape().getExtractedShapes());
-                }
-            }
+            //generate text for propertyshapes, which have no text yet -> very unlikely
+//            for (var ps : comparisonTreeViewItem.getPropertyShapeList().values()) {
+//                if(ps.getGeneratedText().isEmpty()) {
+//                    ps.generateText();
+//                    System.out.println("Text not generated for shape " + ps.getIri().getLocalName() + ", " + ps.getNodeShape().getIri().getLocalName());
+//                    shapeService.update(ps.getNodeShape().getExtractedShapes());
+//                }
+//            }
             comparisonTreeViewItem.setShapesEqual(
                     areAllStringsEqual(
                             comparisonTreeViewItem.getPropertyShapeList().values().stream()
@@ -283,12 +299,14 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     private void addEqualInformationNS(ArrayList<ComparisonTreeViewItem> propertyShapesToShow) {
         for (var comparisonTreeViewItem:
                 propertyShapesToShow) {
-            for (var ps : comparisonTreeViewItem.getNodeShapeList().values()) {
-                if(ps.getGeneratedText().isEmpty()) {
-                    ps.generateText();
-                    shapeService.update(ps.getExtractedShapes());
-                }
-            }
+            //generate text for propertyshapes, which have no text yet
+
+//            for (var ps : comparisonTreeViewItem.getNodeShapeList().values()) {
+//                if(ps.getGeneratedText().isEmpty()) {
+//                    ps.generateText();
+//                    shapeService.update(ps.getExtractedShapes());
+//                }
+//            }
             comparisonTreeViewItem.setShapesEqual(
                     areAllStringsEqual(
                             comparisonTreeViewItem.getNodeShapeList().values().stream()

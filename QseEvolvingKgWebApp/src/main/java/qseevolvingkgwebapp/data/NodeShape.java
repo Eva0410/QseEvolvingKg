@@ -3,6 +3,7 @@ package qseevolvingkgwebapp.data;
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 import qseevolvingkgwebapp.services.Utils;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class NodeShape {
         for (var ps : ns.getPropertyShapes()) {
             //Bug in Shactor...
             var propertyShape = new PropertyShape(ps, this, shouldGenerateText);
-            if(propertyShape.getSupport() > extractedShapes.getSupport() && propertyShape.getConfidence()*100 > extractedShapes.getConfidence())
+            if(propertyShape.willPSbeAdded())
                 propertyShapeList.add(propertyShape);
             else
                 System.out.println(ps.getIri() + " dropped");
@@ -108,8 +109,8 @@ public class NodeShape {
 
     public void generateText() {
         if(shouldGenerateText) {
-            var model = extractedShapes.getModel();
-            this.generatedText = Utils.generateTTLFromIRIInModel(iri, model);
+//            var model = this.getExtractedShapes().getModelJena(); //for alternatives
+            this.generatedText = Utils.generateTTLFromRegex(iri, this.extractedShapes.getFileAsString(), this.extractedShapes.prefixLines);
         }
     }
 }

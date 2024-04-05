@@ -111,6 +111,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         radioGroupQseType.setItems(Arrays.stream(QseType.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
+        radioGroupQseType.setEnabled(false); //TODO remove
         radioGroupQseType.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroupQseType.setValue(QseType.EXACT.toString());
         classesGrid.setSelectionMode(Grid.SelectionMode.MULTI);
@@ -212,6 +213,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         });
 
         classes.forEach(item -> classesGrid.select(item));
+        if(classes == null || classes.isEmpty())
+            Notification.show("Something went wrong! Please check, if the graph file contains data. Comments and empty lines will lead to errors.");
     }
 
     private void completeFileBasedShapesExtraction() throws Exception {
@@ -229,14 +232,15 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
 
         //default shapes must be computed first
         System.out.println(chosenClasses);
-        String outputAddress = parser.extractSHACLShapes(chosenClasses.size()>0, chosenClasses);
+        String outputAddress = parser.extractSHACLShapes(!chosenClasses.isEmpty(), chosenClasses);
         List<NS> nodeShapes = parser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setVersionEntity(currentVersion);
 
         if(!checkboxUseDefaultShapes.getValue()) {
             int supportValue = support.getValue();
             double confidenceValue = confidence.getValue()/100;
-            extractedShapes.setFileContentDefaultShapes(Files.readAllBytes(Paths.get(outputAddress)));
+            extractedShapes.setFileContentDefaultShapesPath(outputAddress);
             extractedShapes.setNodeShapesDefault(nodeShapes);
 
             outputAddress = parser.extractSHACLShapesWithPruning(!chosenClasses.isEmpty(), confidenceValue, supportValue, chosenClasses); // extract shapes with pruning
@@ -251,7 +255,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             pruningUtil.getStatsByBoth(nodeShapes);
         }
 
-        extractedShapes.setVersionEntity(currentVersion);
+        long startTimeMillis = System.currentTimeMillis();
+
         var classes = new ArrayList<String>();
         for (var i: classesGrid.getSelectedItems()) {
             classes.add(((Type)i).className);
@@ -261,15 +266,23 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setSupport(support.isEnabled() ? support.getValue() : 0);
         extractedShapes.setQseType(QseType.valueOf(radioGroupQseType.getValue().toString()));
         extractedShapes.setCreatedAt(LocalDateTime.now());
-        extractedShapes.setFileContent(Files.readAllBytes(Paths.get(outputAddress)));
-        if(extractedShapes.getModel().size() == 0) {
+        extractedShapes.setFileContentPath(outputAddress);
+        if(extractedShapes.getModel().isEmpty()) {
             Notification.show("Caution, there were no shapes extracted. Please try lower values for support or confidence.");
-            throw new Exception("Noting exported");
+            //Cleanup
+            try {
+                Files.delete(Paths.get(extractedShapes.getFileContentPath()));
+                Files.delete(Paths.get(extractedShapes.getFileContentDefaultShapesPath()));
+            } catch (Exception ex) {
+                //ignore
+            }
+            throw new Exception("Nothing exported");
         }
         extractedShapes.setNodeShapes(nodeShapes);
         extractedShapes.generateComboBoxString();
         shapeService.insert(extractedShapes);
-        System.out.println("Shapes inserted");
+        long durationMillis = System.currentTimeMillis() - startTimeMillis;
+        System.out.println("Shapes inserted, duration: "+durationMillis);
     }
 
     private static List<Type> getClasses(Map<Integer, Integer> classEntityCountMap, StringEncoder stringEncoder) {

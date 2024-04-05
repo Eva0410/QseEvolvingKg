@@ -331,8 +331,11 @@ public class ShapesExtractor {
                 this.prepareNodeAndPropertyShapes(confidence, support, b, encodedClassIRI, propToObjectType, subj);
             }
         } else {
-            Encoder var10001 = this.encoder;
-            System.out.println("constructShapesWithPruning:: INVALID SUBJECT IRI: " + var10001.decode(encodedClassIRI));
+            //Bug: Performance issues for Bear-B dataset. Classes are also not correctly resolved.
+            //<http://dbpedia.org/resource/2015_US_Open_(tennis)> <http://dbpedia.org/ontology/budget> "4.22534E7"^^<http://dbpedia.org/datatype/usDollar> .
+            //<http://dbpedia.org/datatype/usDollar> -> <%3http://dbpedia.org/datatype/usDollar%3>
+            //Encoder var10001 = this.encoder;
+            //System.out.println("constructShapesWithPruning:: INVALID SUBJECT IRI: " + var10001.decode(encodedClassIRI));
         }
 
     }
