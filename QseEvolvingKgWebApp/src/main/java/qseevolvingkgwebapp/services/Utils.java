@@ -1,19 +1,23 @@
 package qseevolvingkgwebapp.services;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.server.VaadinSession;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
@@ -27,14 +31,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
 
-    static String graphDirectory;
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final String preconfiguredFolderName = "pre_configured";
+    public static final String shapesPath = "shapes";
+
 
 
     public static String getGraphDirectory() {
@@ -112,14 +121,25 @@ public class Utils {
     public static Boolean usePrettyFormatting = true; //debugging
     public static String generateTTLFromIRIInModel(IRI iri, Model model) {
         if(usePrettyFormatting) {
-            var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
             SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
             IRI iriSupport = valueFactory.createIRI("http://shaclshapes.org/support");
             IRI iriConfidence = valueFactory.createIRI("http://shaclshapes.org/confidence");
+            var filteredModel = model.stream().filter(statement -> statement.getSubject().equals(iri)).collect(Collectors.toSet());
 
             var filteredModelWithBlankNodes = addBlankNodesToModel(filteredModel, model);
             filteredModelWithBlankNodes = filteredModelWithBlankNodes.stream().filter(statement -> !statement.getPredicate().equals(iriSupport)
                     && !statement.getPredicate().equals(iriConfidence)).collect(Collectors.toSet());
+
+            //Faster but bug with blank nodes,  TODO investigate
+//            org.apache.jena.rdf.model.Model jenaModel = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+//            filteredModelWithBlankNodes.forEach(statement -> {
+//                jenaModel.add(
+//                        jenaModel.createResource(statement.getSubject().stringValue()),
+//                        jenaModel.createProperty(statement.getPredicate().stringValue()),
+//                        jenaModel.createResource(statement.getObject().stringValue())
+//                );
+//            });
+
 
             //need to write to file to load as jena model
             var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
@@ -151,9 +171,99 @@ public class Utils {
         }
     }
 
+    public static String generateTTLFromRegex(IRI iri, String fileContent, String prefixLines) {
+        //TODO maybe also replace other characters
+        String iriWithEscapedChars = iri.toString().replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+        String regexPattern = String.format("\n<%s>.*? \\.", iriWithEscapedChars);
+        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
+
+        Matcher matcher = pattern.matcher(fileContent);
+
+        if(!matcher.find()) {
+            System.out.println("No text generated for " +iri.getLocalName());
+            return "";
+        }
+        String match = matcher.group();
+
+        var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+        model.read(new java.io.StringReader(prefixLines+match), null, "TURTLE"); // Assuming Turtle format, change as needed
+
+        org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
+        org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
+
+        String queryString = String.format("CONSTRUCT {?s ?p ?o} WHERE { ?s ?p ?o. FILTER (?p != <%s> && ?p != <%s>)}", iriSupport, iriConfidence);
+
+        var query = QueryFactory.create(queryString);
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+            org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
+            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+            OutputStream outputStream = new ByteArrayOutputStream();
+            formatter.accept(jenaModel, outputStream);
+            String cleanedString = reorderShaclInItems(outputStream.toString());
+            return cleanedString.replaceAll("\n+$", "");
+        }
+    }
+
+    private static String reorderShaclInItems(String input) {
+        String searchString = "shacl#in";
+        if(input.contains(searchString) && input.indexOf(searchString)!=input.lastIndexOf(searchString)) {
+            String[] lines = input.split("\n");
+            List<String> inLines = new ArrayList<>();
+            for (String line : lines) {
+                if (line.contains(searchString))
+                    inLines.add(line.trim());
+            }
+            Collections.sort(inLines);
+            List<String> orderedLines = new ArrayList<>();
+            int remainingIndex = 0;
+            for (String line : lines) {
+                if (line.contains(searchString)) {
+                    orderedLines.add(inLines.get(remainingIndex));
+                    remainingIndex++;
+                }
+                else
+                    orderedLines.add(line);
+            }
+            StringBuilder orderedText = new StringBuilder();
+            orderedText.append(String.join("\n", orderedLines));
+
+            return orderedText.toString();
+        }
+        else
+            return input;
+    }
+
+    //not used. Alternative to filtering with rdf4j-model, writing to file and reading jena file from file.
+    //Not tested
+    public static String generateTTLFromIRIInModelJena(IRI iri, org.apache.jena.rdf.model.Model model) {
+        org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
+        org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
+        String iriWithEscapedChars = iri.toString().replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+
+        String queryString = String.format("CONSTRUCT {?s ?p ?o} WHERE { " +
+                "    <%s> (rdf:type|!rdf:type)* ?s ." +
+                "    ?s ?p ?o " +
+                "    FILTER ((?s = <%s> || isBlank(?s)) && ?p != <%s> && ?p != <%s>) " +
+                "    }", iriWithEscapedChars,iriWithEscapedChars, iriSupport, iriConfidence);
+
+        var query = QueryFactory.create(queryString);
+
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+            org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
+            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+            OutputStream outputStream = new ByteArrayOutputStream();
+            formatter.accept(jenaModel, outputStream);
+            return outputStream.toString().replaceAll("\n+$", "");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
     public static String escapeNew(String input) {
         if(usePrettyFormatting) {
-            return input.replaceAll("\r","").replaceAll("\n","\\\\\\\\n");
+            return input.replaceAll("\r","").replaceAll("\n","\\\\n");
         }
         else {
             input = input.replaceFirst("\r\n", "");
@@ -239,7 +349,6 @@ public class Utils {
         var vasdf = preconfiguredGraphs.getValue();
         return preconfiguredGraphs.getValue() == null || preconfiguredGraphs.getValue().isEmpty();
     }
-    public static final String preconfiguredFolderName = "pre_configured";
 
     public static List<String> listFilesInStaticGraphDirectory() {
         Path projectDirectory = Paths.get("").toAbsolutePath().resolve("graphs" + File.separator + preconfiguredFolderName);
