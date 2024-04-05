@@ -281,7 +281,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     private void addEqualInformationPS(ArrayList<ComparisonTreeViewItem> propertyShapesToShow) {
         for (var comparisonTreeViewItem:
              propertyShapesToShow) {
-            //generate text for propertyshapes, which have no text yet
+            //generate text for propertyshapes, which have no text yet -> very unlikely
 //            for (var ps : comparisonTreeViewItem.getPropertyShapeList().values()) {
 //                if(ps.getGeneratedText().isEmpty()) {
 //                    ps.generateText();

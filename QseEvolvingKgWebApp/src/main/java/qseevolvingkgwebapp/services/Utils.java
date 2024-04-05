@@ -1,13 +1,10 @@
 package qseevolvingkgwebapp.services;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.server.VaadinSession;
 import de.atextor.turtle.formatter.FormattingStyle;
@@ -15,10 +12,12 @@ import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
@@ -31,7 +30,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -119,8 +121,6 @@ public class Utils {
     public static Boolean usePrettyFormatting = true; //debugging
     public static String generateTTLFromIRIInModel(IRI iri, Model model) {
         if(usePrettyFormatting) {
-            var startMillis =  System.currentTimeMillis();
-
             SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
             IRI iriSupport = valueFactory.createIRI("http://shaclshapes.org/support");
             IRI iriConfidence = valueFactory.createIRI("http://shaclshapes.org/confidence");
@@ -130,45 +130,37 @@ public class Utils {
             filteredModelWithBlankNodes = filteredModelWithBlankNodes.stream().filter(statement -> !statement.getPredicate().equals(iriSupport)
                     && !statement.getPredicate().equals(iriConfidence)).collect(Collectors.toSet());
 
-            var tmp = System.currentTimeMillis() - startMillis;
-            System.out.println("after filtering "+tmp);
-
             //Faster but bug with blank nodes,  TODO investigate
-            org.apache.jena.rdf.model.Model jenaModel = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
-            filteredModelWithBlankNodes.forEach(statement -> {
-                jenaModel.add(
-                        jenaModel.createResource(statement.getSubject().stringValue()),
-                        jenaModel.createProperty(statement.getPredicate().stringValue()),
-                        jenaModel.createResource(statement.getObject().stringValue())
-                );
-            });
+//            org.apache.jena.rdf.model.Model jenaModel = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+//            filteredModelWithBlankNodes.forEach(statement -> {
+//                jenaModel.add(
+//                        jenaModel.createResource(statement.getSubject().stringValue()),
+//                        jenaModel.createProperty(statement.getPredicate().stringValue()),
+//                        jenaModel.createResource(statement.getObject().stringValue())
+//                );
+//            });
 
 
             //need to write to file to load as jena model
-//            var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
-//            FileWriter fileWriter = null;
-//            try {
-//                fileWriter = new FileWriter(tmpPath, false);
-//                Rio.write(filteredModelWithBlankNodes, fileWriter, RDFFormat.TURTLE);
-//                fileWriter.close();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//            org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(tmpPath);
-//
-//            tmp = System.currentTimeMillis() - startMillis;
-//            System.out.println("after writing "+tmp);
-//
-//            File file = new File(tmpPath);
-//            if (file.exists()) {
-//                file.delete();
-//            }
-//
+            var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
+            FileWriter fileWriter = null;
+            try {
+                fileWriter = new FileWriter(tmpPath, false);
+                Rio.write(filteredModelWithBlankNodes, fileWriter, RDFFormat.TURTLE);
+                fileWriter.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            org.apache.jena.rdf.model.Model jenaModel = RDFDataMgr.loadModel(tmpPath);
+
+            File file = new File(tmpPath);
+            if (file.exists()) {
+                file.delete();
+            }
+
             TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
             OutputStream outputStream = new ByteArrayOutputStream();
             formatter.accept(jenaModel, outputStream);
-            tmp = System.currentTimeMillis() - startMillis;
-            System.out.println("after loading "+tmp);
             return outputStream.toString().replaceAll("\n+$", "");
         }
         else {
@@ -198,7 +190,6 @@ public class Utils {
 
         org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
         org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
-
 
         String queryString = String.format("CONSTRUCT {?s ?p ?o} WHERE { ?s ?p ?o. FILTER (?p != <%s> && ?p != <%s>)}", iriSupport, iriConfidence);
 

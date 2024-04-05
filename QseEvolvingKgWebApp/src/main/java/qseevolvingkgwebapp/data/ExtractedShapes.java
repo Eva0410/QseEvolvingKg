@@ -2,16 +2,12 @@ package qseevolvingkgwebapp.data;
 
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
-import org.apache.jena.util.FileManager;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
 import qseevolvingkgwebapp.services.Utils;
 
 import java.io.*;
@@ -43,16 +39,8 @@ public class ExtractedShapes extends AbstractEntity{
     @CollectionTable(name = "ExtractedShapesClasses")
     List<String> classes;
 
-//    @Lob
-//    @Column(name = "fileContent", columnDefinition = "BLOB")
-//    byte[] fileContent;
-
     String fileContentPath;
 
-    //Need to be generated for delete reason during comparison
-//    @Lob
-//    @Column(name = "fileContentDefault", columnDefinition = "BLOB")
-//    byte[] fileContentDefaultShapes;
     String fileContentDefaultShapesPath;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -64,12 +52,22 @@ public class ExtractedShapes extends AbstractEntity{
     @Transient
     Model model;
 
+    //not used, only for alternative
     @Transient
     org.apache.jena.rdf.model.Model jenaModel;
 
     String comboBoxString;
+
+    //random file generation
     @Transient
     Random random = new Random();
+
+    //for regex
+    @Transient
+    String fileAsString;
+
+    @Transient
+    public String prefixLines;
 
     public LocalDateTime getGraphCreationTime() {
         return this.getVersionEntity().getGraph().getCreatedAt();
@@ -105,11 +103,6 @@ public class ExtractedShapes extends AbstractEntity{
         return this.jenaModel;
     }
 
-    @Transient
-    String fileAsString;
-
-    @Transient
-    public String prefixLines;
     public String getFileAsString() {
         if(fileAsString == null) {
             StringBuilder fileContent = new StringBuilder();
@@ -138,7 +131,7 @@ public class ExtractedShapes extends AbstractEntity{
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
             //Bug in QSE...
-            var nsAlreadyExists = list.stream().anyMatch(li -> li.iri.equals(item.getIri()));
+            var nsAlreadyExists = nsAlreadyExists(list, item);
             if(item.getSupport() > this.support && !nsAlreadyExists)
                 list.add(new NodeShape(item, this, true));
         }
@@ -148,11 +141,15 @@ public class ExtractedShapes extends AbstractEntity{
     public void setNodeShapesDefault(List<NS> ns) {
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
-            var nsAlreadyExists = list.stream().anyMatch(li -> li.iri.equals(item.getIri()));
+            var nsAlreadyExists = nsAlreadyExists(list, item);
             if(!nsAlreadyExists)
                 list.add(new NodeShape(item, this, false));
         }
         this.nodeShapesDefault = list;
+    }
+
+    private Boolean nsAlreadyExists(ArrayList<NodeShape> list, NS item) {
+        return list.stream().anyMatch(li -> li.iri.equals(item.getIri()));
     }
 
     public String getClassesAsString() {
@@ -168,10 +165,6 @@ public class ExtractedShapes extends AbstractEntity{
         }
         return "";
     }
-
-//    public void setFileContent(byte[] fileContent) {
-//        this.fileContent = fileContent;
-//    }
 
     public Version getVersionObject() {
         return versionEntity;
@@ -238,14 +231,6 @@ public class ExtractedShapes extends AbstractEntity{
         return comboBoxString;
     }
 
-//    public byte[] getFileContentDefaultShapes() {
-//        return fileContentDefaultShapes;
-//    }
-//
-//    public void setFileContentDefaultShapes(byte[] fileContentDefaultShapes) {
-//        this.fileContentDefaultShapes = fileContentDefaultShapes;
-//    }
-
     public List<NodeShape> getNodeShapesDefault() {
         return nodeShapesDefault;
     }
@@ -255,20 +240,26 @@ public class ExtractedShapes extends AbstractEntity{
     }
 
     public void setFileContentPath(String fileContentPath) {
-        if(!fileContentPath.contains(Utils.shapesPath)) {
-            try {
-                checkIfShapesDirExists();
-                Path sourcePath = Paths.get(fileContentPath);
-                String fileName = random.nextInt()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+"_default.ttl";
-                Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+Utils.shapesPath+File.separator+fileName);
-                Files.copy(sourcePath, destinationPath);
-                this.fileContentPath = destinationPath.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        if(!fileContentPath.contains(Utils.shapesPath))
+            this.fileContentPath = saveFileContentPath(fileContentPath, ".ttl");
         else
             this.fileContentPath = fileContentPath;
+    }
+
+    private String saveFileContentPath(String path, String fileEnding) {
+        try {
+            checkIfShapesDirExists();
+            //Save file instead of blob in database
+            Path sourcePath = Paths.get(path);
+            //Id is not known during creation, therefore random number
+            String fileName = random.nextInt()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+fileEnding;
+            Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+Utils.shapesPath+File.separator+fileName);
+            Files.copy(sourcePath, destinationPath);
+            return destinationPath.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     public String getFileContentDefaultShapesPath() {
@@ -277,7 +268,6 @@ public class ExtractedShapes extends AbstractEntity{
 
     private static void checkIfShapesDirExists() {
         Path path = Paths.get(Utils.getGraphDirectory()+File.separator+Utils.shapesPath);
-
         if (!Files.exists(path)) {
             try {
                 Files.createDirectories(path);
@@ -288,18 +278,8 @@ public class ExtractedShapes extends AbstractEntity{
     }
 
     public void setFileContentDefaultShapesPath(String fileContentDefaultShapesPath) {
-        if(!fileContentDefaultShapesPath.contains(Utils.shapesPath)) {
-            checkIfShapesDirExists();
-            try {
-                Path sourcePath = Paths.get(fileContentDefaultShapesPath);
-                String fileName = random.nextInt()+"_"+this.versionEntity.getGraph().getName()+"_"+this.versionEntity.getName()+".ttl";
-                Path destinationPath = Paths.get(Utils.getGraphDirectory()+File.separator+Utils.shapesPath+File.separator+fileName);
-                Files.copy(sourcePath, destinationPath);
-                this.fileContentDefaultShapesPath = destinationPath.toString();
-            } catch (IOException e) {
-                System.err.println("Error copying file: " + e.getMessage());
-            }
-        }
+        if(!fileContentDefaultShapesPath.contains(Utils.shapesPath))
+            this.fileContentDefaultShapesPath = saveFileContentPath(fileContentDefaultShapesPath, "_default.ttl");
         else
             this.fileContentDefaultShapesPath = fileContentDefaultShapesPath;
     }

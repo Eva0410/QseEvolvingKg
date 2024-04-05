@@ -1,20 +1,17 @@
 package qseevolvingkgwebapp.services;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
-import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import qseevolvingkgwebapp.data.*;
+import qseevolvingkgwebapp.data.ExtractedShapes;
+import qseevolvingkgwebapp.data.ShapeRepository;
 
 import java.util.Comparator;
 import java.util.List;
@@ -83,20 +80,4 @@ public class ShapesService {
 
         return entityManager.createQuery(query).getSingleResult();
     }
-
-//    @Transactional
-//    public ExtractedShapes getWithNodeAndPropertyShapes(Long id) {
-//        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-//        CriteriaQuery<ExtractedShapes> query = criteriaBuilder.createQuery(ExtractedShapes.class);
-//        Root<ExtractedShapes> root = query.from(ExtractedShapes.class);
-//        Join<ExtractedShapes, NodeShape> nodeShapeJoin = root.join("nodeShapes");
-//        Join<NodeShape, PropertyShape> propShapeJoin = nodeShapeJoin.join("propertyShapeList");
-//        root.fetch("nodeShapes");
-//        nodeShapeJoin.fetch("propertyShapeList");
-//        query.select(root);
-//
-//        var tmp = entityManager.createQuery(query).getSingleResult();
-//
-//        return entityManager.createQuery(query).getSingleResult();
-//    }
 }

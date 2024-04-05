@@ -23,7 +23,7 @@ public class PropertyShape {
     Double confidence;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    List<ShaclOrListItem> shaclOrListItems;
+    List<ShaclOrListItem> shaclOrListItems; //never used
 
     @Lob
     String generatedText;

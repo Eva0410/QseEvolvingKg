@@ -111,7 +111,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         radioGroupQseType.setItems(Arrays.stream(QseType.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
-        radioGroupQseType.setEnabled(false);
+        radioGroupQseType.setEnabled(false); //TODO remove
         radioGroupQseType.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroupQseType.setValue(QseType.EXACT.toString());
         classesGrid.setSelectionMode(Grid.SelectionMode.MULTI);
@@ -269,6 +269,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         extractedShapes.setFileContentPath(outputAddress);
         if(extractedShapes.getModel().isEmpty()) {
             Notification.show("Caution, there were no shapes extracted. Please try lower values for support or confidence.");
+            //Cleanup
             try {
                 Files.delete(Paths.get(extractedShapes.getFileContentPath()));
                 Files.delete(Paths.get(extractedShapes.getFileContentDefaultShapesPath()));
