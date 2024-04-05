@@ -65,7 +65,7 @@ public class NewVersionView extends Composite<VerticalLayout> implements HasUrlP
                 } else {
                     saveFile(null, textField.getValue(), preconfiguredGraphs.getValue());
                 }
-                Notification.show("Graph saved!");
+                Notification.show("Version saved!");
             }
             getUI().ifPresent(ui -> ui.navigate("versions"));
 

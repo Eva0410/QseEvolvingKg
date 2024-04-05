@@ -20,6 +20,7 @@ public class NodeShape {
     IRI iri;
     IRI targetClass;
     Integer support;
+    String iriLocalName;
     @Lob
     String generatedText;
 
@@ -49,6 +50,7 @@ public class NodeShape {
                 System.out.println(ps.getIri() + " dropped");
         }
         this.generateText();
+        this.iriLocalName = iri.getLocalName();
     }
 
     public ExtractedShapes getExtractedShapes() {
@@ -105,6 +107,10 @@ public class NodeShape {
 
     public void setGeneratedText(String generatedText) {
         this.generatedText = generatedText;
+    }
+
+    public String getIriLocalName() {
+        return iriLocalName;
     }
 
     public void generateText() {

@@ -22,6 +22,7 @@ import qseevolvingkgwebapp.services.ShapesService;
 import qseevolvingkgwebapp.services.Utils;
 import qseevolvingkgwebapp.views.MainLayout;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 @Route(value = "comparison-details", layout = MainLayout.class)
@@ -121,7 +122,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
     }
 
     private void updateInfoParagraph() {
-        if(oldText == null || oldText.equals("") || newText == null || newText.equals("")) {
+        if(oldText == null || oldText.isEmpty() || newText == null || newText.isEmpty()) {
             infoParagraph.getElement().getStyle().setDisplay(Style.Display.BLOCK);
             int supportThreshold = treeViewItem.getSupportThreshold();
             int confidenceThreshold = treeViewItem.getConfidenceThreshold();
@@ -130,12 +131,17 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             comparisonDiv.getElement().getStyle().setDisplay(Style.Display.NONE);
 
             //shape has been deleted
-            if(oldText != null && !oldText.equals("") && (newText == null || newText.equals(""))) {
+            if(oldText != null && !oldText.isEmpty() && (newText == null || newText.isEmpty())) {
                 if(treeViewItem.usesDefaultShapes()) {
                     infoParagraph.setText("This shape was deleted because there were no nodes of this class found (default shapes were compared)");
                 }
                 else {
-                    var extractedShapes = shapesService.get(newSelectItemIdExtractedShapes).get();
+                    var shapeNamesToFetch = new ArrayList<String>();
+                    shapeNamesToFetch.add(treeViewItem.getShapeName());
+                    if (treeViewItem.getParentShape() != null) {
+                        shapeNamesToFetch.add(treeViewItem.getParentShape().getShapeName());
+                    }
+                    var extractedShapes = shapesService.getWithNodeShapesDefault(newSelectItemIdExtractedShapes, shapeNamesToFetch);
 
                     if(treeViewItem.isNodeShapeLine()) {
                         var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst();

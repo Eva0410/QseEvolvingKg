@@ -2,15 +2,14 @@ package qseevolvingkgwebapp.services;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import qseevolvingkgwebapp.data.ExtractedShapes;
+import qseevolvingkgwebapp.data.NodeShape;
 import qseevolvingkgwebapp.data.ShapeRepository;
 
 import java.util.Comparator;
@@ -67,6 +66,23 @@ public class ShapesService {
 
     public List<ExtractedShapes> listByVersionId(Long versionId) {
         return repository.findAll().stream().filter(s -> s.getVersionObject().getId().equals(versionId)).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ExtractedShapes getWithNodeShapesDefault(Long id, List<String> shapeNames) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<ExtractedShapes> query = criteriaBuilder.createQuery(ExtractedShapes.class);
+        Root<ExtractedShapes> root = query.from(ExtractedShapes.class);
+        root.fetch("nodeShapesDefault");
+        Join<ExtractedShapes, NodeShape> nodeShapesJoin = root.join("nodeShapesDefault");
+        Predicate shapePredicate = nodeShapesJoin.get("iriLocalName").in(shapeNames);
+        Predicate idPredicate = criteriaBuilder.equal(root.get("id"), id);
+        Predicate finalPredicate = criteriaBuilder.and(idPredicate, shapePredicate);
+
+        query.where(finalPredicate);
+        query.select(root);
+
+        return entityManager.createQuery(query).getSingleResult();
     }
 
     @Transactional

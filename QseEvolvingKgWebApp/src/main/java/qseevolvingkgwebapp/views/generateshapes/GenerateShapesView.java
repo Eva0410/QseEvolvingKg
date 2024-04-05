@@ -135,6 +135,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
         support.setEnabled(true);
         confidence.setEnabled(true);
         buttonPrimary.setText("Generate");
+        buttonPrimary.setTooltipText("Please be patient, this can take a while :)");
         buttonPrimary.setWidth("min-content");
         buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         getContent().add(layoutRow);
