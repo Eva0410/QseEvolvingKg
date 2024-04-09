@@ -30,10 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -200,7 +197,8 @@ public class Utils {
             OutputStream outputStream = new ByteArrayOutputStream();
             formatter.accept(jenaModel, outputStream);
             String cleanedString = reorderShaclInItems(outputStream.toString());
-            return cleanedString.replaceAll("\n+$", "");
+            String cleanedStringOrItems = reOrderOrItems(cleanedString);
+            return cleanedStringOrItems.replaceAll("\n+$", "");
         }
     }
 
@@ -259,6 +257,50 @@ public class Utils {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static String reOrderOrItems(String input) {
+        try {
+            String orItemString = "<http://www.w3.org/ns/shacl#or>"; //highly dependent on turtlePrettyFormatter
+            String patternString = orItemString + " \\(.*\\)"; //would not work for names with '('
+
+            Pattern patternOrParent = Pattern.compile(patternString, Pattern.DOTALL);
+            Matcher matcherOrParent = patternOrParent.matcher(input);
+            if(matcherOrParent.find()) { //no or items
+                var firstResultParent = matcherOrParent.group(); //only works for first item
+                var patternOrObjects = Pattern.compile("\\[[^\\]]*\\]", Pattern.DOTALL);
+                var matcherObjects = patternOrObjects.matcher(firstResultParent);
+                List<String> objects = new ArrayList<>();
+                while (matcherObjects.find()) {
+                    String object = matcherObjects.group().trim(); // Extract contents of brackets and trim whitespace
+                    objects.add(object);
+                }
+                objects.sort(Comparator.comparing(o -> o));
+                var newString = input;
+                StringBuilder newOrItems = new StringBuilder();
+                for(var m : objects) {
+                    newString = newString.replace(m, "");
+                    newOrItems.append(m).append(" ");
+                }
+                return insertAfter(newString, orItemString+" ( ", newOrItems.toString());
+            }
+            else
+                return input;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return input;
+        }
+    }
+
+    public static String insertAfter(String original, String searchString, String toInsert) {
+        int index = original.indexOf(searchString);
+        if (index == -1) {
+            return original;
+        }
+        String part1 = original.substring(0, index + searchString.length());
+        String part2 = original.substring(index + searchString.length()).trim();
+
+        return part1 + toInsert + part2;
     }
 
     public static String escapeNew(String input) {

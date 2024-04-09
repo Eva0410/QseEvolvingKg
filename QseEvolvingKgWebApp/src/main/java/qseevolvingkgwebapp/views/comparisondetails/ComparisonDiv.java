@@ -9,6 +9,16 @@ import com.vaadin.flow.component.internal.UIInternals;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Source;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.File;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @JavaScript("https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.js") //path to jsdiff file
 // https://npm.runkit.com/diff
@@ -55,41 +65,36 @@ public class ComparisonDiv extends Div {
 
         getElement().removeAllChildren();
         Div diffDiv = new Div();
-        String s = diffText.toString().replaceAll("\\n", "<br>");
-        diffDiv.getElement().setProperty("innerHTML", s);
+        String formattedString = diffText.toString().replaceAll("\\n", "<br>");
+        diffDiv.getElement().setProperty("innerHTML", formattedString);
         add(diffDiv);
     }
 
     public void updateTextDifferences(String t1, String t2) {
-        if(t1 == null || t1.isEmpty() || t2 == null || t2.isEmpty()) {
+        if (t1 == null || t1.isEmpty() || t2 == null || t2.isEmpty()) {
             getElement().removeAllChildren();
             return;
         }
-        //TODO
-        //This works for all shapes but causes UI freeze
-        var js = "const originalText = $0;" +
-                "const modifiedText = $1;" +
+
+        var js = "const originalText = '" + t1 + "';" +
+                "const modifiedText = '" + t2 + "';" +
                 "const diff = Diff.diffWords(originalText, modifiedText);" +
                 "return diff;";
-
-        UI.getCurrent().getPage().executeJs(js, t1, t2).then(response -> {
-                if (response instanceof JsonArray) {
-                    displayDiffOnUI((JsonArray) response);
-                }
+        UI.getCurrent().getPage().executeJs(
+                js
+        ).then(response -> {
+            if (response instanceof JsonArray) {
+                displayDiffOnUI((JsonArray) response);
+            }
         });
 
-        //Works nice but only for short texts
-//        var js = "    const originalText = '" + t1 + "';" +
-//                "    const modifiedText = '" + t2 + "';" +
-//                "    const diff = Diff.diffWords(originalText, modifiedText);" +
-//                "    return diff;";
-//        UI.getCurrent().getPage().executeJs(
-//                js
-//        ).then(response -> {
-//            if (response instanceof JsonArray) {
-//                displayDiffOnUI((JsonArray) response);
-//            }
-//        });
+        //Known issue: JS fails if strings are too long. Alternatively, parameters could be used, but this causes UI freeze
+        if(getElement().getChildCount() == 0)
+        {
+            Div diffDiv = new Div();
+            diffDiv.getElement().setProperty("innerHTML", "The shapes are too large to compare! Please use the overview menu!");
+            add(diffDiv);
+        }
     }
 
     public static String escapeHtmlCharacters(String input) {
