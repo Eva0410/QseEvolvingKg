@@ -136,34 +136,38 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
                     infoParagraph.setText("This shape was deleted because there were no nodes of this class found (default shapes were compared)");
                 }
                 else {
-                    var shapeNamesToFetch = new ArrayList<String>();
-                    shapeNamesToFetch.add(treeViewItem.getShapeName());
-                    if (treeViewItem.getParentShape() != null) {
-                        shapeNamesToFetch.add(treeViewItem.getParentShape().getShapeName());
-                    }
-                    var extractedShapes = shapesService.getWithNodeShapesDefault(newSelectItemIdExtractedShapes, shapeNamesToFetch);
+                    try {
+                        var shapeNamesToFetch = new ArrayList<String>();
+                        shapeNamesToFetch.add(treeViewItem.getShapeName());
+                        if (treeViewItem.getParentShape() != null) {
+                            shapeNamesToFetch.add(treeViewItem.getParentShape().getShapeName());
+                        }
+                        var extractedShapes = shapesService.getWithNodeShapesDefault(newSelectItemIdExtractedShapes, shapeNamesToFetch);
 
-                    if(treeViewItem.isNodeShapeLine()) {
-                        var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst();
-                        support = nodeShape.isPresent() ? nodeShape.get().getSupport() : 0;
-                    }
-                    else {
-                        try {
-                            var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getParentShape().getShapeName())).findFirst().get();
-                            var propertyShape = nodeShape.getPropertyShapeList()
-                                    .stream().filter(ps -> ps.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst().get();
-                            support = propertyShape.getSupport();
-                            confidence = (int)Math.round(propertyShape.getConfidence()*100);
-                        } catch (Exception ex) {
-                            //ignore, values are 0 anyways
+                        if (treeViewItem.isNodeShapeLine()) {
+                            var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst();
+                            support = nodeShape.isPresent() ? nodeShape.get().getSupport() : 0;
+                        } else {
+                            try {
+                                var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getParentShape().getShapeName())).findFirst().get();
+                                var propertyShape = nodeShape.getPropertyShapeList()
+                                        .stream().filter(ps -> ps.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst().get();
+                                support = propertyShape.getSupport();
+                                confidence = (int) Math.round(propertyShape.getConfidence() * 100);
+                            } catch (Exception ex) {
+                                //ignore, values are 0 anyways
+                            }
+                        }
+
+                        if (supportThreshold != 0 && support <= supportThreshold) {
+                            infoParagraph.setText(String.format("This shape was deleted because there were less shapes (%d) than defined by the support-parameter (%d)", support, supportThreshold));
+                        } else if (confidenceThreshold != 0 && confidence <= confidenceThreshold) {
+                            infoParagraph.setText(String.format("This shape was deleted because the confidence (%d %%) was less than defined by the confidence-parameter (%d %%)", confidence, confidenceThreshold));
                         }
                     }
-
-                    if(supportThreshold != 0 && support <= supportThreshold) {
-                        infoParagraph.setText(String.format("This shape was deleted because there were less shapes (%d) than defined by the support-parameter (%d)", support, supportThreshold));
-                    }
-                    else if (confidenceThreshold != 0 && confidence <= confidenceThreshold) {
-                        infoParagraph.setText(String.format("This shape was deleted because the confidence (%d %%) was less than defined by the confidence-parameter (%d %%)", confidence, confidenceThreshold));
+                    catch(Exception ex) {
+                        infoParagraph.setText("This shape was deleted!");
+                        ex.printStackTrace();
                     }
                 }
             }

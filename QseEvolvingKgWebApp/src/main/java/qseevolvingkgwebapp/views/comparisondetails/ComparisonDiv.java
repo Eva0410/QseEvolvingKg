@@ -67,29 +67,29 @@ public class ComparisonDiv extends Div {
         }
         //TODO
         //This works for all shapes but causes UI freeze
-//        var js = "const originalText = $0;" +
-//                "const modifiedText = $1;" +
-//                "const diff = Diff.diffWords(originalText, modifiedText);" +
-//                "return diff;";
-//
-//        UI.getCurrent().getPage().executeJs(js, t1, t2).then(response -> {
-//                if (response instanceof JsonArray) {
-//                    displayDiffOnUI((JsonArray) response);
-//                }
-//        });
+        var js = "const originalText = $0;" +
+                "const modifiedText = $1;" +
+                "const diff = Diff.diffWords(originalText, modifiedText);" +
+                "return diff;";
+
+        UI.getCurrent().getPage().executeJs(js, t1, t2).then(response -> {
+                if (response instanceof JsonArray) {
+                    displayDiffOnUI((JsonArray) response);
+                }
+        });
 
         //Works nice but only for short texts
-        var js = "    const originalText = '" + t1 + "';" +
-                "    const modifiedText = '" + t2 + "';" +
-                "    const diff = Diff.diffWords(originalText, modifiedText);" +
-                "    return diff;";
-        UI.getCurrent().getPage().executeJs(
-                js
-        ).then(response -> {
-            if (response instanceof JsonArray) {
-                displayDiffOnUI((JsonArray) response);
-            }
-        });
+//        var js = "    const originalText = '" + t1 + "';" +
+//                "    const modifiedText = '" + t2 + "';" +
+//                "    const diff = Diff.diffWords(originalText, modifiedText);" +
+//                "    return diff;";
+//        UI.getCurrent().getPage().executeJs(
+//                js
+//        ).then(response -> {
+//            if (response instanceof JsonArray) {
+//                displayDiffOnUI((JsonArray) response);
+//            }
+//        });
     }
 
     public static String escapeHtmlCharacters(String input) {
