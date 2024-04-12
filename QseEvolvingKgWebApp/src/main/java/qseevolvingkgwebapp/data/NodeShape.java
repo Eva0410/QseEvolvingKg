@@ -44,12 +44,17 @@ public class NodeShape {
         for (var ps : ns.getPropertyShapes()) {
             //Bug in Shactor: if all classes are selected, all shapes will be returned, even when support and confidence
             //are not high enough
-            var propertyShape = new PropertyShape(ps, this, shouldGenerateText);
+            var propertyShape = new PropertyShape(ps, this);
             //Bug in Shactor again: list of Propertyshapes contain objects which are not in the .SHACL file
             if(propertyShape.willPSbeAdded() && propertyShape.getGeneratedText() != null && !propertyShape.getGeneratedText().isEmpty())
                 propertyShapeList.add(propertyShape);
 //            else
 //                System.out.println(ps.getIri() + " dropped"); //Uncomment for debugging
+
+            //special case for default shapes: should be added anyways
+            if(!this.shouldGenerateText)
+                propertyShapeList.add(propertyShape);
+
         }
         this.generateText();
         this.iriLocalName = iri.getLocalName();

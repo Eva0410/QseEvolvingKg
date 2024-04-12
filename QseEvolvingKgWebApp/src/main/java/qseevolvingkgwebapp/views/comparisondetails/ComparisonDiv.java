@@ -9,8 +9,6 @@ import com.vaadin.flow.component.internal.UIInternals;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Source;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

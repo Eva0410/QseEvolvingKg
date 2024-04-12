@@ -160,9 +160,9 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
                         }
 
                         if (supportThreshold != 0 && support <= supportThreshold) {
-                            infoParagraph.setText(String.format("This shape was deleted because there were less shapes (%d) than defined by the support-parameter (%d)", support, supportThreshold));
+                            infoParagraph.setText(String.format("This shape was deleted because there were less (<=) shapes (%d) than defined by the support-parameter (%d)", support, supportThreshold));
                         } else if (confidenceThreshold != 0 && confidence <= confidenceThreshold) {
-                            infoParagraph.setText(String.format("This shape was deleted because the confidence (%d %%) was less than defined by the confidence-parameter (%d %%)", confidence, confidenceThreshold));
+                            infoParagraph.setText(String.format("This shape was deleted because the confidence (%d %%) was less(<=) than defined by the confidence-parameter (%d %%)", confidence, confidenceThreshold));
                         }
                     }
                     catch(Exception ex) {

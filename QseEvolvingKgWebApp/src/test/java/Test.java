@@ -1,5 +1,4 @@
-import com.oracle.truffle.js.runtime.builtins.JSArray;
-import com.vaadin.flow.component.UI;
+
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
 import elemental.json.JsonArray;
@@ -13,9 +12,6 @@ import org.apache.jena.riot.RDFLanguages;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.Value;
 import qseevolvingkgwebapp.services.Utils;
 
 import javax.script.ScriptEngine;

@@ -41,7 +41,7 @@ public class PropertyShape {
 
         //set shaclOrItems (copied from Shactor)
         //Also resets support and confidence to the maximum confidence if ShaclOrItems are used (copied from Shactor)
-        if(ps.getShaclOrListItems() != null && ps.getShaclOrListItems().size() != 0){
+        if(ps.getShaclOrListItems() != null && !ps.getShaclOrListItems().isEmpty()){
             cs.qse.common.structure.ShaclOrListItem maxConfidenceItem = null;
             var shaclOrListItems = new ArrayList<ShaclOrListItem>();
             for (var item:
@@ -60,7 +60,7 @@ public class PropertyShape {
         }
     }
 
-    public PropertyShape(PS ps, NodeShape ns, boolean shouldGenerateText) {
+    public PropertyShape(PS ps, NodeShape ns) {
         this(ps);
         this.nodeShape = ns;
         if(willPSbeAdded())
