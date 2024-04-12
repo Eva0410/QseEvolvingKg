@@ -1,9 +1,12 @@
-/target/
+#/target/
 .idea/
 .vscode/
 .settings
 .project
 .classpath
+
+target/*
+!target/qseevolvingkgwebapp-1.0-SNAPSHOT.jar
 
 *.iml
 .DS_Store

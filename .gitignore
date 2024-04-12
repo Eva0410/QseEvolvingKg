@@ -15,10 +15,6 @@ Logs/
 # Eclipse Core
 .project
 
-# sbteclipse plugin
-.target
-target/
-
 qse/build/*
 !qse/build/libs
 qse/build/libs/*
@@ -39,7 +35,7 @@ OUTPUT_QUERY/*
 # but keep the folder
 !OUTPUT_QUERY/.keep
 
-/target/
+
 .idea/
 .vscode/
 .settings
