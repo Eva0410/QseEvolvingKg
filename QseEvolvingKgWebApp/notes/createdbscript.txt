@@ -1,0 +1,36 @@
+create table extracted_shapes (id bigint not null, version integer not null, combo_box_string varchar(255), confidence float(53) not null, created_at timestamp(6), file_content_default_shapes_path varchar(255), file_content_path varchar(255), qse_type varchar(255) check (qse_type in ('EXACT','APPROXIMATE')), support integer not null, version_entity_id bigint, primary key (id))
+create table extracted_shapes_node_shapes (extracted_shapes_id bigint not null, node_shapes_id bigint not null)
+create table extracted_shapes_node_shapes_default (extracted_shapes_id bigint not null, node_shapes_default_id bigint not null)
+create table extracted_shapes_classes (extracted_shapes_id bigint not null, classes varchar(255))
+create table graph (id bigint not null, version integer not null, created_at timestamp(6), name varchar(255), primary key (id))
+create table node_shape (id bigint not null, generated_text clob, iri varbinary(255), iri_local_name varchar(255), should_generate_text boolean, support integer, target_class varbinary(255), extracted_shapes_id bigint, primary key (id))
+create table node_shape_property_shape_list (node_shape_id bigint not null, property_shape_list_id bigint not null)
+create table property_shape (id bigint not null, confidence float(53), data_type_or_class varchar(255), generated_text clob, iri varbinary(255), node_kind varchar(255), path varchar(255), support integer, node_shape_id bigint, primary key (id))
+create table property_shape_shacl_or_list_items (property_shape_id bigint not null, shacl_or_list_items_id bigint not null)
+create table shacl_or_list_item (id bigint not null, confidence float(53), data_type_or_class varchar(255), node_kind varchar(255), support integer, primary key (id))
+create table version (id bigint not null, version integer not null, created_at timestamp(6), name varchar(255), path varchar(255), version_number integer not null, graph_id bigint, primary key (id))
+alter table if exists extracted_shapes_node_shapes drop constraint if exists UK_1042fj12rl4fg8ltlgg9euy5u
+alter table if exists extracted_shapes_node_shapes add constraint UK_1042fj12rl4fg8ltlgg9euy5u unique (node_shapes_id)
+alter table if exists extracted_shapes_node_shapes_default drop constraint if exists UK_cw7yoi470ct7vodam5vrx5032
+alter table if exists extracted_shapes_node_shapes_default add constraint UK_cw7yoi470ct7vodam5vrx5032 unique (node_shapes_default_id)
+alter table if exists node_shape_property_shape_list drop constraint if exists UK_2jaux5ll74iegu78csmq9wrko
+alter table if exists node_shape_property_shape_list add constraint UK_2jaux5ll74iegu78csmq9wrko unique (property_shape_list_id)
+alter table if exists property_shape_shacl_or_list_items drop constraint if exists UK_8kfbd547waptwlyici1asg1r9
+alter table if exists property_shape_shacl_or_list_items add constraint UK_8kfbd547waptwlyici1asg1r9 unique (shacl_or_list_items_id)
+create sequence idgenerator start with 1000 increment by 50
+create sequence node_shape_seq start with 1 increment by 50
+create sequence property_shape_seq start with 1 increment by 50
+create sequence shacl_or_list_item_seq start with 1 increment by 50
+alter table if exists extracted_shapes add constraint FK9h3jnc1usle62722b4u4ngmbf foreign key (version_entity_id) references version
+alter table if exists extracted_shapes_node_shapes add constraint FKlws1boockt7fkhj005kgejv33 foreign key (node_shapes_id) references node_shape
+alter table if exists extracted_shapes_node_shapes add constraint FKddt87nyflxgcg7agyt6oirr6g foreign key (extracted_shapes_id) references extracted_shapes
+alter table if exists extracted_shapes_node_shapes_default add constraint FK3f8xqcp2fvxjcmu9d550d2ubq foreign key (node_shapes_default_id) references node_shape
+alter table if exists extracted_shapes_node_shapes_default add constraint FKsup4jnkalmec0odtb83s4wly9 foreign key (extracted_shapes_id) references extracted_shapes
+alter table if exists extracted_shapes_classes add constraint FKl7nuwieyih1rlej8g3hvkjn5v foreign key (extracted_shapes_id) references extracted_shapes
+alter table if exists node_shape add constraint FKcrl16xy7dt3gfu8lg4jcomjwk foreign key (extracted_shapes_id) references extracted_shapes
+alter table if exists node_shape_property_shape_list add constraint FK7nqhyx47edfri6gm1kr4u3w9q foreign key (property_shape_list_id) references property_shape
+alter table if exists node_shape_property_shape_list add constraint FK48tgcl7w5t13uf2e1gf8ljk9t foreign key (node_shape_id) references node_shape
+alter table if exists property_shape add constraint FKeq9tso5irix6upnp9yuvqyqr foreign key (node_shape_id) references node_shape
+alter table if exists property_shape_shacl_or_list_items add constraint FKcp1pan7r54acpcsmb3bp6a8vo foreign key (shacl_or_list_items_id) references shacl_or_list_item
+alter table if exists property_shape_shacl_or_list_items add constraint FKd0esycl663l7v7k0v4bjxr5s1 foreign key (property_shape_id) references property_shape
+alter table if exists version add constraint FKh7uhdho21ju79gc9yl3otfc8t foreign key (graph_id) references graph
