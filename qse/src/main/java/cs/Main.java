@@ -28,6 +28,9 @@ public class Main {
     public static boolean qseFromSpecificClasses;
     public static String resourcesPath;
     public static String configDirPath;
+    public static String graphDbUrl;
+    public static String graphDbRepository;
+    public static String pruningThresholds;
 
     
     public static void main(String[] args) throws Exception {
@@ -139,5 +142,10 @@ public class Main {
 
     public static void setDataSetNameForJar(String name) {
         datasetName = name;
+    }
+    public static void setGraphDbUrlForJar(String url) { graphDbUrl = url;}
+    public static void setGraphDbRepository(String repo) {graphDbRepository = repo;}
+    public static void setPruningThresholds(String thresholds) {
+        pruningThresholds = thresholds;
     }
 }

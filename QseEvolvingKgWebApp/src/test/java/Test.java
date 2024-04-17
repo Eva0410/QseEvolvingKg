@@ -1,4 +1,8 @@
 
+import cs.Main;
+import cs.qse.querybased.nonsampling.QbParser;
+import cs.utils.ConfigManager;
+import cs.utils.Constants;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
 import elemental.json.JsonArray;
@@ -23,9 +27,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static cs.Main.setOutputFilePathForJar;
+
 //Just debugging and trying
 public class Test {
 
+    @org.junit.Test
+    public void testQueryBased() {
+        Main.setResourcesPathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources");
+        setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/");
+        Main.setPruningThresholds("{(0.1,100)}");
+
+        //setDataSetNameForJar(paramVal("dataset_path"));
+
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, "http://localhost:7201/","Bear-B");
+        qbParser.run();
+    }
     @org.junit.Test
     public void reorderOR() {
         String shape = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
