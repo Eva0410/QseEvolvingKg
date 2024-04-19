@@ -20,6 +20,8 @@ qse/build/*
 qse/build/libs/*
 !qse/build/libs/qse-1.0-QSE-all.jar
 
+qse/Output/*
+
 gradle/
 gradlew
 gradlew.bat

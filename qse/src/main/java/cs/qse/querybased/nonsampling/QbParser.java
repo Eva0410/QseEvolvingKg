@@ -2,6 +2,7 @@ package cs.qse.querybased.nonsampling;
 
 import cs.Main;
 import cs.qse.common.ExperimentsUtil;
+import cs.qse.common.ShapesExtractor_Old;
 import cs.qse.common.Utility;
 import cs.qse.common.ShapesExtractor;
 import cs.qse.filebased.SupportConfidence;
@@ -36,6 +37,9 @@ public class QbParser {
     String instantiationProperty;
     Boolean qseFromSpecificClasses;
     long globalComputeSupportMethodTime = 0L;
+    public String prettyFormattedShaclFilePath;
+    public String dbDefaultConnectionString; //needed?
+    public String dbPrunedConnectionString;
 
     public QbParser(String typeProperty) {
         this.graphDBUtils = new GraphDBUtils();
@@ -218,6 +222,10 @@ public class QbParser {
         ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
         watch.stop();
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+//        this.prettyFormattedShaclFilePath = se.prettyFormattedShaclFilePath;
+//        this.dbDefaultConnectionString = se.dbDefaultConnectionString;
+//        this.dbPrunedConnectionString = se.dbPrunedConnectionString;
+
     }
 
     public void writeSupportToFile() {

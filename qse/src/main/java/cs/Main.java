@@ -31,6 +31,8 @@ public class Main {
     public static String graphDbUrl;
     public static String graphDbRepository;
     public static String pruningThresholds;
+    public static String annotateSupportConfidence;
+    public static String qse_validation_with_shNot = "false";
 
     
     public static void main(String[] args) throws Exception {
@@ -109,7 +111,7 @@ public class Main {
         outputFilePath = paramVal("output_file_path");
     }
     
-    private static void qseExactExecutionWithMinimumParams() {
+    public static void qseExactExecutionWithMinimumParams() {
         datasetPath = paramVal("dataset_path");
         datasetName = FilesUtil.getFileName(datasetPath);
         numberOfClasses = Integer.parseInt(paramVal("expected_number_classes")); // expected or estimated numberOfClasses
@@ -148,4 +150,5 @@ public class Main {
     public static void setPruningThresholds(String thresholds) {
         pruningThresholds = thresholds;
     }
+    public static void setAnnotateSupportConfidence(String value) { annotateSupportConfidence = value;}
 }

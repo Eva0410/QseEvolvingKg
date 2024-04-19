@@ -1,5 +1,6 @@
 
 import cs.Main;
+import cs.qse.filebased.Parser;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.ConfigManager;
 import cs.utils.Constants;
@@ -33,14 +34,29 @@ import static cs.Main.setOutputFilePathForJar;
 public class Test {
 
     @org.junit.Test
-    public void testQueryBased() {
+    public void testFileBased() {
         Main.setResourcesPathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources");
-        setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/");
-        Main.setPruningThresholds("{(0.1,100)}");
+        setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/fileBased/");
+//        Main.setPruningThresholds("{(0.1,100)}");
+        Main.annotateSupportConfidence = "true";
+//        String path = "/Users/evapu/Downloads/alldata.IC.nt/000001.nt/000001.nt";
+//        String path = "/Users/evapu/Downloads/qse-main/qse-main/src/main/resources/lubm-mini.nt";
+        String path = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QseEvolvingKgWebApp/graphs/pre_configured/film.nt";
+        Main.datasetName = "film";
 
-        //setDataSetNameForJar(paramVal("dataset_path"));
+        Parser parser = new Parser(path, 100, 1000000, "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>");
+        parser.run();
+    }
+    @org.junit.Test
+    public void testQueryBased() {
+        Main.setResourcesPathForJar("/Users/evapu/Downloads/qse-main/qse-main/src/main/resources");
+        setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/qb");
+//        Main.setPruningThresholds("{(0.1,100)}");
+        Main.annotateSupportConfidence = "true";
+        var repoName = "film";
+        Main.datasetName = repoName;
 
-        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, "http://localhost:7201/","Bear-B");
+        QbParser qbParser = new QbParser(10, Constants.RDF_TYPE, "http://localhost:7201/",repoName);
         qbParser.run();
     }
     @org.junit.Test

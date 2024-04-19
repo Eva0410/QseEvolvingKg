@@ -27,6 +27,7 @@ import cs.Main;
 import cs.qse.common.encoders.StringEncoder;
 import cs.qse.common.structure.NS;
 import cs.qse.filebased.Parser;
+import cs.qse.filebased.Parser_Old;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.ShactorUtils.PruningUtil;
@@ -64,7 +65,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
     Select<ComboBoxItem> comboBoxVersion;
     Long currentVersionId;
     Grid classesGrid;
-    Parser parser;
+    Parser_Old parser;
     H5 graphInfo;
     TextField searchField;
     List<String> chosenClasses;
@@ -196,7 +197,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
     private void setClassesGridData() {
         //Copied from Shactor
         Version version = versionService.get(currentVersionId).get();
-        parser = new Parser(version.getPath(), 50, 5000, "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>");
+        parser = new Parser_Old(version.getPath(), 50, 5000, "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>");
         parser.entityExtraction();
         String info = "No. of entities: " + decimalFormatter.format(parser.entityDataHashMap.size()) + " ; " + "No. of classes: " + decimalFormatter.format(parser.classEntityCount.size()) + ". Please select the classes from the table below for which you want to extract shapes. Don't select classes with the same name but different IRI, this will lead to inconsistencies! e.g. <http://dbpedia.org/ontology/Agent>, <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent>";
         graphInfo.setText(info);
