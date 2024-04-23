@@ -342,8 +342,8 @@ public class ShapesExtractor_Old {
         b.subject(nodeShape).add(RDF.TYPE, SHACL.NODE_SHAPE).add(SHACL.TARGET_CLASS, subj);
         if (propToObjectType != null) {
             Map<Integer, Set<Integer>> propToObjectTypesLocalPositive = this.performPropShapePruningPositive(encodedClassIRI, propToObjectType, confidence, support);
-            if (ConfigManager.getProperty("qse_validation_with_shNot") != null) {
-                if (Boolean.parseBoolean(ConfigManager.getProperty("qse_validation_with_shNot"))) {
+            if (Main.qse_validation_with_shNot != null) {
+                if (Boolean.parseBoolean(Main.qse_validation_with_shNot)) {
                     Map<Integer, Set<Integer>> propToObjectTypesLocalNegative = this.performPropShapePruningNegative(encodedClassIRI, propToObjectType, confidence, support);
                     this.constructPropertyShapesWithShNot(b, subj, encodedClassIRI, nodeShape, propToObjectTypesLocalPositive, propToObjectTypesLocalNegative);
                 } else {

@@ -6,7 +6,6 @@
 package cs.qse.filebased;
 
 import cs.Main;
-import cs.mg.MembershipGraph;
 import cs.qse.common.EntityData;
 import cs.qse.common.ExperimentsUtil;
 import cs.qse.common.MinCardinalityExperiment;
@@ -48,7 +47,7 @@ public class Parser {
     public Map<Integer, Integer> classEntityCount;
     public Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes;
     public Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport;
-    public MembershipGraph mg;
+//    public MembershipGraph mg;
     public ShapesExtractor shapesExtractor;
 
     public Parser() {
@@ -72,7 +71,7 @@ public class Parser {
         this.extractSHACLShapes(false, Main.qseFromSpecificClasses);
         Utility.writeClassFrequencyInFile(this.classEntityCount, this.stringEncoder);
         System.out.println("STATS: \n\tNo. of Classes: " + this.classEntityCount.size());
-        this.createMembershipGraph();
+//        this.createMembershipGraph();
     }
 
     public void entityExtraction() {
@@ -185,7 +184,7 @@ public class Parser {
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
 
-    public String extractSHACLShapes(Boolean qseFromSpecificClasses, List<String> classes) {
+    public void extractSHACLShapes(Boolean qseFromSpecificClasses, List<String> classes) {
         StopWatch watch = new StopWatch();
         watch.start();
         String methodName = "extractSHACLShapes:No Pruning";
@@ -199,10 +198,9 @@ public class Parser {
         ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
         watch.stop();
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
-        return this.shapesExtractor.getOutputFileAddress();
     }
 
-    public String extractSHACLShapesWithPruning(Boolean qseFromSpecificClasses, Double conf, Integer supp, List<String> classes) {
+    public void extractSHACLShapesWithPruning(Boolean qseFromSpecificClasses, Double conf, Integer supp, List<String> classes) {
         StopWatch watch = new StopWatch();
         watch.start();
         String methodName = "extractSHACLShapes:WithPruning";
@@ -218,23 +216,22 @@ public class Parser {
         ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
         watch.stop();
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
-        return this.shapesExtractor.getOutputFileAddress();
     }
 
-    public void createMembershipGraph() {
-        StopWatch watch = new StopWatch();
-        watch.start();
-        this.mg = new MembershipGraph(this.stringEncoder, this.entityDataHashMap, this.classEntityCount);
-        this.mg.createMembershipSets();
-        this.mg.createMembershipGraph();
-        this.mg.visualizeMg();
-        System.out.println("Vertices: " + this.mg.getMembershipGraph().vertexSet().size());
-        System.out.println("Edges: " + this.mg.getMembershipGraph().edgeSet().size());
-        watch.stop();
-        PrintStream var10000 = System.out;
-        long var10001 = TimeUnit.MILLISECONDS.toSeconds(watch.getTime());
-        var10000.println("Time Elapsed MembershipGraphConstruction: " + var10001 + " : " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
-    }
+//    public void createMembershipGraph() {
+//        StopWatch watch = new StopWatch();
+//        watch.start();
+//        this.mg = new MembershipGraph(this.stringEncoder, this.entityDataHashMap, this.classEntityCount);
+//        this.mg.createMembershipSets();
+//        this.mg.createMembershipGraph();
+//        this.mg.visualizeMg();
+//        System.out.println("Vertices: " + this.mg.getMembershipGraph().vertexSet().size());
+//        System.out.println("Edges: " + this.mg.getMembershipGraph().edgeSet().size());
+//        watch.stop();
+//        PrintStream var10000 = System.out;
+//        long var10001 = TimeUnit.MILLISECONDS.toSeconds(watch.getTime());
+//        var10000.println("Time Elapsed MembershipGraphConstruction: " + var10001 + " : " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+//    }
 
     public void computeGraphStats() {
     }

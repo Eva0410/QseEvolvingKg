@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +45,7 @@ public class QbParser {
 
     public QbParser(String typeProperty) {
         this.graphDBUtils = new GraphDBUtils();
-        int expectedNumberOfClasses = Integer.parseInt(ConfigManager.getProperty("expected_number_classes"));
+        int expectedNumberOfClasses = Integer.parseInt(Main.expected_number_classes);
         this.classEntityCount = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
         this.classToPropWithObjTypes = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
         this.shapeTripletSupport = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
@@ -68,6 +70,7 @@ public class QbParser {
     }
 
     private void runParser() {
+        deleteOutputDir(); //BUGFIX evapuermayr -> otherwise result changes after every execution
         getNumberOfInstancesOfEachClass();
         getDistinctClasses();
         getShapesInfoAndComputeSupport();
@@ -76,6 +79,24 @@ public class QbParser {
         writeSupportToFile();
         Utility.writeClassFrequencyInFile(classEntityCount, stringEncoder);
         System.out.println("Size: classToPropWithObjTypes :: " + classToPropWithObjTypes.size() + " , Size: shapeTripletSupport :: " + shapeTripletSupport.size());
+    }
+
+    private void deleteOutputDir() {
+        try {
+            Files.walk(Paths.get(Main.outputFilePath))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            System.err.println("Failed to delete: " + path);
+                            e.printStackTrace();
+                        }
+                    });
+            System.out.println("All files and directories deleted successfully.");
+        } catch (IOException e) {
+            System.err.println("Failed to delete files and directories.");
+            e.printStackTrace();
+        }
     }
 
     private void getNumberOfInstancesOfEachClass() {
@@ -133,6 +154,7 @@ public class QbParser {
                 //Literal Type Object
                 if (graphDBUtils.runAskQuery(queryToVerifyLiteralObjectType)) {
                     String queryToGetDataTypeOfLiteralObject = buildQuery(classIri, property, "query6");
+                    queryToGetDataTypeOfLiteralObject = setProperty(queryToGetDataTypeOfLiteralObject); //BUGFIX evapuermayr
                     List<BindingSet> results = graphDBUtils.runSelectQuery(queryToGetDataTypeOfLiteralObject);
                     if (results != null) {
                         results.forEach(row -> {

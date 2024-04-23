@@ -37,12 +37,12 @@ public class Test {
     public void testFileBased() {
         Main.setResourcesPathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources");
         setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/fileBased/");
-//        Main.setPruningThresholds("{(0.1,100)}");
+        Main.setPruningThresholds("{(0,10)}");
         Main.annotateSupportConfidence = "true";
-//        String path = "/Users/evapu/Downloads/alldata.IC.nt/000001.nt/000001.nt";
+        String path = "/Users/evapu/Downloads/alldata.IC.nt/000001.nt/000001.nt";
 //        String path = "/Users/evapu/Downloads/qse-main/qse-main/src/main/resources/lubm-mini.nt";
-        String path = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QseEvolvingKgWebApp/graphs/pre_configured/film.nt";
-        Main.datasetName = "film";
+//        String path = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QseEvolvingKgWebApp/graphs/pre_configured/film.nt";
+        Main.datasetName = "bearb";
 
         Parser parser = new Parser(path, 100, 1000000, "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>");
         parser.run();

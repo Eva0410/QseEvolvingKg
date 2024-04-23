@@ -34,6 +34,7 @@ public class Main {
     public static String annotateSupportConfidence;
     public static String qse_validation_with_shNot = "false";
 
+    public static String expected_number_classes = "100";
     
     public static void main(String[] args) throws Exception {
         //configPath = args[0];
@@ -125,7 +126,8 @@ public class Main {
         Parser parser = new Parser(datasetPath, numberOfClasses, numberOfInstances, paramVal("instance_type_property"));
         parser.run();
     }
-    
+
+    //unused
     private static boolean isActivated(String option) {return Boolean.parseBoolean(ConfigManager.getProperty(option));}
     
     private static String paramVal(String prop) {return ConfigManager.getProperty(prop);}
