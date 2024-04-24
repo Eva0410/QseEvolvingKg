@@ -51,9 +51,9 @@ public class Test {
     public void testQueryBased() {
         Main.setResourcesPathForJar("/Users/evapu/Downloads/qse-main/qse-main/src/main/resources");
         setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/qb");
-//        Main.setPruningThresholds("{(0.1,100)}");
+        Main.setPruningThresholds("{(-1,10)}");
         Main.annotateSupportConfidence = "true";
-        var repoName = "film";
+        var repoName = "Bear-B";
         Main.datasetName = repoName;
 
         QbParser qbParser = new QbParser(10, Constants.RDF_TYPE, "http://localhost:7201/",repoName);
