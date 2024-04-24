@@ -1,26 +1,47 @@
 package qseevolvingkg.partialsparqlqueries;
 
+import cs.qse.common.PostConstraintsAnnotator;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
+import cs.utils.FilesUtil;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
+import org.jgrapht.Graph;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
     public static final String resourcesPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources";
-    public static final String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/";
-    public static final String pruningThresholds = "{(0.1,100)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
+    public static final String firstVersionName = "lubm-mini";
+
+    public static final String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+    //QSE QueryBases does not calculate confidence, therefore it is always 0 and filtering works with > 0 -> filter to -1
+    public static final String pruningThresholds = "{(-1,10)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
     public static final String graphDbUrl = "http://localhost:7201/";
-    public static final String firstVersionName = "Bear-B";
     public static void main(String[] args) {
         cs.Main.setResourcesPathForJar(resourcesPath);
         cs.Main.setOutputFilePathForJar(outputPath);
         cs.Main.setPruningThresholds(pruningThresholds);
         cs.Main.annotateSupportConfidence = "true";
+        cs.Main.datasetName = firstVersionName;
 
-        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
-        qbParser.run();
-        var filePath = qbParser.prettyFormattedShaclFilePath;
-
+//        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+//        qbParser.run();
+//        var filePath = qbParser.prettyFormattedShaclFilePath;
+//        var localPath = qbParser.dbDefaultConnectionString;
+//        C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QSEQueryBased\Output\lubm-mini\db_default
+        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\lubm-mini\\db_default";
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromFile(localPath);
+        result.forEach(r -> System.out.println(r));
 
 //        //TODO do RQ4
 //        RepositoryManager repositoryManager = new RemoteRepositoryManager("http://localhost:7201/");
@@ -28,5 +49,26 @@ public class Main {
 //        var all = repositoryManager.getAllRepositories();
 //        repo.init();
 //        System.out.println("Hello world!");
+
+
+//        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\lubm-mini\\test";
+//
+//        Repository db = new SailRepository(new NativeStore(new File(localPath))); // Create a new Repository.
+//
+//        try (RepositoryConnection conn = db.getConnection()) { // Open a connection to the database
+//            Model m = null;
+//            ModelBuilder b = new ModelBuilder();
+//            b.subject("http://example.org/resource1")
+//                    .add("http://example.org/property", "Value1")
+//                    .subject("http://example.org/resource2")
+//                    .add("http://example.org/property", "Value2");
+//            m = b.build();
+//            conn.add(m);
+//        } finally {
+//            db.shutDown();// before our program exits, make sure the database is properly shut down.
+//        }
+//
+//        GraphDbUtils graphDbUtils = new GraphDbUtils();
+//        graphDbUtils.getNodeShapesWithTargetClassFromFile(localPath);
     }
 }

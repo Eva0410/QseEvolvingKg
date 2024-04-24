@@ -40,6 +40,7 @@ public class QbParser {
     Boolean qseFromSpecificClasses;
     long globalComputeSupportMethodTime = 0L;
     public String prettyFormattedShaclFilePath;
+    public String defaultShaclFilePath;
     public String dbDefaultConnectionString; //needed?
     public String dbPrunedConnectionString;
 
@@ -88,14 +89,11 @@ public class QbParser {
                         try {
                             Files.delete(path);
                         } catch (IOException e) {
-                            System.err.println("Failed to delete: " + path);
-                            e.printStackTrace();
+//                            e.printStackTrace();
                         }
                     });
-            System.out.println("All files and directories deleted successfully.");
         } catch (IOException e) {
-            System.err.println("Failed to delete files and directories.");
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -223,7 +221,7 @@ public class QbParser {
         ShapesExtractor se = new ShapesExtractor(stringEncoder, shapeTripletSupport, classEntityCount, instantiationProperty);
         //se.setPropWithClassesHavingMaxCountOne(statsComputer.getPropWithClassesHavingMaxCountOne());
 
-        se.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
+        this.defaultShaclFilePath = se.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
         if (performPruning) {
             StopWatch watchForPruning = new StopWatch();
             watchForPruning.start();
@@ -231,7 +229,7 @@ public class QbParser {
                 supportRange.forEach(supp -> {
                     StopWatch innerWatch = new StopWatch();
                     innerWatch.start();
-                    se.constructPrunedShapes(classToPropWithObjTypes, conf, supp);
+                    this.prettyFormattedShaclFilePath = se.constructPrunedShapes(classToPropWithObjTypes, conf, supp);
                     innerWatch.stop();
                     Utils.logTime(conf + "_" + supp + "", TimeUnit.MILLISECONDS.toSeconds(innerWatch.getTime()), TimeUnit.MILLISECONDS.toMinutes(innerWatch.getTime()));
                 });
@@ -244,9 +242,8 @@ public class QbParser {
         ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
         watch.stop();
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
-//        this.prettyFormattedShaclFilePath = se.prettyFormattedShaclFilePath;
-//        this.dbDefaultConnectionString = se.dbDefaultConnectionString;
-//        this.dbPrunedConnectionString = se.dbPrunedConnectionString;
+        this.dbDefaultConnectionString = se.dbDefaultConnectionString;
+        this.dbPrunedConnectionString = se.dbPrunedConnectionString;
 
     }
 

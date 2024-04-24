@@ -58,6 +58,7 @@ public class ShapesExtractor {
 
     //Used for RQ4
     public String prettyFormattedShaclFilePath;
+    public String defaultFormattedShaclFilePath;
     public String dbDefaultConnectionString;
     public String dbPrunedConnectionString;
 
@@ -82,7 +83,7 @@ public class ShapesExtractor {
      * ==================================== QSE-Default Shapes Construction ============================================
      */
 
-    public void constructDefaultShapes(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes) {
+    public String constructDefaultShapes(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes) {
         File dbDir = new File(Main.outputFilePath + "db_default");
         performDirCheck(dbDir);
         dbDefaultConnectionString = dbDir.getAbsolutePath();
@@ -118,6 +119,7 @@ public class ShapesExtractor {
         } finally {
             db.shutDown();// before our program exits, make sure the database is properly shut down.
         }
+        return this.prettyFormattedShaclFilePath;
     }
 
     /**
@@ -205,7 +207,7 @@ public class ShapesExtractor {
         } finally {
             db.shutDown(); // before our program exits, make sure the database is properly shut down.
         }
-        return outputAddress;
+        return this.prettyFormattedShaclFilePath;
     }
 
     /**

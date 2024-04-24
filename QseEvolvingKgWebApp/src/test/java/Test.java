@@ -50,7 +50,7 @@ public class Test {
     @org.junit.Test
     public void testQueryBased() {
         Main.setResourcesPathForJar("/Users/evapu/Downloads/qse-main/qse-main/src/main/resources");
-        setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/qb");
+        setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/qb/");
         Main.setPruningThresholds("{(-1,10)}");
         Main.annotateSupportConfidence = "true";
         var repoName = "Bear-B";
