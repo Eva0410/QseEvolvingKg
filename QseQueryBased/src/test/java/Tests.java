@@ -1,5 +1,6 @@
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
+import org.jgrapht.Graph;
 import org.junit.Test;
 import qseevolvingkg.partialsparqlqueries.GraphDbUtils;
 
@@ -37,9 +38,35 @@ public class Tests {
     public void testNewRepo() {
         var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
         GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.cloneSailRepository(localPath, "secondVersion");
         var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
         var result = graphDbUtils.getNodeShapesWithTargetClassFromFile(goalRepo);
         result.forEach(r -> System.out.println(r));
+    }
+
+    @Test
+    public void testDeleteInNewRepo() {
+        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromFile(localPath);
+        graphDbUtils.checkNodeShapesInNewGraph(graphDbUrl, "film3", result);
+        result.forEach(r -> System.out.println(r));
+        var targetDb = graphDbUtils.cloneSailRepository(localPath, "secondVersion");
+        graphDbUtils.deleteFromRepoWhereSupportIsZero(targetDb, result);
+        var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
+        var result2 = graphDbUtils.getNodeShapesWithTargetClassFromFile(goalRepo);
+        System.out.println("new version");
+        result2.forEach(r -> System.out.println(r));
+    }
+
+    @Test
+    public void generateShaclTtlFromDb() {
+        cs.Main.setResourcesPathForJar(resourcesPath);
+        cs.Main.setOutputFilePathForJar(outputPath);
+        cs.Main.setPruningThresholds(pruningThresholds);
+        cs.Main.annotateSupportConfidence = "true";
+        cs.Main.datasetName = firstVersionName + "_cloned";
+        var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.constructDefaultShapes(goalRepo);
     }
 }
