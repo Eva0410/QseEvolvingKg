@@ -1,8 +1,6 @@
-import cs.qse.querybased.nonsampling.QbParser;
-import cs.utils.Constants;
-import org.jgrapht.Graph;
 import org.junit.Test;
 import qseevolvingkg.partialsparqlqueries.GraphDbUtils;
+import qseevolvingkg.partialsparqlqueries.RegexUtils;
 
 public class Tests {
     public static final String resourcesPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources";
@@ -26,7 +24,7 @@ public class Tests {
 //        var localPath = qbParser.dbDefaultConnectionString;
         var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
         GraphDbUtils graphDbUtils = new GraphDbUtils();
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromFile(localPath);
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
         result.forEach(r -> System.out.println(r));
         System.out.println("new version");
         graphDbUtils.checkNodeShapesInNewGraph(graphDbUrl, "film3", result);
@@ -39,7 +37,7 @@ public class Tests {
         var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
         GraphDbUtils graphDbUtils = new GraphDbUtils();
         var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromFile(goalRepo);
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(goalRepo);
         result.forEach(r -> System.out.println(r));
     }
 
@@ -47,15 +45,22 @@ public class Tests {
     public void testDeleteInNewRepo() {
         var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
         GraphDbUtils graphDbUtils = new GraphDbUtils();
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromFile(localPath);
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
         graphDbUtils.checkNodeShapesInNewGraph(graphDbUrl, "film3", result);
         result.forEach(r -> System.out.println(r));
-        var targetDb = graphDbUtils.cloneSailRepository(localPath, "secondVersion");
-        graphDbUtils.deleteFromRepoWhereSupportIsZero(targetDb, result);
-        var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
-        var result2 = graphDbUtils.getNodeShapesWithTargetClassFromFile(goalRepo);
-        System.out.println("new version");
-        result2.forEach(r -> System.out.println(r));
+        RegexUtils regexUtils = new RegexUtils();
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_copy.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(copiedFile, result);
+        regexUtils.saveStringAsFile(content, copiedFile);
+
+//        var targetDb = graphDbUtils.cloneSailRepository(localPath, "secondVersion");
+//        graphDbUtils.deleteFromRepoWhereSupportIsZero(targetDb, result);
+//        var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
+//        var result2 = graphDbUtils.getNodeShapesWithTargetClassFromFile(goalRepo);
+//        System.out.println("new version");
+//        result2.forEach(r -> System.out.println(r));
     }
 
     @Test

@@ -1,23 +1,5 @@
 package qseevolvingkg.partialsparqlqueries;
 
-import cs.qse.common.PostConstraintsAnnotator;
-import cs.qse.querybased.nonsampling.QbParser;
-import cs.utils.Constants;
-import cs.utils.FilesUtil;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
-import org.eclipse.rdf4j.repository.manager.RepositoryManager;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
-import org.jgrapht.Graph;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 public class Main {
     public static final String resourcesPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources";
     public static final String firstVersionName = "lubm-mini";
@@ -40,7 +22,7 @@ public class Main {
 //        C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QSEQueryBased\Output\lubm-mini\db_default
         var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\lubm-mini\\db_default";
         GraphDbUtils graphDbUtils = new GraphDbUtils();
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromFile(localPath);
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
         result.forEach(r -> System.out.println(r));
 
 //        //TODO do RQ4

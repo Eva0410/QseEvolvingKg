@@ -1,19 +1,11 @@
 package qseevolvingkg.partialsparqlqueries;
 
-import de.atextor.turtle.formatter.FormattingStyle;
-import de.atextor.turtle.formatter.TurtleFormatter;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.eclipse.rdf4j.query.QueryLanguage;
-
 import java.io.*;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class RegexUtils {
     public void getAllNodeShapesfromFile(String filePath) {
@@ -30,7 +22,7 @@ public class RegexUtils {
         }
     }
 
-    public String deleteFromRepoWhereSupportIsZero(String filePath, List<NodeShape> nodeShapes) {
+    public String deleteFromFileWhereSupportIsZero(String filePath, List<NodeShape> nodeShapes) {
         String fileContent = getFileAsString(filePath);
         var filteredNodeShapes = nodeShapes.stream().filter(ns -> ns.support == 0).toList();
 
@@ -41,6 +33,27 @@ public class RegexUtils {
             }
         }
         return fileContent; //Todo testen
+    }
+
+    public void saveStringAsFile(String content, String filePath) {
+        byte[] bytes = content.getBytes();
+
+        try {
+            Path path = Paths.get(filePath);
+            Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e) {
+            System.err.println("Failed to save the file: " + e.getMessage());
+        }
+    }
+
+    public void copyFile(String sourceFilePath, String destinationFilePath) {
+        Path sourcePath = Paths.get(sourceFilePath);
+        Path destinationPath = Paths.get(destinationFilePath);
+        try {
+            Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            System.err.println("Failed to copy the file: " + e.getMessage());
+        }
     }
 
     private String deleteIriFromString(String iri, String file) {

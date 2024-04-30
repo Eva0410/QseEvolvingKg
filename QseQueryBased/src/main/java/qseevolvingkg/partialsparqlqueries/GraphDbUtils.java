@@ -1,7 +1,5 @@
 package qseevolvingkg.partialsparqlqueries;
 
-import cs.Main;
-import cs.qse.common.PostConstraintsAnnotator;
 import cs.qse.common.ShapesExtractor;
 import cs.utils.Constants;
 import cs.utils.FilesUtil;
@@ -17,7 +15,6 @@ import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
-import org.w3c.dom.Node;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class GraphDbUtils {
-    public List<NodeShape> getNodeShapesWithTargetClassFromFile(String localDbFilePath) {
+    public List<NodeShape> getNodeShapesWithTargetClassFromRepo(String localDbFilePath) {
         Repository db = new SailRepository(new NativeStore(new File(localDbFilePath)));
         var nodeShapes = new ArrayList<NodeShape>();
         try (RepositoryConnection conn = db.getConnection()) {
@@ -49,6 +46,7 @@ public class GraphDbUtils {
                         NodeShape nodeShape = new NodeShape();
                         nodeShape.iri = shapeIri;
                         nodeShape.addTargetClasses(targetClass);
+                        getPropertyShapesForNodeShape(nodeShape, conn);
                         nodeShapes.add(nodeShape);
                     }
                 }
@@ -73,6 +71,7 @@ public class GraphDbUtils {
                 var shapeIri = (IRI) bindingSet.getValue("ps");
                 PropertyShape propertyShape = new PropertyShape();
                 propertyShape.iri = shapeIri;
+                propertyShapes.add(propertyShape);
             }
         }
         nodeShape.propertyShapes = propertyShapes;
@@ -99,7 +98,6 @@ public class GraphDbUtils {
                         BindingSet bindingSet = result.next();
                         var shapeIri = (IRI) bindingSet.getValue("class");
                         var support = Integer.parseInt(bindingSet.getValue("classCount").stringValue());
-
                         var nodeShape = nodeShapes.stream().filter(ns -> ns.targetClasses.stream().anyMatch(s -> s.equals(shapeIri))).findFirst().get();
                         nodeShape.support += support;
                     }
