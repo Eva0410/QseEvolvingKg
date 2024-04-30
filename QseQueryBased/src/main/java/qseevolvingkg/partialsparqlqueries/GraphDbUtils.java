@@ -59,6 +59,25 @@ public class GraphDbUtils {
         return nodeShapes;
     }
 
+    private void getPropertyShapesForNodeShape(NodeShape nodeShape, RepositoryConnection conn) {
+        var sparql = "select distinct ?ps where { " +
+                "?shape <http://www.w3.org/ns/shacl#property> ?ps " +
+                " filter(?shape = <"+nodeShape.iri+">)}";
+
+        //todo get more infos for property shape
+        TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
+        List<PropertyShape> propertyShapes = new ArrayList<>();
+        try (TupleQueryResult result = query.evaluate()) {
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                var shapeIri = (IRI) bindingSet.getValue("ps");
+                PropertyShape propertyShape = new PropertyShape();
+                propertyShape.iri = shapeIri;
+            }
+        }
+        nodeShape.propertyShapes = propertyShapes;
+    }
+
     public List<NodeShape> checkNodeShapesInNewGraph(String url, String repositoryName, List<NodeShape> nodeShapes) {
         RepositoryManager repositoryManager = new RemoteRepositoryManager(url);
         try {
@@ -116,7 +135,27 @@ public class GraphDbUtils {
         return targetFolder.getAbsolutePath();
     }
 
+    //unused, deletion per query does not work
+//    public void deleteFromRepoWhereSupportIsZero(String filePath, List<NodeShape> nodeShapes) {
+//        Repository db = new SailRepository(new NativeStore(new File(filePath)));
+//        try (RepositoryConnection conn = db.getConnection()) {
+//            var targetClasses = nodeShapes.stream().filter(ns -> ns.support == 0).flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
+//            //no better way found to delete multiple triples
+//            for (var targetClass : targetClasses) {
+//                String sparql = "delete where {\n" +
+//                        "\t ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/shacl#NodeShape> .\n " +
+//                        " ?s <http://www.w3.org/ns/shacl#targetClass> <"+targetClass+"> . " +
+//                        " ?s ?p ?o ." +
+//                        " }";
+//                conn.prepareUpdate(QueryLanguage.SPARQL, sparql).execute();
+//            }
+//        } finally {
+//            db.shutDown();
+//        }
+//    }
+
     public void deleteFromRepoWhereSupportIsZero(String filePath, List<NodeShape> nodeShapes) {
+
         Repository db = new SailRepository(new NativeStore(new File(filePath)));
         try (RepositoryConnection conn = db.getConnection()) {
             var targetClasses = nodeShapes.stream().filter(ns -> ns.support == 0).flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());

@@ -9,6 +9,16 @@ public class NodeShape {
     List<IRI> targetClasses;
     IRI iri;
     int support;
+    List<PropertyShape> propertyShapes;
+
+
+    public List<PropertyShape> getPropertyShapes() {
+        return propertyShapes;
+    }
+
+    public void setPropertyShapes(List<PropertyShape> propertyShapes) {
+        this.propertyShapes = propertyShapes;
+    }
 
     public void addTargetClasses(IRI targetClasses) {
         if(this.targetClasses == null)
