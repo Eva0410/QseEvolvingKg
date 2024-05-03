@@ -2,6 +2,9 @@ package qseevolvingkg.partialsparqlqueries;
 
 import org.eclipse.rdf4j.model.IRI;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PropertyShape {
     IRI iri;
     int support;
@@ -10,6 +13,7 @@ public class PropertyShape {
     IRI dataType;
     IRI path;
     IRI classIri;
+    List<ShaclOrListItem> orItems;
 
 
     public  PropertyShape() {
@@ -20,6 +24,12 @@ public class PropertyShape {
         this.iri = iri;
         this.support = support;
         this.confidence = confidence;
+    }
+
+    public void addOrListItem(IRI nodeKind, IRI classIri) {
+        if(this.orItems == null)
+            this.orItems = new ArrayList<>();
+        this.orItems.add(new ShaclOrListItem(nodeKind, classIri));
     }
 
     public IRI getIri() {

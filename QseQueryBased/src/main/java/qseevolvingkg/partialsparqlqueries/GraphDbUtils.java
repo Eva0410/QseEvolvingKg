@@ -59,39 +59,63 @@ public class GraphDbUtils {
 
 
     private void getPropertyShapesForNodeShape(NodeShape nodeShape, RepositoryConnection conn) {
-        var sparql = "select distinct ?ps ?nodeKind ?dataType ?path ?class where { " +
+        var sparql = "select distinct ?ps ?nodeKind ?dataType ?path ?class ?nodeKindNested ?classNested where { " +
                 "?shape <http://www.w3.org/ns/shacl#property> ?ps." +
-                "?ps <http://www.w3.org/ns/shacl#NodeKind> ?nodeKind;" +
-                " <http://www.w3.org/ns/shacl#path> ?path ." +
+                "?ps <http://www.w3.org/ns/shacl#path> ?path . " +
+                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#NodeKind> ?nodeKind }" +
                 " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#datatype> ?dataType } " +
                 " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#class> ?class } " +
+                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#or> ?orList ." +
+                "  ?orList rdf:rest*/rdf:first ?el . " +
+                "  ?el <http://www.w3.org/ns/shacl#NodeKind> ?nodeKindNested. " +
+                "  ?el <http://www.w3.org/ns/shacl#class> ?classNested } " +
                 " filter(?shape = <"+nodeShape.iri+">)}";
 
-        //todo get more infos for property shape with lists
+        //todo get more infos for property shape with in lists
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
         List<PropertyShape> propertyShapes = new ArrayList<>();
         try (TupleQueryResult result = query.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 var shapeIri = (IRI) bindingSet.getValue("ps");
-                var nodeKind = (IRI) bindingSet.getValue("nodeKind");
+                var nodeKindValue = (IRI) bindingSet.getValue("nodeKind");
                 var dataTypeValue = bindingSet.getValue("dataType");
                 var classIriValue = bindingSet.getValue("class");
+                var nodeKindNestedValue = bindingSet.getValue("nodeKindNested");
+                var classIriNestedValue = bindingSet.getValue("classNested");
+
                 IRI dataType = null;
                 if(dataTypeValue != null)
                     dataType = (IRI) dataTypeValue;
                 IRI classIri = null;
                 if(classIriValue != null)
                     classIri = (IRI) classIriValue;
+                IRI nodeKind = null;
+                if(nodeKindValue != null)
+                    nodeKind = (IRI) classIriValue;
+                IRI nodeKindNested = null;
+                if(nodeKindNestedValue != null)
+                    nodeKindNested = (IRI) nodeKindNestedValue;
+                IRI classIriNested = null;
+                if(classIriNestedValue != null)
+                    classIriNested = (IRI) classIriNestedValue;
                 var path = (IRI) bindingSet.getValue("path");
 
-                PropertyShape propertyShape = new PropertyShape();
-                propertyShape.iri = shapeIri;
-                propertyShape.nodeKind = nodeKind;
-                propertyShape.dataType = dataType;
-                propertyShape.classIri = classIri;
-                propertyShape.path = path;
-                propertyShapes.add(propertyShape);
+                var optionalExistingPs = propertyShapes.stream().filter(n -> n.iri.equals(shapeIri)).findFirst();
+                if(optionalExistingPs.isPresent()) {
+                   optionalExistingPs.get().addOrListItem(nodeKindNested, classIriNested);
+                }
+                else {
+                    PropertyShape propertyShape = new PropertyShape();
+                    propertyShape.iri = shapeIri;
+                    propertyShape.nodeKind = nodeKind;
+                    propertyShape.dataType = dataType;
+                    propertyShape.classIri = classIri;
+                    propertyShape.path = path;
+                    if(nodeKindNested != null && classIriNested != null)
+                        propertyShape.addOrListItem(nodeKindNested, classIriNested);
+                    propertyShapes.add(propertyShape);
+                }
             }
         }
         nodeShape.propertyShapes = propertyShapes;
