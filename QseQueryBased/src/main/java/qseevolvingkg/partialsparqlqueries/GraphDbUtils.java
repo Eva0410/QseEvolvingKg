@@ -57,58 +57,140 @@ public class GraphDbUtils {
         return nodeShapes;
     }
 
+
     private void getPropertyShapesForNodeShape(NodeShape nodeShape, RepositoryConnection conn) {
-        var sparql = "select distinct ?ps where { " +
-                "?shape <http://www.w3.org/ns/shacl#property> ?ps " +
+        var sparql = "select distinct ?ps ?nodeKind ?dataType ?path ?class where { " +
+                "?shape <http://www.w3.org/ns/shacl#property> ?ps." +
+                "?ps <http://www.w3.org/ns/shacl#NodeKind> ?nodeKind;" +
+                " <http://www.w3.org/ns/shacl#path> ?path ." +
+                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#datatype> ?dataType } " +
+                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#class> ?class } " +
                 " filter(?shape = <"+nodeShape.iri+">)}";
 
-        //todo get more infos for property shape
+        //todo get more infos for property shape with lists
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
         List<PropertyShape> propertyShapes = new ArrayList<>();
         try (TupleQueryResult result = query.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 var shapeIri = (IRI) bindingSet.getValue("ps");
+                var nodeKind = (IRI) bindingSet.getValue("nodeKind");
+                var dataTypeValue = bindingSet.getValue("dataType");
+                var classIriValue = bindingSet.getValue("class");
+                IRI dataType = null;
+                if(dataTypeValue != null)
+                    dataType = (IRI) dataTypeValue;
+                IRI classIri = null;
+                if(classIriValue != null)
+                    classIri = (IRI) classIriValue;
+                var path = (IRI) bindingSet.getValue("path");
+
                 PropertyShape propertyShape = new PropertyShape();
                 propertyShape.iri = shapeIri;
+                propertyShape.nodeKind = nodeKind;
+                propertyShape.dataType = dataType;
+                propertyShape.classIri = classIri;
+                propertyShape.path = path;
                 propertyShapes.add(propertyShape);
             }
         }
         nodeShape.propertyShapes = propertyShapes;
     }
 
-    public List<NodeShape> checkNodeShapesInNewGraph(String url, String repositoryName, List<NodeShape> nodeShapes) {
+    public void checkShapesInNewGraph(String url, String repositoryName, List<NodeShape> nodeShapes) {
         RepositoryManager repositoryManager = new RemoteRepositoryManager(url);
         try {
             Repository repo = repositoryManager.getRepository(repositoryName);
             repo.init();
-
-            var targetClasses = nodeShapes.stream().flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
-            var filterString = String.join("> <", targetClasses);
-
             try (RepositoryConnection conn = repo.getConnection()) {
-                String sparql = "SELECT DISTINCT ?class (COUNT(DISTINCT ?s) AS ?classCount) FROM <http://www.ontotext.com/explicit> where {\n" +
-                        "\t?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class .\n" +
-                        "VALUES ?class { <"+filterString+"> } }\n" +
-                        "Group by ?class";
-                TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
-
-                try (TupleQueryResult result = query.evaluate()) {
-                    while (result.hasNext()) {
-                        BindingSet bindingSet = result.next();
-                        var shapeIri = (IRI) bindingSet.getValue("class");
-                        var support = Integer.parseInt(bindingSet.getValue("classCount").stringValue());
-                        var nodeShape = nodeShapes.stream().filter(ns -> ns.targetClasses.stream().anyMatch(s -> s.equals(shapeIri))).findFirst().get();
-                        nodeShape.support += support;
-                    }
-                }
+                checkNodeShapesInNewGraph(conn, nodeShapes);
+                checkPropertyShapesInNewGraph(conn, nodeShapes);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             } finally {
                 repo.shutDown();
             }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
         } finally {
             repositoryManager.shutDown();
         }
-        return nodeShapes;
+    }
+
+    public void checkNodeShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
+        var targetClasses = nodeShapes.stream().flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
+        var filterString = String.join("> <", targetClasses);
+
+        String sparql = "SELECT DISTINCT ?class (COUNT(DISTINCT ?s) AS ?classCount) FROM <http://www.ontotext.com/explicit> where {\n" +
+                "\t?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class .\n" +
+                "VALUES ?class { <"+filterString+"> } }\n" +
+                "Group by ?class";
+        TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
+
+        try (TupleQueryResult result = query.evaluate()) {
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                var shapeIri = (IRI) bindingSet.getValue("class");
+                var support = Integer.parseInt(bindingSet.getValue("classCount").stringValue());
+                var nodeShape = nodeShapes.stream().filter(ns -> ns.targetClasses.stream().anyMatch(s -> s.equals(shapeIri))).findFirst().get();
+                nodeShape.support += support;
+            }
+        }
+    }
+
+    public void checkPropertyShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
+        for(var nodeShape : nodeShapes) {
+            if (nodeShape.support != 0) { //performance
+                var targetClasses = nodeShape.targetClasses.stream().map(Object::toString).toList();
+                var filterString = String.join("> <", targetClasses);
+                //todo better way for performance?
+                for (var propertyShape : nodeShape.propertyShapes) {
+                    if (propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
+                        getSupportForLiteralPropertyShape(propertyShape, filterString, conn);
+                    }
+                    else if(propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
+                        getSupportForIriPropertyShape(propertyShape, filterString, conn);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void getSupportForIriPropertyShape(PropertyShape propertyShape, String filterString, RepositoryConnection conn) {
+        String sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) " +
+                "FROM <http://www.ontotext.com/explicit> WHERE { " +
+                " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class ." +
+                " ?s <" + propertyShape.path + "> ?obj . " +
+                " ?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <"+ propertyShape.classIri+">" +
+                " VALUES ?class { <" + filterString + "> }}";
+        TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
+
+        try (TupleQueryResult result = query.evaluate()) {
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                var support = Integer.parseInt(bindingSet.getValue("count").stringValue());
+                propertyShape.support = support;
+            }
+        }
+    }
+
+    private static void getSupportForLiteralPropertyShape(PropertyShape propertyShape, String filterString, RepositoryConnection conn) {
+        String sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) " +
+                "FROM <http://www.ontotext.com/explicit> WHERE { " +
+                " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class ." +
+                " ?s <" + propertyShape.path + "> ?obj . " +
+                " FILTER(dataType(?obj) = <" + propertyShape.dataType + "> )" +
+                " VALUES ?class { <" + filterString + "> }}";
+        TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
+
+        try (TupleQueryResult result = query.evaluate()) {
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                var support = Integer.parseInt(bindingSet.getValue("count").stringValue());
+                propertyShape.support = support;
+            }
+        }
     }
 
     public String cloneSailRepository(String originalFileRepo, String secondVersionName) {

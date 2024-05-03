@@ -24,15 +24,24 @@ public class RegexUtils {
 
     public String deleteFromFileWhereSupportIsZero(String filePath, List<NodeShape> nodeShapes) {
         String fileContent = getFileAsString(filePath);
-        var filteredNodeShapes = nodeShapes.stream().filter(ns -> ns.support == 0).toList();
 
-        for (var nodeShape : filteredNodeShapes) {
-            fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent);
-            for (var propertyShape : nodeShape.propertyShapes) {
-                fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
+        for (var nodeShape : nodeShapes) {
+            if(nodeShape.support == 0) {
+                fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent);
+                for (var propertyShape : nodeShape.propertyShapes) {
+                    fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
+                }
             }
+            else {
+                for(var propertyShape : nodeShape.propertyShapes) {
+                    if(propertyShape.support == 0) {
+                        fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
+                    }
+                }
+            }
+
         }
-        return fileContent; //Todo testen
+        return fileContent;
     }
 
     public void saveStringAsFile(String content, String filePath) {

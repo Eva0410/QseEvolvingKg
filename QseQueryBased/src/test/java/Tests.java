@@ -27,7 +27,7 @@ public class Tests {
         var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
         result.forEach(r -> System.out.println(r));
         System.out.println("new version");
-        graphDbUtils.checkNodeShapesInNewGraph(graphDbUrl, "film3", result);
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", result);
         result.forEach(r -> System.out.println(r));
 
     }
@@ -46,7 +46,7 @@ public class Tests {
         var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
         GraphDbUtils graphDbUtils = new GraphDbUtils();
         var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
-        graphDbUtils.checkNodeShapesInNewGraph(graphDbUrl, "film3", result);
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", result);
         result.forEach(r -> System.out.println(r));
         RegexUtils regexUtils = new RegexUtils();
         var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
@@ -73,5 +73,35 @@ public class Tests {
         var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
         GraphDbUtils graphDbUtils = new GraphDbUtils();
         graphDbUtils.constructDefaultShapes(goalRepo);
+    }
+
+    @Test
+    public void testDeleteWithPropertyShapeLiteralInNewRepo() {
+        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", result);
+        result.forEach(r -> System.out.println(r));
+        RegexUtils regexUtils = new RegexUtils();
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_copyPropertyShape.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(copiedFile, result);
+        regexUtils.saveStringAsFile(content, copiedFile);
+    }
+
+    @Test
+    public void testDeleteWithPropertyShapeIriInNewRepo() {
+        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", result);
+        result.forEach(r -> System.out.println(r));
+        RegexUtils regexUtils = new RegexUtils();
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(copiedFile, result);
+        regexUtils.saveStringAsFile(content, copiedFile);
     }
 }

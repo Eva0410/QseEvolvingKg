@@ -5,7 +5,12 @@ import org.eclipse.rdf4j.model.IRI;
 public class PropertyShape {
     IRI iri;
     int support;
-    double confidence;
+    double confidence; //unused
+    IRI nodeKind;
+    IRI dataType;
+    IRI path;
+    IRI classIri;
+
 
     public  PropertyShape() {
 
