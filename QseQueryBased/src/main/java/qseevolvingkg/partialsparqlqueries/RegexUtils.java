@@ -37,6 +37,14 @@ public class RegexUtils {
                     if(propertyShape.support == 0) {
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
                     }
+                    else {
+                        //TODO does not work
+                        for(var orItem : propertyShape.orItems) {
+                            if(orItem.support == 0) {
+                                fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
+                            }
+                        }
+                    }
                 }
             }
 

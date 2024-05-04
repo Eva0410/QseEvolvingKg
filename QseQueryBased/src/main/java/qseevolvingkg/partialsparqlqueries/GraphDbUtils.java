@@ -68,6 +68,7 @@ public class GraphDbUtils {
                 " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#or> ?orList ." +
                 "  ?orList rdf:rest*/rdf:first ?el . " +
                 "  ?el <http://www.w3.org/ns/shacl#NodeKind> ?nodeKindNested. " +
+                "  ?el <http://www.w3.org/ns/shacl#datatype> ?dataTypeNested. " +
                 "  ?el <http://www.w3.org/ns/shacl#class> ?classNested } " +
                 " filter(?shape = <"+nodeShape.iri+">)}";
 
@@ -83,6 +84,7 @@ public class GraphDbUtils {
                 var classIriValue = bindingSet.getValue("class");
                 var nodeKindNestedValue = bindingSet.getValue("nodeKindNested");
                 var classIriNestedValue = bindingSet.getValue("classNested");
+                var dataTypeNestedValue = bindingSet.getValue("dataTypeNested");
 
                 IRI dataType = null;
                 if(dataTypeValue != null)
@@ -92,18 +94,21 @@ public class GraphDbUtils {
                     classIri = (IRI) classIriValue;
                 IRI nodeKind = null;
                 if(nodeKindValue != null)
-                    nodeKind = (IRI) classIriValue;
+                    nodeKind = (IRI) nodeKindValue;
                 IRI nodeKindNested = null;
                 if(nodeKindNestedValue != null)
                     nodeKindNested = (IRI) nodeKindNestedValue;
                 IRI classIriNested = null;
                 if(classIriNestedValue != null)
                     classIriNested = (IRI) classIriNestedValue;
+                IRI dataTypeNested = null;
+                if(dataTypeNestedValue != null)
+                    dataTypeNested = (IRI) dataTypeNestedValue;
                 var path = (IRI) bindingSet.getValue("path");
 
                 var optionalExistingPs = propertyShapes.stream().filter(n -> n.iri.equals(shapeIri)).findFirst();
                 if(optionalExistingPs.isPresent()) {
-                   optionalExistingPs.get().addOrListItem(nodeKindNested, classIriNested);
+                   optionalExistingPs.get().addOrListItem(nodeKindNested, classIriNested, dataTypeNested);
                 }
                 else {
                     PropertyShape propertyShape = new PropertyShape();
@@ -113,7 +118,7 @@ public class GraphDbUtils {
                     propertyShape.classIri = classIri;
                     propertyShape.path = path;
                     if(nodeKindNested != null && classIriNested != null)
-                        propertyShape.addOrListItem(nodeKindNested, classIriNested);
+                        propertyShape.addOrListItem(nodeKindNested, classIriNested, dataTypeNested);
                     propertyShapes.add(propertyShape);
                 }
             }
@@ -170,50 +175,68 @@ public class GraphDbUtils {
                 var filterString = String.join("> <", targetClasses);
                 //todo better way for performance?
                 for (var propertyShape : nodeShape.propertyShapes) {
-                    if (propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
-                        getSupportForLiteralPropertyShape(propertyShape, filterString, conn);
+                    if (propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
+                        propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataType, filterString, conn);
                     }
-                    else if(propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
-                        getSupportForIriPropertyShape(propertyShape, filterString, conn);
+                    else if(propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
+                        propertyShape.support = getSupportForIriPropertyShape(propertyShape.path, propertyShape.dataType, filterString, conn);
+                    }
+                    else if (propertyShape.nodeKind == null) {
+                        for(var orItem : propertyShape.orItems) {
+                            if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
+                                orItem.support = getSupportForLiteralPropertyShape(propertyShape.path, orItem.dataType, filterString, conn);
+                            }
+                            else if(propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
+                                orItem.support = getSupportForIriPropertyShape(propertyShape.path, orItem.classIri, filterString, conn);
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    private static void getSupportForIriPropertyShape(PropertyShape propertyShape, String filterString, RepositoryConnection conn) {
+    private static int getSupportForIriPropertyShape(IRI path, IRI classIri, String filterString, RepositoryConnection conn) {
         String sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) " +
                 "FROM <http://www.ontotext.com/explicit> WHERE { " +
                 " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class ." +
-                " ?s <" + propertyShape.path + "> ?obj . " +
-                " ?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <"+ propertyShape.classIri+">" +
+                " ?s <" + path + "> ?obj . " +
+                " ?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <"+ classIri+">" +
                 " VALUES ?class { <" + filterString + "> }}";
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
         try (TupleQueryResult result = query.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
-                var support = Integer.parseInt(bindingSet.getValue("count").stringValue());
-                propertyShape.support = support;
+                return Integer.parseInt(bindingSet.getValue("count").stringValue());
             }
+            throw new Exception("No support returned");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return 0;
         }
     }
 
-    private static void getSupportForLiteralPropertyShape(PropertyShape propertyShape, String filterString, RepositoryConnection conn) {
+    private static int getSupportForLiteralPropertyShape(IRI path, IRI dataType, String filterString, RepositoryConnection conn) {
         String sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) " +
                 "FROM <http://www.ontotext.com/explicit> WHERE { " +
                 " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class ." +
-                " ?s <" + propertyShape.path + "> ?obj . " +
-                " FILTER(dataType(?obj) = <" + propertyShape.dataType + "> )" +
+                " ?s <" + path + "> ?obj . " +
+                " FILTER(dataType(?obj) = <" + dataType + "> )" +
                 " VALUES ?class { <" + filterString + "> }}";
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
         try (TupleQueryResult result = query.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
-                var support = Integer.parseInt(bindingSet.getValue("count").stringValue());
-                propertyShape.support = support;
+                return Integer.parseInt(bindingSet.getValue("count").stringValue());
             }
+            throw new Exception("No support returned");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return 0;
         }
     }
 

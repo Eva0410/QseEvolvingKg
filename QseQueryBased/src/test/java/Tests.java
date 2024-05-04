@@ -104,4 +104,20 @@ public class Tests {
         var content = regexUtils.deleteFromFileWhereSupportIsZero(copiedFile, result);
         regexUtils.saveStringAsFile(content, copiedFile);
     }
+
+    //todo implement, with shacl or items with literal and iri. make test reproducable
+    @Test
+    public void testDeleteWithPropertyShapeNestedItemIriInNewRepo() {
+        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", result);
+        result.forEach(r -> System.out.println(r));
+        RegexUtils regexUtils = new RegexUtils();
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(copiedFile, result);
+        regexUtils.saveStringAsFile(content, copiedFile);
+    }
 }

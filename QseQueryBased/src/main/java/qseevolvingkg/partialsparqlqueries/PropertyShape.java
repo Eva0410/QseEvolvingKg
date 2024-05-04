@@ -26,10 +26,10 @@ public class PropertyShape {
         this.confidence = confidence;
     }
 
-    public void addOrListItem(IRI nodeKind, IRI classIri) {
+    public void addOrListItem(IRI nodeKind, IRI classIri, IRI dataType) {
         if(this.orItems == null)
             this.orItems = new ArrayList<>();
-        this.orItems.add(new ShaclOrListItem(nodeKind, classIri));
+        this.orItems.add(new ShaclOrListItem(nodeKind, classIri, dataType));
     }
 
     public IRI getIri() {
