@@ -14,6 +14,8 @@ public class PropertyShape {
     IRI path;
     IRI classIri;
     List<ShaclOrListItem> orItems;
+    boolean errorDuringGeneration = false;
+
 
 
     public  PropertyShape() {

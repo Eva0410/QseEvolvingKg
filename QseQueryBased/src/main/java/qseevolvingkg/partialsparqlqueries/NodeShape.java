@@ -10,6 +10,7 @@ public class NodeShape {
     IRI iri;
     int support;
     List<PropertyShape> propertyShapes;
+    boolean errorDuringGeneration = false;
 
 
     public List<PropertyShape> getPropertyShapes() {

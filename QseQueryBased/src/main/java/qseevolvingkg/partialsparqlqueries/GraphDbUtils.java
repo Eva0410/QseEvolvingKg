@@ -3,8 +3,16 @@ package qseevolvingkg.partialsparqlqueries;
 import cs.qse.common.ShapesExtractor;
 import cs.utils.Constants;
 import cs.utils.FilesUtil;
+import de.atextor.turtle.formatter.FormattingStyle;
+import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.commons.io.FileUtils;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -16,8 +24,10 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,7 +69,7 @@ public class GraphDbUtils {
 
 
     private void getPropertyShapesForNodeShape(NodeShape nodeShape, RepositoryConnection conn) {
-        var sparql = "select distinct ?ps ?nodeKind ?dataType ?path ?class ?nodeKindNested ?classNested where { " +
+        var sparql = "select distinct ?ps ?nodeKind ?dataType ?path ?class ?nodeKindNested ?classNested ?dataTypeNested where { " +
                 "?shape <http://www.w3.org/ns/shacl#property> ?ps." +
                 "?ps <http://www.w3.org/ns/shacl#path> ?path . " +
                 " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#NodeKind> ?nodeKind }" +
@@ -68,8 +78,8 @@ public class GraphDbUtils {
                 " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#or> ?orList ." +
                 "  ?orList rdf:rest*/rdf:first ?el . " +
                 "  ?el <http://www.w3.org/ns/shacl#NodeKind> ?nodeKindNested. " +
-                "  ?el <http://www.w3.org/ns/shacl#datatype> ?dataTypeNested. " +
-                "  ?el <http://www.w3.org/ns/shacl#class> ?classNested } " +
+                "   OPTIONAL { ?el <http://www.w3.org/ns/shacl#datatype> ?dataTypeNested. } " +
+                "   OPTIONAL {?el <http://www.w3.org/ns/shacl#class> ?classNested } } " +
                 " filter(?shape = <"+nodeShape.iri+">)}";
 
         //todo get more infos for property shape with in lists
@@ -179,16 +189,22 @@ public class GraphDbUtils {
                         propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataType, filterString, conn);
                     }
                     else if(propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
-                        propertyShape.support = getSupportForIriPropertyShape(propertyShape.path, propertyShape.dataType, filterString, conn);
+                        propertyShape.support = getSupportForIriPropertyShape(propertyShape.path, propertyShape.classIri, filterString, conn);
                     }
                     else if (propertyShape.nodeKind == null) {
-                        for(var orItem : propertyShape.orItems) {
-                            if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
-                                orItem.support = getSupportForLiteralPropertyShape(propertyShape.path, orItem.dataType, filterString, conn);
+                        //Ignore special case when nodeKind is null, but there are also no nested items (QSE error)
+                        if(propertyShape.orItems != null)  {
+                            for(var orItem : propertyShape.orItems) {
+                                if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
+                                    orItem.support = getSupportForLiteralPropertyShape(propertyShape.path, orItem.dataType, filterString, conn);
+                                }
+                                else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
+                                    orItem.support = getSupportForIriPropertyShape(propertyShape.path, orItem.classIri, filterString, conn);
+                                }
                             }
-                            else if(propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
-                                orItem.support = getSupportForIriPropertyShape(propertyShape.path, orItem.classIri, filterString, conn);
-                            }
+                        }
+                        else {
+                            propertyShape.errorDuringGeneration = true;
                         }
                     }
                 }
@@ -313,5 +329,28 @@ public class GraphDbUtils {
         } finally {
             db.shutDown();
         }
+    }
+
+    public String getStringAsShape(String shape, NodeShape nodeShape) {
+        var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+        model.read(new java.io.StringReader(shape), null, "TURTLE");
+
+        //would need prefix lines for this
+//        org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
+//        org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
+//
+//        String queryString = String.format("CONSTRUCT {?s ?p ?o} WHERE { ?s ?p ?o. FILTER (?p != <%s> && ?p != <%s>)}", iriSupport, iriConfidence);
+
+//        var query = QueryFactory.create(queryString);
+//        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+//            org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
+//            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+//            OutputStream outputStream = new ByteArrayOutputStream();
+//            formatter.accept(jenaModel, outputStream);
+//            String cleanedString = reorderShaclInItems(outputStream.toString());
+//            String cleanedStringOrItems = reOrderOrItems(cleanedString);
+//            return cleanedStringOrItems.replaceAll("\n+$", "");
+//        }
+        return "";
     }
 }

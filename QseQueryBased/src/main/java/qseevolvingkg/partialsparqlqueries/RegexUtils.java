@@ -27,23 +27,24 @@ public class RegexUtils {
 
         for (var nodeShape : nodeShapes) {
             if(nodeShape.support == 0) {
-                fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent);
+                fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent, nodeShape.errorDuringGeneration);
                 for (var propertyShape : nodeShape.propertyShapes) {
-                    fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
+                    fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                 }
             }
             else {
                 for(var propertyShape : nodeShape.propertyShapes) {
-                    if(propertyShape.support == 0) {
-                        fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
+                    if(propertyShape.support == 0 && propertyShape.orItems == null) {
+                        fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
+                        fileContent = deletePropertyShapeReferenceWithIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                     }
                     else {
                         //TODO does not work
-                        for(var orItem : propertyShape.orItems) {
-                            if(orItem.support == 0) {
-                                fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
-                            }
-                        }
+//                        for(var orItem : propertyShape.orItems) {
+//                            if(orItem.support == 0) {
+//                                fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent);
+//                            }
+//                        }
                     }
                 }
             }
@@ -73,9 +74,11 @@ public class RegexUtils {
         }
     }
 
-    private String deleteIriFromString(String iri, String file) {
+    private String deleteIriFromString(String iri, String file, boolean errorDuringGeneration) {
+        if(errorDuringGeneration)
+            return file;
         String iriWithEscapedChars = iri.toString().replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
-        String regexPattern = String.format("\n<%s>.*? \\.", iriWithEscapedChars);
+        String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
@@ -83,7 +86,40 @@ public class RegexUtils {
         }
         String match = matcher.group();
         return file.replace(match, "");
+    }
 
+    private String deletePropertyShapeReferenceWithIriFromString(String iri, String file, boolean errorDuringGeneration) {
+        if(errorDuringGeneration)
+            return file;
+        String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+        String regexPattern = String.format("  <http://www.w3.org/ns/shacl#property> <%s> \\;\n", iriWithEscapedChars);
+        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(file);
+        if (!matcher.find()) {
+            System.out.println("Delete did not work for " + iri);
+        }
+        String match = matcher.group();
+        return file.replace(match, "");
+    }
+
+    public String deleteShaclOrItemWithIriFromString(ShaclOrListItem orItem, String shape, boolean errorDuringGeneration) {
+        if(errorDuringGeneration)
+            return shape;
+
+        String regexPart = "";
+        if(orItem.dataType != null)
+            regexPart = String.format(" \\<http://www.w3.org/ns/shacl#datatype> <?%s>?", orItem.dataType);
+        else if(orItem.classIri != null)
+            regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.classIri);
+
+        String regexPattern = String.format(" \\[.*?<http://www.w3.org/ns/shacl#NodeKind> <%s>.*?%s.*?\\] ", orItem.nodeKind, regexPart);
+        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(shape);
+        if (!matcher.find()) {
+            System.out.println("Delete did not work for " + orItem.toString());
+        }
+        String match = matcher.group();
+        return shape.replace(match, "");
     }
 
     public String getFileAsString(String path) {
@@ -98,4 +134,16 @@ public class RegexUtils {
         }
         return fileContent.toString();
     }
+
+    public String getShapeAsString(String iri, String file) {
+        String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+        String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
+        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(file);
+        if (!matcher.find()) {
+            System.out.println("Could not find shape " + iri);
+        }
+        return matcher.group();
+    }
+
 }
