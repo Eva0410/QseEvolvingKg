@@ -1,6 +1,7 @@
 package qseevolvingkgwebapp.ShactorUtils;
 
 import cs.qse.common.ShapesExtractor;
+import cs.qse.common.ShapesExtractor_Old;
 import cs.qse.common.structure.NS;
 import cs.qse.common.structure.PS;
 import cs.qse.common.structure.ShaclOrListItem;
@@ -39,7 +40,7 @@ public class PruningUtil implements Serializable {
         return statsDefault;
     }
 
-    public void computeStats(ShapesExtractor shapesExtractor, Integer support, Double confidence) {
+    public void computeStats(ShapesExtractor_Old shapesExtractor, Integer support, Double confidence) {
         shapesExtractor.getDefaultRepoConnection().close();
         Repository db = shapesExtractor.getDefaultShapesDb();
         try (RepositoryConnection conn = shapesExtractor.getDefaultShapesDb().getConnection()) { // Open a connection to the database
