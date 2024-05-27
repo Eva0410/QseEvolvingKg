@@ -28,6 +28,8 @@ public class Main {
     public static boolean qseFromSpecificClasses;
     public static String resourcesPath;
     public static String configDirPath;
+<<<<<<< HEAD:src/main/java/cs/Main.java
+=======
     public static String graphDbUrl;
     public static String graphDbRepository;
     public static String pruningThresholds;
@@ -35,6 +37,7 @@ public class Main {
     public static String qse_validation_with_shNot = "false";
 
     public static String expected_number_classes = "100";
+>>>>>>> RQ4copied:qse/src/main/java/cs/Main.java
     
     public static void main(String[] args) throws Exception {
         //configPath = args[0];
@@ -110,6 +113,24 @@ public class Main {
         entitySamplingTargetPercentage = Integer.parseInt(paramVal("entity_sampling_target_percentage"));
         qseFromSpecificClasses = isActivated("qse_specific_classes");
         outputFilePath = paramVal("output_file_path");
+        resourcesPath = paramVal("resources_path");
+        configDirPath = paramVal("config_dir_path");
+    }
+    
+    public static void setResourcesPathForJar(String path) {
+        resourcesPath = path;
+    }
+    
+    public static void setOutputFilePathForJar(String path) {
+        outputFilePath = path;
+    }
+    
+    public static void setConfigDirPathForJar(String path) {
+        configDirPath = path;
+    }
+    
+    public static void setDataSetNameForJar(String name) {
+        datasetName = name;
     }
     
     public static void qseExactExecutionWithMinimumParams() {
@@ -120,7 +141,10 @@ public class Main {
         extractMaxCardConstraints = false;
         isWikiData = false;
         qseFromSpecificClasses = isActivated("qse_specific_classes");
+        
         outputFilePath = paramVal("output_file_path");
+        resourcesPath = paramVal("resources_path");
+        configDirPath = paramVal("config_dir_path");
         
         // Run QSE-Exact
         Parser parser = new Parser(datasetPath, numberOfClasses, numberOfInstances, paramVal("instance_type_property"));

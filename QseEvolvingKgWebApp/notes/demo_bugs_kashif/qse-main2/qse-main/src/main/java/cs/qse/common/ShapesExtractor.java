@@ -2,9 +2,10 @@ package cs.qse.common;
 
 import com.google.common.collect.Lists;
 import cs.Main;
-import cs.qse.common.ExperimentsUtil;
-import cs.qse.common.TurtlePrettyFormatter;
 import cs.qse.common.encoders.Encoder;
+import cs.qse.common.structure.NS;
+import cs.qse.common.structure.PS;
+import cs.qse.common.structure.ShaclOrListItem;
 import cs.qse.filebased.SupportConfidence;
 import cs.utils.*;
 import org.apache.commons.io.FilenameUtils;
@@ -49,19 +50,44 @@ public class ShapesExtractor {
     Map<Integer, Set<Integer>> propWithClassesHavingMaxCountOne;
     ValueFactory factory = SimpleValueFactory.getInstance();
     String logfileAddress = Constants.EXPERIMENTS_RESULT;
+    String outputFileAddress = "";
     Boolean isSamplingOn = false;
     Map<Integer, Integer> propCount;
     Map<Integer, Integer> sampledPropCount;
     Map<Integer, List<Integer>> sampledEntitiesPerClass; // Size == O(T*entityThreshold)
     Map<Integer, List<Double>> supportToRelativeSupport = new HashMap<>();
     String typePredicate;
-    
+
+    RepositoryConnection defaultRepoConnection;
+    RepositoryConnection prunedRepoConnection;
+
+    List<NS> nodeShapes;
+    NS currNodeShape;
+    PS currPropertyShape;
+    ShaclOrListItem currShaclOrListItem;
+    Repository defaultShapesDb;
+    HashMap<String, String> currentShapesModelStats;
+
+    public HashMap<String, String> getCurrentShapesModelStats() {return currentShapesModelStats;}
+
+    public List<NS> getNodeShapes() {return nodeShapes;}
+
+    public Repository getDefaultShapesDb() {return defaultShapesDb;}
+
+    public RepositoryConnection getDefaultRepoConnection() {
+        return defaultRepoConnection;
+    }
+
+    public RepositoryConnection getPrunedRepoConnection() {
+        return prunedRepoConnection;
+    }
+
     /**
      * ============================================= Constructor =======================================================
      */
-    
+
     public ShapesExtractor() {}
-    
+
     public ShapesExtractor(Encoder encoder, Map<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport, Map<Integer, Integer> classInstanceCount, String typePredicate) {
         this.encoder = encoder;
         this.builder = new ModelBuilder();
@@ -70,30 +96,34 @@ public class ShapesExtractor {
         this.typePredicate = typePredicate;
         builder.setNamespace("shape", Constants.SHAPES_NAMESPACE);
     }
-    
-    
+
+
     /**
      * ==================================== QSE-Default Shapes Construction ============================================
      */
-    
+
     public void constructDefaultShapes(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes) {
         File dbDir = new File(Main.outputFilePath + "db_default");
         performDirCheck(dbDir);
-        Repository db = new SailRepository(new NativeStore(new File(dbDir.getAbsolutePath()))); // Create a new Repository.
-        
-        try (RepositoryConnection conn = db.getConnection()) { // Open a connection to the database
-            
+        defaultShapesDb = new SailRepository(new NativeStore(new File(dbDir.getAbsolutePath()))); // Create a new Repository.
+
+        try (RepositoryConnection conn = defaultShapesDb.getConnection()) { // Open a connection to the database
+            this.defaultRepoConnection = conn;
             constructShapeWithoutPruning(classToPropWithObjTypes, conn);
             conn.setNamespace("shape", Constants.SHAPES_NAMESPACE);
             conn.setNamespace("shape", Constants.SHACL_NAMESPACE);
+<<<<<<< HEAD:src/main/java/cs/qse/common/ShapesExtractor.java
+
+=======
             
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/common/ShapesExtractor.java
             PostConstraintsAnnotator pca = new PostConstraintsAnnotator(conn);
             pca.addShNodeConstraint();
-            
+
             // Compute Statistics and prepare logs
             System.out.println("MODEL:: DEFAULT - SIZE: " + conn.size());
-            HashMap<String, String> currentShapesModelStats = this.computeShapeStatistics(conn);
-            
+            currentShapesModelStats = this.computeShapeStatistics(conn);
+
             StringBuilder header = new StringBuilder("DATASET,Confidence,Support,");
             StringBuilder log = new StringBuilder(Main.datasetName + ", > " + 1.0 + "%, > " + 1.0 + ",");
             for (Map.Entry<String, String> entry : currentShapesModelStats.entrySet()) {
@@ -101,22 +131,25 @@ public class ShapesExtractor {
                 log = new StringBuilder(log.append(v).append(","));
                 header = new StringBuilder(header.append(entry.getKey()) + ",");
             }
-            
+
             FilesUtil.writeToFileInAppendMode(header.toString(), logfileAddress);
             FilesUtil.writeToFileInAppendMode(log.toString(), logfileAddress);
-            
+
             String outputFilePath = this.writeModelToFile("QSE_FULL", conn);
             this.prettyFormatTurtle(outputFilePath);
             FilesUtil.deleteFile(outputFilePath);
         } finally {
-            db.shutDown();// before our program exits, make sure the database is properly shut down.
+            defaultShapesDb.shutDown();// before our program exits, make sure the database is properly shut down.
         }
     }
-    
+
     /**
      * QSE-Default sub-method to construct Node and Property shapes without pruning
      */
+
+
     private void constructShapeWithoutPruning(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes, RepositoryConnection conn) {
+        nodeShapes = new ArrayList<>();
         if (classToPropWithObjTypes.size() > 10000) { // partition to reduce memory consumption by Model creation library
             List<Integer> classesList = new ArrayList<>(classToPropWithObjTypes.keySet());
             List<List<Integer>> classesPartition = Lists.partition(classesList, classToPropWithObjTypes.size() / 4);
@@ -124,8 +157,10 @@ public class ShapesExtractor {
                 Model m = null;
                 ModelBuilder b = new ModelBuilder();
                 partition.forEach(encodedClassIRI -> {
+                    NS ns = new NS();
                     Map<Integer, Set<Integer>> propToObjectType = classToPropWithObjTypes.get(encodedClassIRI);
-                    buildShapes(b, encodedClassIRI, propToObjectType);
+                    buildShapes(b, encodedClassIRI, propToObjectType, ns);
+                    nodeShapes.add(ns);
                 });
                 m = b.build();
                 conn.add(m);
@@ -135,19 +170,30 @@ public class ShapesExtractor {
             Model m = null;
             ModelBuilder b = new ModelBuilder();
             classToPropWithObjTypes.forEach((encodedClassIRI, propToObjectType) -> {
-                buildShapes(b, encodedClassIRI, propToObjectType);
+                NS ns = new NS();
+                buildShapes(b, encodedClassIRI, propToObjectType, ns);
+                nodeShapes.add(ns);
             });
             m = b.build();
             conn.add(m);
         }
     }
-    
-    private void buildShapes(ModelBuilder b, Integer encodedClassIRI, Map<Integer, Set<Integer>> propToObjectType) {
+
+    private void buildShapes(ModelBuilder b, Integer encodedClassIRI, Map<Integer, Set<Integer>> propToObjectType, NS ns) {
         if (Utils.isValidIRI(encoder.decode(encodedClassIRI))) {
             IRI subj = factory.createIRI(encoder.decode(encodedClassIRI));
             String nodeShape = Constants.SHAPES_NAMESPACE + subj.getLocalName() + "Shape";
             b.subject(nodeShape)
                     .add(RDF.TYPE, SHACL.NODE_SHAPE)
+<<<<<<< HEAD:src/main/java/cs/qse/common/ShapesExtractor.java
+                    .add(SHACL.TARGET_CLASS, subj)
+                    .add(Constants.SUPPORT, classInstanceCount.get(encodedClassIRI));
+
+            ns.setIri(factory.createIRI(nodeShape));
+            ns.setSupport(classInstanceCount.get(encodedClassIRI));
+            ns.setTargetClass(subj);
+            currNodeShape = ns;
+=======
                     .add(SHACL.TARGET_CLASS, subj);
             //.add(SHACL.IGNORED_PROPERTIES, RDF.TYPE)
             //.add(SHACL.CLOSED, true);
@@ -156,6 +202,7 @@ public class ShapesExtractor {
                 //b.subject(nodeShape).add(VOID.ENTITIES, classInstanceCount.get(encodedClassIRI));
             }
             
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/common/ShapesExtractor.java
             if (propToObjectType != null) {
                 constructPropertyShapes(b, subj, encodedClassIRI, nodeShape, propToObjectType); // Property Shapes
             }
@@ -163,28 +210,33 @@ public class ShapesExtractor {
             System.out.println("constructShapeWithoutPruning::INVALID SUBJECT IRI: " + encoder.decode(encodedClassIRI));
         }
     }
-    
-    
+
+
     /**
      * ====================================  QSE-Pruned Shapes Construction ============================================
      */
     public void constructPrunedShapes(Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes, Double confidence, Integer support) {
-        
+
         File dbDir = new File(Main.outputFilePath + "db_" + confidence + "_" + support);
         performDirCheck(dbDir);
         Repository db = new SailRepository(new NativeStore(new File(dbDir.getAbsolutePath()))); // Create a new Repository.
-        
+
         try (RepositoryConnection conn = db.getConnection()) { // Open a connection to the database
+            this.prunedRepoConnection = conn;
             constructShapesWithPruning(classToPropWithObjTypes, confidence, support, conn);
             conn.setNamespace("shape", Constants.SHAPES_NAMESPACE);
             conn.setNamespace("shape", Constants.SHACL_NAMESPACE);
+<<<<<<< HEAD:src/main/java/cs/qse/common/ShapesExtractor.java
+
+=======
             
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/common/ShapesExtractor.java
             PostConstraintsAnnotator pca_pruned = new PostConstraintsAnnotator(conn);
             pca_pruned.addShNodeConstraint();
-            
+
             System.out.println("MODEL:: CUSTOM - SIZE: " + conn.size() + " | PARAMS: " + confidence * 100 + " - " + support);
-            
-            HashMap<String, String> currentShapesModelStats = this.computeShapeStatistics(conn);
+
+            currentShapesModelStats = this.computeShapeStatistics(conn);
             StringBuilder log = new StringBuilder(Main.datasetName + ", > " + confidence * 100 + "%, > " + support + ",");
             for (Map.Entry<String, String> entry : currentShapesModelStats.entrySet()) {
                 String v = entry.getValue();
@@ -195,10 +247,10 @@ public class ShapesExtractor {
             this.prettyFormatTurtle(outputFilePath);
             FilesUtil.deleteFile(outputFilePath);
         } finally {
-            db.shutDown(); // before our program exits, make sure the database is properly shut down.
+            //db.shutDown(); // before our program exits, make sure the database is properly shut down.
         }
     }
-    
+
     /**
      * QSE-Pruned sub-method Construct Node and Property Shapes with specified support and confidence
      * Also include computation of relative support if QSE-Approximate (isSampling) is true
@@ -207,7 +259,7 @@ public class ShapesExtractor {
         if (classToPropWithObjTypes.size() > 10000) { // partition to reduce memory consumption by Model creation library
             List<Integer> classesList = new ArrayList<>(classToPropWithObjTypes.keySet());
             List<List<Integer>> classesPartition = Lists.partition(classesList, classToPropWithObjTypes.size() / 4);
-            
+
             classesPartition.forEach(partition -> {
                 Model m = null;
                 ModelBuilder b = new ModelBuilder();
@@ -230,13 +282,13 @@ public class ShapesExtractor {
             conn.add(m);
         }
     }
-    
+
     private void buildAndPruneShapes(Double confidence, Integer support, ModelBuilder b, Integer encodedClassIRI, Map<Integer, Set<Integer>> propToObjectType) {
         if (Utils.isValidIRI(encoder.decode(encodedClassIRI))) {
             IRI subj = factory.createIRI(encoder.decode(encodedClassIRI));
             int classId = encoder.encode(subj.stringValue());
             int classInstances = classInstanceCount.get(classId);
-            
+
             //NODE SHAPES PRUNING based on support
             if (support == 1) {
                 if (classInstances >= support) {
@@ -251,7 +303,7 @@ public class ShapesExtractor {
             System.out.println("constructShapesWithPruning:: INVALID SUBJECT IRI: " + encoder.decode(encodedClassIRI));
         }
     }
-    
+
     /**
      * QSE-Pruned sub-method
      */
@@ -263,10 +315,10 @@ public class ShapesExtractor {
                 .add(SHACL.TARGET_CLASS, subj);
         //.add(SHACL.IGNORED_PROPERTIES, RDF.TYPE)
         //.add(SHACL.CLOSED, true);
-        
+
         if (propToObjectType != null) {
             Map<Integer, Set<Integer>> propToObjectTypesLocalPositive = performPropShapePruningPositive(encodedClassIRI, propToObjectType, confidence, support);
-            
+
             if (ConfigManager.getProperty("qse_validation_with_shNot") != null) {
                 if (Boolean.parseBoolean(ConfigManager.getProperty("qse_validation_with_shNot"))) {
                     Map<Integer, Set<Integer>> propToObjectTypesLocalNegative = performPropShapePruningNegative(encodedClassIRI, propToObjectType, confidence, support);
@@ -279,7 +331,7 @@ public class ShapesExtractor {
             }
         }
     }
-    
+
     /**
      * QSE-Pruned sub-method
      */
@@ -289,14 +341,14 @@ public class ShapesExtractor {
             Integer prop = entry.getKey();
             Set<Integer> propObjectTypes = entry.getValue();
             HashSet<Integer> objTypesSet = new HashSet<>();
-            
+
             //Make sure instant type (either rdf:type or wdt:P31 of WikiData) is not pruned
             IRI property = factory.createIRI(encoder.decode(prop));
             boolean isInstantTypeProperty = property.toString().equals(remAngBrackets(typePredicate));
             if (isInstantTypeProperty) {
                 propToObjectTypesLocal.put(prop, objTypesSet);
             }
-            
+
             //compute Relative Support if sampling is on
             double relativeSupport = 0;
             if (isSamplingOn) {
@@ -309,7 +361,7 @@ public class ShapesExtractor {
                     supportToRelativeSupport.put(support, list);
                 }
             }
-            
+
             positivePruning(classEncodedLabel, confidence, support, prop, propObjectTypes, objTypesSet, relativeSupport);
             if (objTypesSet.size() != 0) {
                 propToObjectTypesLocal.put(prop, objTypesSet);
@@ -317,21 +369,21 @@ public class ShapesExtractor {
         }
         return propToObjectTypesLocal;
     }
-    
+
     private Map<Integer, Set<Integer>> performPropShapePruningNegative(Integer classEncodedLabel, Map<Integer, Set<Integer>> propToObjectType, Double confidence, Integer support) {
         Map<Integer, Set<Integer>> propToObjectTypesLocal = new HashMap<>();
         for (Map.Entry<Integer, Set<Integer>> entry : propToObjectType.entrySet()) {
             Integer prop = entry.getKey();
             Set<Integer> propObjectTypes = entry.getValue();
             HashSet<Integer> objTypesSet = new HashSet<>();
-            
+
             //Make sure instant type (either rdf:type or wdt:P31 of WikiData) is not pruned
             IRI property = factory.createIRI(encoder.decode(prop));
             boolean isInstantTypeProperty = property.toString().equals(remAngBrackets(typePredicate));
             if (isInstantTypeProperty) {
                 propToObjectTypesLocal.put(prop, objTypesSet);
             }
-            
+
             //compute Relative Support if sampling is on
             double relativeSupport = 0;
             if (isSamplingOn) {
@@ -344,30 +396,30 @@ public class ShapesExtractor {
                     supportToRelativeSupport.put(support, list);
                 }
             }
-            
+
             negativePruning(classEncodedLabel, confidence, support, prop, propObjectTypes, objTypesSet, relativeSupport);
-            
+
             if (objTypesSet.size() != 0) {
                 propToObjectTypesLocal.put(prop, objTypesSet);
             }
         }
         return propToObjectTypesLocal;
     }
-    
+
     private void positivePruning(Integer classEncodedLabel, Double confidence, Integer support, Integer prop, Set<Integer> propObjectTypes, HashSet<Integer> objTypesSet, double relativeSupport) {
         for (Integer encodedObjectType : propObjectTypes) {
             Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(classEncodedLabel, prop, encodedObjectType);
-            
-            
+
+
             if (shapeTripletSupport.containsKey(tuple3)) {
                 SupportConfidence sc = shapeTripletSupport.get(tuple3);
-                
+
                 if (support == 1) {
                     if (sc.getConfidence() > confidence && sc.getSupport() >= support) {
                         objTypesSet.add(encodedObjectType);
                     }
                 }
-                
+
                 if (isSamplingOn && support != 1) {
                     //support = (int) relativeSupport;
                     if (sc.getConfidence() > confidence && sc.getSupport() > relativeSupport) {
@@ -381,21 +433,21 @@ public class ShapesExtractor {
             }
         }
     }
-    
+
     private void negativePruning(Integer classEncodedLabel, Double confidence, Integer support, Integer prop, Set<Integer> propObjectTypes, HashSet<Integer> objTypesSet, double relativeSupport) {
         for (Integer encodedObjectType : propObjectTypes) {
             Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(classEncodedLabel, prop, encodedObjectType);
-            
-            
+
+
             if (shapeTripletSupport.containsKey(tuple3)) {
                 SupportConfidence sc = shapeTripletSupport.get(tuple3);
-                
+
                 if (support == 1) {
                     if (sc.getConfidence() <= confidence && sc.getSupport() < support) {
                         objTypesSet.add(encodedObjectType);
                     }
                 }
-                
+
                 if (isSamplingOn && support != 1) {
                     //support = (int) relativeSupport;
                     if (sc.getConfidence() <= confidence && sc.getSupport() < relativeSupport) {
@@ -409,47 +461,59 @@ public class ShapesExtractor {
             }
         }
     }
-    
-    
+
+
     //==================================== SHARED Methods between QSE-Pruned and QSE-Default===========================
-    
+
     /**
      * SHARED METHOD (QSE-Default & QSE-Pruned) : to build node and property shapes
      */
     private void constructPropertyShapes(ModelBuilder b, IRI subj, Integer subjEncoded, String nodeShape, Map<Integer, Set<Integer>> propToObjectTypesLocal) {
         Map<String, Integer> propDuplicateDetector = new HashMap<>();
-        
+        List<PS> propertyShapes = new ArrayList<>();
+
         propToObjectTypesLocal.forEach((prop, propObjectTypes) -> {
             ModelBuilder localBuilder = new ModelBuilder();
             IRI property = factory.createIRI(encoder.decode(prop));
             String localName = property.getLocalName();
+<<<<<<< HEAD:src/main/java/cs/qse/common/ShapesExtractor.java
+            PS ps = new PS();
+            currPropertyShape = ps;
+=======
 
             if(property.toString().equals("http://swat.cse.lehigh.edu/onto/univ-bench.owl#advisor"))
                 System.out.println();
             
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/common/ShapesExtractor.java
             boolean isInstanceTypeProperty = property.toString().equals(remAngBrackets(typePredicate));
             if (isInstanceTypeProperty) {
                 localName = "instanceType";
             }
-            
+
             if (propDuplicateDetector.containsKey(localName)) {
                 int freq = propDuplicateDetector.get(localName);
                 propDuplicateDetector.put(localName, freq + 1);
                 localName = localName + "_" + freq;
             }
             propDuplicateDetector.putIfAbsent(localName, 1);
-            
+
             IRI propShape = factory.createIRI(Constants.SHAPES_NAMESPACE + localName + subj.getLocalName() + "ShapeProperty");
 
+<<<<<<< HEAD:src/main/java/cs/qse/common/ShapesExtractor.java
+=======
             if(propShape.toString().equals("http://shaclshapes.org/seeAlsoNamedIndividualShapeProperty"))
                 System.out.println();
             
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/common/ShapesExtractor.java
             b.subject(nodeShape)
                     .add(SHACL.PROPERTY, propShape);
             b.subject(propShape)
                     .add(RDF.TYPE, SHACL.PROPERTY_SHAPE)
                     .add(SHACL.PATH, property);
-            
+
+            ps.setIri(propShape);
+            ps.setPath(property.toString());
+
             if (isInstanceTypeProperty) {
                 Resource head = bnode();
                 List<Resource> members = Arrays.asList(new Resource[]{subj});
@@ -462,10 +526,11 @@ public class ShapesExtractor {
                 b.build().addAll(tempModel);
                 b.build().addAll(localBuilder.build());
             }
-            
+
             int numberOfObjectTypes = propObjectTypes.size();
-            
+
             if (numberOfObjectTypes == 1 && !isInstanceTypeProperty) {
+                ps.setHasOrList(false);
                 propObjectTypes.forEach(encodedObjectType -> {
                     Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(encoder.encode(subj.stringValue()), prop, encodedObjectType);
                     if (shapeTripletSupport.containsKey(tuple3)) {
@@ -486,6 +551,9 @@ public class ShapesExtractor {
                             b.subject(propShape).add(SHACL.DATATYPE, objectTypeIri);
                             b.subject(propShape).add(SHACL.NODE_KIND, SHACL.LITERAL);
                             annotateWithSupportAndConfidence(propShape, localBuilder, tuple3);
+
+                            ps.setNodeKind(SHACL.LITERAL.getLocalName());
+                            ps.setDataTypeOrClass(objectTypeIri.toString());
                         } else {
                             //objectType = objectType.replace("<", "").replace(">", "");
                             if (Utils.isValidIRI(objectType) && !objectType.equals(Constants.OBJECT_UNDEFINED_TYPE)) {
@@ -493,12 +561,17 @@ public class ShapesExtractor {
                                 b.subject(propShape).add(SHACL.CLASS, objectTypeIri);
                                 b.subject(propShape).add(SHACL.NODE_KIND, SHACL.IRI);
                                 annotateWithSupportAndConfidence(propShape, localBuilder, tuple3);
+
+                                ps.setNodeKind(SHACL.IRI.getLocalName());
+                                ps.setDataTypeOrClass(objectTypeIri.toString());
                             } else {
                                 //IRI objectTypeIri = factory.createIRI(objectType);
                                 //b.subject(propShape).add(SHACL.CLASS, objectType);
                                 //System.out.println("INVALID Object Type IRI: " + objectType);
                                 b.subject(propShape).add(SHACL.NODE_KIND, SHACL.IRI);
                                 annotateWithSupportAndConfidence(propShape, localBuilder, tuple3);
+
+                                ps.setNodeKind(SHACL.IRI.getLocalName());
                                 if (objectType.equals(Constants.OBJECT_UNDEFINED_TYPE))
                                     b.subject(propShape).add(SHACL.MIN_COUNT, factory.createLiteral(XMLDatatypeUtil.parseInteger("1")));
                             }
@@ -506,16 +579,26 @@ public class ShapesExtractor {
                     } else {
                         // in case the type is null, we set it default as string
                         b.subject(propShape).add(SHACL.DATATYPE, XSD.STRING);
+                        ps.setDataTypeOrClass(XSD.STRING.getLocalName());
                     }
                 });
-                
+
                 b.build().addAll(localBuilder.build());
             }
             if (numberOfObjectTypes > 1) {
+
+                ps.setHasOrList(true);
                 List<Resource> members = new ArrayList<>();
                 Resource headMember = bnode();
+<<<<<<< HEAD:src/main/java/cs/qse/common/ShapesExtractor.java
+                List<ShaclOrListItem> shaclOrListItems = new ArrayList<>();
+
+=======
                 
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/common/ShapesExtractor.java
                 for (Integer encodedObjectType : propObjectTypes) {
+                    ShaclOrListItem shaclOrListItem = new ShaclOrListItem();
+                    currShaclOrListItem = shaclOrListItem;
                     Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(encoder.encode(subj.stringValue()), prop, encodedObjectType);
                     String objectType = encoder.decode(encodedObjectType);
                     Resource currentMember = bnode();
@@ -530,25 +613,33 @@ public class ShapesExtractor {
                             }
                         }
                     }
-                    
+
                     if (objectType != null) {
                         if (objectType.contains(XSD.NAMESPACE) || objectType.contains(RDF.LANGSTRING.toString())) {
                             if (objectType.contains("<")) {objectType = objectType.replace("<", "").replace(">", "");}
                             IRI objectTypeIri = factory.createIRI(objectType);
                             localBuilder.subject(currentMember).add(SHACL.DATATYPE, objectTypeIri);
                             localBuilder.subject(currentMember).add(SHACL.NODE_KIND, SHACL.LITERAL);
-                            
+
+                            shaclOrListItem.setDataTypeOrClass(objectTypeIri.toString());
+                            shaclOrListItem.setNodeKind(SHACL.LITERAL.getLocalName());
+
                             annotateWithSupportAndConfidence(currentMember, localBuilder, tuple3);
-                            
+
                         } else {
                             if (Utils.isValidIRI(objectType) && !objectType.equals(Constants.OBJECT_UNDEFINED_TYPE)) {
                                 IRI objectTypeIri = factory.createIRI(objectType);
                                 localBuilder.subject(currentMember).add(SHACL.CLASS, objectTypeIri);
                                 localBuilder.subject(currentMember).add(SHACL.NODE_KIND, SHACL.IRI);
+
+                                shaclOrListItem.setDataTypeOrClass(objectTypeIri.toString());
+                                shaclOrListItem.setNodeKind(SHACL.IRI.getLocalName());
+
                                 annotateWithSupportAndConfidence(currentMember, localBuilder, tuple3);
                             } else {
                                 //System.out.println("INVALID Object Type IRI: " + objectType);
                                 localBuilder.subject(currentMember).add(SHACL.NODE_KIND, SHACL.IRI);
+                                shaclOrListItem.setNodeKind(SHACL.IRI.getLocalName());
                                 annotateWithSupportAndConfidence(currentMember, localBuilder, tuple3);
                             }
                         }
@@ -556,48 +647,57 @@ public class ShapesExtractor {
                         // in case the type is null, we set it default as string
                         //b.subject(propShape).add(SHACL.DATATYPE, XSD.STRING);
                         localBuilder.subject(currentMember).add(SHACL.DATATYPE, XSD.STRING);
+                        shaclOrListItem.setDataTypeOrClass(XSD.STRING.getLocalName());
                     }
                     members.add(currentMember);
+                    shaclOrListItems.add(shaclOrListItem);
                 }
+
+
                 Model localModel = RDFCollections.asRDF(members, headMember, new LinkedHashModel());
                 localModel.add(propShape, SHACL.OR, headMember);
                 localModel.addAll(localBuilder.build());
                 b.build().addAll(localModel);
+
+                ps.setShaclOrListItems(shaclOrListItems);
             }
+
+            propertyShapes.add(ps);
         });
+        currNodeShape.setPropertyShapes(propertyShapes);
     }
-    
-    
+
+
     /**
      * SHARED METHOD (QSE-Default & QSE-Pruned) : to build node and property shapes with sh:not
      */
     private void constructPropertyShapesWithShNot(ModelBuilder b, IRI subj, Integer subjEncoded, String nodeShape, Map<Integer, Set<Integer>> PropToObjectTypesPositive, Map<Integer, Set<Integer>> propToObjectTypesNegative) {
         Map<String, Integer> propDuplicateDetector = new HashMap<>();
-        
+
         //handle positive property shapes
         PropToObjectTypesPositive.forEach((prop, propObjectTypes) -> {
             ModelBuilder localBuilder = new ModelBuilder();
             IRI property = factory.createIRI(encoder.decode(prop));
             String localName = property.getLocalName();
-            
+
             boolean isInstanceTypeProperty = property.toString().equals(remAngBrackets(typePredicate));
             if (isInstanceTypeProperty) {localName = "instanceType";}
-            
+
             if (propDuplicateDetector.containsKey(localName)) {
                 int freq = propDuplicateDetector.get(localName);
                 propDuplicateDetector.put(localName, freq + 1);
                 localName = localName + "_" + freq;
             }
             propDuplicateDetector.putIfAbsent(localName, 1);
-            
+
             IRI propShape = factory.createIRI(Constants.SHAPES_NAMESPACE + localName + subj.getLocalName() + "ShapeProperty");
-            
+
             b.subject(nodeShape)
                     .add(SHACL.PROPERTY, propShape);
             b.subject(propShape)
                     .add(RDF.TYPE, SHACL.PROPERTY_SHAPE)
                     .add(SHACL.PATH, property);
-            
+
             if (isInstanceTypeProperty) {
                 Resource head = bnode();
                 List<Resource> members = Arrays.asList(new Resource[]{subj});
@@ -610,9 +710,9 @@ public class ShapesExtractor {
                 b.build().addAll(tempModel);
                 b.build().addAll(localBuilder.build());
             }
-            
+
             int numberOfObjectTypes = propObjectTypes.size();
-            
+
             if (numberOfObjectTypes == 1 && !isInstanceTypeProperty) {
                 propObjectTypes.forEach(encodedObjectType -> {
                     Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(encoder.encode(subj.stringValue()), prop, encodedObjectType);
@@ -656,14 +756,14 @@ public class ShapesExtractor {
                         b.subject(propShape).add(SHACL.DATATYPE, XSD.STRING);
                     }
                 });
-                
+
                 b.build().addAll(localBuilder.build());
             }
             if (numberOfObjectTypes > 1) {
                 List<Resource> members = new ArrayList<>();
                 Resource headMember = bnode();
-                
-                
+
+
                 for (Integer encodedObjectType : propObjectTypes) {
                     Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(encoder.encode(subj.stringValue()), prop, encodedObjectType);
                     String objectType = encoder.decode(encodedObjectType);
@@ -679,16 +779,16 @@ public class ShapesExtractor {
                             }
                         }
                     }
-                    
+
                     if (objectType != null) {
                         if (objectType.contains(XSD.NAMESPACE) || objectType.contains(RDF.LANGSTRING.toString())) {
                             if (objectType.contains("<")) {objectType = objectType.replace("<", "").replace(">", "");}
                             IRI objectTypeIri = factory.createIRI(objectType);
                             localBuilder.subject(currentMember).add(SHACL.DATATYPE, objectTypeIri);
                             localBuilder.subject(currentMember).add(SHACL.NODE_KIND, SHACL.LITERAL);
-                            
+
                             annotateWithSupportAndConfidence(currentMember, localBuilder, tuple3);
-                            
+
                         } else {
                             if (Utils.isValidIRI(objectType) && !objectType.equals(Constants.OBJECT_UNDEFINED_TYPE)) {
                                 IRI objectTypeIri = factory.createIRI(objectType);
@@ -714,43 +814,43 @@ public class ShapesExtractor {
                 b.build().addAll(localModel);
             }
         });
-        
+
         //handle negative property shapes to annotate with sh:not
         propToObjectTypesNegative.forEach((prop, propObjectTypes) -> {
             ModelBuilder localBuilder = new ModelBuilder();
             IRI property = factory.createIRI(encoder.decode(prop));
             String localName = property.getLocalName();
-            
+
             boolean isInstanceTypeProperty = property.toString().equals(remAngBrackets(typePredicate));
             if (isInstanceTypeProperty) {localName = "instanceType";}
-            
+
             if (propDuplicateDetector.containsKey(localName)) {
                 int freq = propDuplicateDetector.get(localName);
                 propDuplicateDetector.put(localName, freq + 1);
                 localName = localName + "_" + freq;
             }
             propDuplicateDetector.putIfAbsent(localName, 1);
-            
+
             //create node shape IRI for each property shape
             IRI shNotNodeShapeIriForPropShape = factory.createIRI(Constants.SHAPES_NAMESPACE + localName + subj.getLocalName() + "_PS_NotShape");
-            
+
             // add sh:not to current node shape
             b.subject(nodeShape).add(SHACL.NOT, shNotNodeShapeIriForPropShape);
-            
+
             // create node shape
             b.subject(shNotNodeShapeIriForPropShape).add(RDF.TYPE, SHACL.NODE_SHAPE);
-            
+
             //add property shape to current sh:not node shape -> shNotNodeShapeIriForPropShape
             IRI propShape = factory.createIRI(Constants.SHAPES_NAMESPACE + localName + subj.getLocalName() + "ShapeProperty");
             b.subject(shNotNodeShapeIriForPropShape).add(SHACL.PROPERTY, propShape);
-            
-            
+
+
             //Add constraints of the property shape
-            
+
             b.subject(propShape)
                     .add(RDF.TYPE, SHACL.PROPERTY_SHAPE)
                     .add(SHACL.PATH, property);
-            
+
             if (isInstanceTypeProperty) {
                 Resource head = bnode();
                 List<Resource> members = Arrays.asList(new Resource[]{subj});
@@ -763,9 +863,9 @@ public class ShapesExtractor {
                 b.build().addAll(tempModel);
                 b.build().addAll(localBuilder.build());
             }
-            
+
             int numberOfObjectTypes = propObjectTypes.size();
-            
+
             if (numberOfObjectTypes == 1 && !isInstanceTypeProperty) {
                 propObjectTypes.forEach(encodedObjectType -> {
                     Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(encoder.encode(subj.stringValue()), prop, encodedObjectType);
@@ -809,14 +909,14 @@ public class ShapesExtractor {
                         b.subject(propShape).add(SHACL.DATATYPE, XSD.STRING);
                     }
                 });
-                
+
                 b.build().addAll(localBuilder.build());
             }
             if (numberOfObjectTypes > 1) {
                 List<Resource> members = new ArrayList<>();
                 Resource headMember = bnode();
-                
-                
+
+
                 for (Integer encodedObjectType : propObjectTypes) {
                     Tuple3<Integer, Integer, Integer> tuple3 = new Tuple3<>(encoder.encode(subj.stringValue()), prop, encodedObjectType);
                     String objectType = encoder.decode(encodedObjectType);
@@ -832,16 +932,16 @@ public class ShapesExtractor {
                             }
                         }
                     }
-                    
+
                     if (objectType != null) {
                         if (objectType.contains(XSD.NAMESPACE) || objectType.contains(RDF.LANGSTRING.toString())) {
                             if (objectType.contains("<")) {objectType = objectType.replace("<", "").replace(">", "");}
                             IRI objectTypeIri = factory.createIRI(objectType);
                             localBuilder.subject(currentMember).add(SHACL.DATATYPE, objectTypeIri);
                             localBuilder.subject(currentMember).add(SHACL.NODE_KIND, SHACL.LITERAL);
-                            
+
                             annotateWithSupportAndConfidence(currentMember, localBuilder, tuple3);
-                            
+
                         } else {
                             if (Utils.isValidIRI(objectType) && !objectType.equals(Constants.OBJECT_UNDEFINED_TYPE)) {
                                 IRI objectTypeIri = factory.createIRI(objectType);
@@ -868,7 +968,7 @@ public class ShapesExtractor {
             }
         });
     }
-    
+
     /**
      * SHARED METHOD (QSE-Default & QSE-Pruned) : to annotate shapes with support and confidence
      */
@@ -879,9 +979,12 @@ public class ShapesExtractor {
             //localBuilder.subject(currentMember).add(VOID.ENTITIES, entities);
             Literal confidence = Values.literal(shapeTripletSupport.get(tuple3).getConfidence()); // confidence value
             localBuilder.subject(currentMember).add(Constants.CONFIDENCE, confidence);
+
+            currShaclOrListItem.setConfidence(confidence.doubleValue());
+            currShaclOrListItem.setSupport(entities.intValue());
         }
     }
-    
+
     /**
      * SHARED METHOD (QSE-Default & QSE-Pruned) : to annotate shapes with support and confidence
      */
@@ -892,9 +995,12 @@ public class ShapesExtractor {
             //localBuilder.subject(propShape).add(VOID.ENTITIES, entities);
             Literal confidence = Values.literal(shapeTripletSupport.get(tuple3).getConfidence()); // confidence value
             localBuilder.subject(propShape).add(Constants.CONFIDENCE, confidence);
+
+            currPropertyShape.setConfidence(confidence.doubleValue());
+            currPropertyShape.setSupport(entities.intValue());
         }
     }
-    
+
     /**
      * SHARED METHOD (QSE-Default & QSE-Pruned) : to compute statistics of output shapes
      */
@@ -942,10 +1048,10 @@ public class ShapesExtractor {
                 shapesStats.put(ExperimentsUtil.getMinHeader().get(i), "-999");
             }
         }
-        
+
         return shapesStats;
     }
-    
+
     /**
      * SHARED METHOD (QSE-Default & QSE-Pruned) : to execute a specific SPARQL query
      */
@@ -963,36 +1069,36 @@ public class ShapesExtractor {
         }
         return queryOutput;
     }
-    
+
     /**
      * SHARED METHOD (QSE-Default & QSE-Pruned) : to remove angle brackets from a predicate
      */
     public String remAngBrackets(String typePredicate) {
         return typePredicate.replace("<", "").replace(">", "");
     }
-    
-    
+
+
     //============================================= Utility Methods ====================================================
-    
+
     private static void performDirCheck(File dbDir) {
         if (dbDir.exists()) {
             if (dbDir.delete())
                 System.out.println("Deleted already existing directory. This will avoid duplication.");
         }
-        
+
         if (!dbDir.exists())
             if (dbDir.mkdir())
                 System.out.println(dbDir.getAbsoluteFile() + " created successfully.");
             else System.out.println("WARNING::directory creation failed");
     }
-    
+
     public String writeModelToFile(String fileIdentifier, RepositoryConnection conn) {
         StopWatch watch = new StopWatch();
         watch.start();
         String path = Main.outputFilePath;
         String outputPath = path + Main.datasetName + "_" + fileIdentifier + ".ttl";
         System.out.println("::: ShapesExtractor ~ WRITING MODEL TO FILE: " + outputPath);
-        
+
         GraphQuery query = conn.prepareGraphQuery("CONSTRUCT WHERE { ?s ?p ?o .}");
         Model model = QueryResults.asModel(query.evaluate());
         try {
@@ -1005,13 +1111,14 @@ public class ShapesExtractor {
         System.out.println("writeModelToFile " + " - " + TimeUnit.MILLISECONDS.toSeconds(watch.getTime()) + " - " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
         return outputPath;
     }
-    
+
     public void prettyFormatTurtle(String inputFilePath) {
         StopWatch watch = new StopWatch();
         watch.start();
         Path path = Paths.get(inputFilePath);
         String fileName = FilenameUtils.removeExtension(path.getFileName().toString()) + "_SHACL.ttl";
         String outputPath = Main.outputFilePath + fileName;
+        this.outputFileAddress = outputPath;
         System.out.println("::: ShapesExtractor ~ PRETTY FORMATTING TURTLE FILE: " + outputPath);
         try {
             new TurtlePrettyFormatter(inputFilePath).format(outputPath);
@@ -1021,35 +1128,39 @@ public class ShapesExtractor {
         watch.stop();
         System.out.println("prettyFormatTurtle " + " - " + TimeUnit.MILLISECONDS.toSeconds(watch.getTime()) + " - " + TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
-    
+
     //============================================= Setter Methods =====================================================
-    
+
     public void setPropWithClassesHavingMaxCountOne(Map<Integer, Set<Integer>> propWithClassesHavingMaxCountOne) {
         this.propWithClassesHavingMaxCountOne = propWithClassesHavingMaxCountOne;
     }
-    
+
     public void setSampledEntitiesPerClass(Map<Integer, List<Integer>> sampledEntitiesPerClass) {
         this.sampledEntitiesPerClass = sampledEntitiesPerClass;
     }
-    
-    
+
+
     //============================================= Other Methods ======================================================
-    
+
     public Boolean isSamplingOn() {
         return isSamplingOn;
     }
-    
+
     public void setSamplingOn(Boolean samplingOn) {
         isSamplingOn = samplingOn;
     }
-    
+
     public void setPropCount(Map<Integer, Integer> propCount) {
         this.propCount = propCount;
     }
-    
+
     public void setSampledPropCount(Map<Integer, Integer> sampledPropCount) {
         this.sampledPropCount = propCount;
     }
+<<<<<<< HEAD:src/main/java/cs/qse/common/ShapesExtractor.java
+
+    public String getOutputFileAddress() { return outputFileAddress;}
+=======
     
     private boolean isAnnotationOfSupportConfidenceActivated() {
         boolean flag = true;
@@ -1058,4 +1169,5 @@ public class ShapesExtractor {
         }
         return flag;
     }
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/common/ShapesExtractor.java
 }
