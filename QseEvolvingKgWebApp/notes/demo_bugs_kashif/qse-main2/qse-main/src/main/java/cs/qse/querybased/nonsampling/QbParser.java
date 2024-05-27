@@ -33,11 +33,17 @@ public class QbParser {
     //HashMap<String, HashMap<Node, HashSet<String>>> classToPropWithObjTypes;
     Map<Integer, Map<Integer, Set<Integer>>> classToPropWithObjTypes;
     HashMap<Tuple3<Integer, Integer, Integer>, SupportConfidence> shapeTripletSupport;
+
     Set<Integer> classes;
     StringEncoder stringEncoder;
     String instantiationProperty;
     Boolean qseFromSpecificClasses;
+
     long globalComputeSupportMethodTime = 0L;
+<<<<<<< HEAD:src/main/java/cs/qse/querybased/nonsampling/QbParser.java
+    public ShapesExtractor shapesExtractor;
+=======
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/querybased/nonsampling/QbParser.java
 
     public QbParser(String typeProperty) {
         this.graphDBUtils = new GraphDBUtils();
@@ -50,6 +56,20 @@ public class QbParser {
         this.qseFromSpecificClasses = Main.qseFromSpecificClasses;
     }
 
+<<<<<<< HEAD:src/main/java/cs/qse/querybased/nonsampling/QbParser.java
+    // This constructor will be called from SHACTOR DEMO
+    public QbParser(int expectedNumberOfClasses, String typePredicate, String graphdbUrl, String graphdbRepository) {
+        this.graphDBUtils = new GraphDBUtils(graphdbUrl, graphdbRepository);
+        this.classEntityCount = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
+        this.classToPropWithObjTypes = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
+        this.shapeTripletSupport = new HashMap<>((int) ((expectedNumberOfClasses) / 0.75 + 1));
+        this.stringEncoder = new StringEncoder();
+        this.instantiationProperty = typePredicate;
+        this.qseFromSpecificClasses = false;
+    }
+
+=======
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/querybased/nonsampling/QbParser.java
     public void run() {
         runParser();
     }
@@ -66,6 +86,9 @@ public class QbParser {
         System.out.println("Size: classToPropWithObjTypes :: " + classToPropWithObjTypes.size() + " , Size: shapeTripletSupport :: " + shapeTripletSupport.size());
     }
 
+<<<<<<< HEAD:src/main/java/cs/qse/querybased/nonsampling/QbParser.java
+    public void getNumberOfInstancesOfEachClass() {
+=======
     private void deleteOutputDir() {
         try {
             Files.walk(Paths.get(Main.outputFilePath))
@@ -82,6 +105,7 @@ public class QbParser {
     }
 
     private void getNumberOfInstancesOfEachClass() {
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/querybased/nonsampling/QbParser.java
         StopWatch watch = new StopWatch();
         watch.start();
         if (qseFromSpecificClasses) {
@@ -115,21 +139,36 @@ public class QbParser {
         Utils.logTime("getNumberOfInstancesOfEachClass ", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
 
+<<<<<<< HEAD:src/main/java/cs/qse/querybased/nonsampling/QbParser.java
+    public void getDistinctClasses() {
+        classes = classEntityCount.keySet();
+    }
+
+    public void setClasses(Set<Integer> values) {
+        classes = values;
+    }
+
+    public void getShapesInfoAndComputeSupport() {
+=======
     private void getDistinctClasses() {
         classes = classEntityCount.keySet();
     }
 
     private void getShapesInfoAndComputeSupport() {
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/querybased/nonsampling/QbParser.java
         StopWatch watch = new StopWatch();
         watch.start();
-        for (Integer classIri : this.classes) {
+        for (Integer classIri : classes) {
             String queryToGetProperties = FilesUtil.readQuery("query4").replace(":Class", " <" + stringEncoder.decode(classIri) + "> ");
             queryToGetProperties = setProperty(queryToGetProperties);
             HashSet<String> props = getPropertiesOfClass(queryToGetProperties);
 
+<<<<<<< HEAD:src/main/java/cs/qse/querybased/nonsampling/QbParser.java
+=======
             if(queryToGetProperties.contains("Ontology"))
                 System.out.println();
 
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/querybased/nonsampling/QbParser.java
             HashMap<Integer, Set<Integer>> propToObjTypes = new HashMap<>();
 
             for (String property : props) {
@@ -178,6 +217,17 @@ public class QbParser {
                             }
                         });
                     }
+
+                    String queryToGetUndefinedNonLiteralObjects = buildQuery(classIri, property, "query7_");
+                    queryToGetUndefinedNonLiteralObjects = setProperty(queryToGetUndefinedNonLiteralObjects);
+                    List<BindingSet> resultsUndefinedTriples = graphDBUtils.runSelectQuery(queryToGetUndefinedNonLiteralObjects);
+                    if (resultsUndefinedTriples != null && resultsUndefinedTriples.size() > 0) {
+                        String undefinedObjType = "http://shaclshapes.org/undefined";
+                        objectTypes.add(stringEncoder.encode(undefinedObjType));
+                        String queryToComputeSupportForNonLiteralTypeObjects = buildQuery(classIri, property, undefinedObjType, "query9_");
+                        queryToComputeSupportForNonLiteralTypeObjects = setProperty(queryToComputeSupportForNonLiteralTypeObjects);
+                        computeSupport(classIri, property, undefinedObjType, queryToComputeSupportForNonLiteralTypeObjects);
+                    }
                 }
                 propToObjTypes.put(stringEncoder.encode(property), objectTypes);
             }
@@ -190,22 +240,32 @@ public class QbParser {
         Utils.logTime("getShapesInfoAndComputeSupport ", TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
 
+<<<<<<< HEAD:src/main/java/cs/qse/querybased/nonsampling/QbParser.java
+    public void computeSupport(Integer classIri, String property, String objectType, String supportQuery) {
+=======
     private void computeSupport(Integer classIri, String property, String objectType, String supportQuery) {
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/querybased/nonsampling/QbParser.java
         StopWatch watcher = new StopWatch();
         watcher.start();
-        graphDBUtils.runSelectQuery(supportQuery).forEach(countRow -> {
+        for (BindingSet countRow : graphDBUtils.runSelectQuery(supportQuery)) {
             if (countRow.getBinding("count").getValue().isLiteral()) {
                 Literal literalCount = (Literal) countRow.getBinding("count").getValue();
-                int count = literalCount.intValue();
-                shapeTripletSupport.put(new Tuple3<>(classIri, stringEncoder.encode(property), stringEncoder.encode(objectType)), new SupportConfidence(count));
+                int support = literalCount.intValue();
+                int clasEntityCount = classEntityCount.get(classIri);
+                Double confidence = ((double) support / (double) clasEntityCount);
+                shapeTripletSupport.put(new Tuple3<>(classIri, stringEncoder.encode(property), stringEncoder.encode(objectType)), new SupportConfidence(support, confidence));
             }
-        });
+        }
         watcher.stop();
         long time = watcher.getTime();
         globalComputeSupportMethodTime = globalComputeSupportMethodTime + time;
     }
 
+<<<<<<< HEAD:src/main/java/cs/qse/querybased/nonsampling/QbParser.java
+    public void extractSHACLShapes(Boolean performPruning) {
+=======
     protected void extractSHACLShapes(Boolean performPruning) {
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/querybased/nonsampling/QbParser.java
         StopWatch watch = new StopWatch();
         watch.start();
         String methodName = "extractSHACLShapes:No Pruning";
@@ -235,6 +295,42 @@ public class QbParser {
         Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
     }
 
+<<<<<<< HEAD:src/main/java/cs/qse/querybased/nonsampling/QbParser.java
+
+    public String extractSHACLShapes() {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String methodName = "extractSHACLShapes:No Pruning";
+        shapesExtractor = new ShapesExtractor(stringEncoder, shapeTripletSupport, classEntityCount, instantiationProperty);
+        shapesExtractor.constructDefaultShapes(classToPropWithObjTypes); // SHAPES without performing pruning based on confidence and support thresholds
+        ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
+        watch.stop();
+        Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+        return shapesExtractor.getOutputFileAddress();
+    }
+
+    /*
+        Used in SHACTOR Demo - Invoked from Extraction View (with support and confidence thresholds)
+     */
+    public String extractSHACLShapesWithPruning(Double conf, Integer supp) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String methodName = "extractSHACLShapes:WithPruning";
+        StopWatch watchForPruning = new StopWatch();
+        watchForPruning.start();
+        shapesExtractor.constructPrunedShapes(classToPropWithObjTypes, conf, supp);
+        watchForPruning.stop();
+
+        Utils.logTime(conf + "_" + supp + " " + methodName + "-Time.For.Pruning.Only", TimeUnit.MILLISECONDS.toSeconds(watchForPruning.getTime()), TimeUnit.MILLISECONDS.toMinutes(watchForPruning.getTime()));
+
+        ExperimentsUtil.prepareCsvForGroupedStackedBarChart(Constants.EXPERIMENTS_RESULT, Constants.EXPERIMENTS_RESULT_CUSTOM, true);
+        watch.stop();
+        Utils.logTime(methodName, TimeUnit.MILLISECONDS.toSeconds(watch.getTime()), TimeUnit.MILLISECONDS.toMinutes(watch.getTime()));
+        return shapesExtractor.getOutputFileAddress();
+    }
+
+=======
+>>>>>>> RQ4copied:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/qse/querybased/nonsampling/QbParser.java
     public void writeSupportToFile() {
         try {
             FileWriter fileWriter = new FileWriter(new File(Constants.TEMP_DATASET_FILE), true);
@@ -281,6 +377,42 @@ public class QbParser {
 
     private String setProperty(String query) {
         return query.replace(":instantiationProperty", instantiationProperty);
+    }
+
+    public StringEncoder getStringEncoder() {
+        return stringEncoder;
+    }
+
+    public GraphDBUtils getGraphDBUtils() {
+        return graphDBUtils;
+    }
+
+    public HashMap<Integer, Integer> getClassEntityCount() {
+        return classEntityCount;
+    }
+
+    public Map<Integer, Map<Integer, Set<Integer>>> getClassToPropWithObjTypes() {
+        return classToPropWithObjTypes;
+    }
+
+    public HashMap<Tuple3<Integer, Integer, Integer>, SupportConfidence> getShapeTripletSupport() {
+        return shapeTripletSupport;
+    }
+
+    public Set<Integer> getClasses() {
+        return classes;
+    }
+
+    public String getInstantiationProperty() {
+        return instantiationProperty;
+    }
+
+    public Boolean getQseFromSpecificClasses() {
+        return qseFromSpecificClasses;
+    }
+
+    public long getGlobalComputeSupportMethodTime() {
+        return globalComputeSupportMethodTime;
     }
 }
 
