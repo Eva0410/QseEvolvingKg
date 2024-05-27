@@ -1,0 +1,16 @@
+Class,Frequency
+http://www.w3.org/2002/07/owl#Ontology,34
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#Department,34
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#University,1000
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#FullProfessor,289
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#Course,1889
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#GraduateCourse,1839
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#AssociateProfessor,410
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#AssistantProfessor,333
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#Lecturer,210
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#UndergraduateStudent,13559
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#GraduateStudent,4319
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#TeachingAssistant,947
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#ResearchAssistant,1227
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#ResearchGroup,518
+http://swat.cse.lehigh.edu/onto/univ-bench.owl#Publication,13934
