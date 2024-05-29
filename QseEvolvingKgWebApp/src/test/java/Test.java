@@ -37,8 +37,8 @@ public class Test {
     public void testFileBased() {
         Main.setResourcesPathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources");
         setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/fileBased/");
-        Main.setPruningThresholds("{(0,10)}");
-        Main.annotateSupportConfidence = "true";
+//        Main.setPruningThresholds("{(0,10)}"); //todo
+//        Main.annotateSupportConfidence = "true";
         String path = "/Users/evapu/Downloads/alldata.IC.nt/000001.nt/000001.nt";
 //        String path = "/Users/evapu/Downloads/qse-main/qse-main/src/main/resources/lubm-mini.nt";
 //        String path = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QseEvolvingKgWebApp/graphs/pre_configured/film.nt";
@@ -51,8 +51,8 @@ public class Test {
     public void testQueryBased() {
         Main.setResourcesPathForJar("/Users/evapu/Downloads/qse-main/qse-main/src/main/resources");
         setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/qb/");
-        Main.setPruningThresholds("{(-1,10)}");
-        Main.annotateSupportConfidence = "true";
+//        Main.setPruningThresholds("{(-1,10)}"); //todo
+//        Main.annotateSupportConfidence = "true";
         var repoName = "Bear-B";
         Main.datasetName = repoName;
 
