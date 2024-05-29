@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class Tests {
-    public static final String resourcesPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources";
+    public static final String resourcesPath = "/Users/evapu/Documents/GitHub/qse/src/main/resources";
     public static final String firstVersionName = "film";
 
     public static final String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
@@ -37,7 +37,6 @@ public class Tests {
 
         QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
         qbParser.run();
-        var localPath = qbParser.dbDefaultConnectionString;
     }
 
     @Test
