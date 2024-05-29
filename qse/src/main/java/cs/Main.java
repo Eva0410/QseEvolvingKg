@@ -28,8 +28,6 @@ public class Main {
     public static boolean qseFromSpecificClasses;
     public static String resourcesPath;
     public static String configDirPath;
-<<<<<<< HEAD:src/main/java/cs/Main.java
-=======
     public static String graphDbUrl;
     public static String graphDbRepository;
     public static String pruningThresholds;
@@ -37,8 +35,7 @@ public class Main {
     public static String qse_validation_with_shNot = "false";
 
     public static String expected_number_classes = "100";
->>>>>>> RQ4copied:qse/src/main/java/cs/Main.java
-    
+
     public static void main(String[] args) throws Exception {
         //configPath = args[0];
         configPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\qse\\config.properties";
@@ -155,22 +152,6 @@ public class Main {
     private static boolean isActivated(String option) {return Boolean.parseBoolean(ConfigManager.getProperty(option));}
     
     private static String paramVal(String prop) {return ConfigManager.getProperty(prop);}
-
-    public static void setResourcesPathForJar(String path) {
-        resourcesPath = path;
-    }
-
-    public static void setOutputFilePathForJar(String path) {
-        outputFilePath = path;
-    }
-
-    public static void setConfigDirPathForJar(String path) {
-        configDirPath = path;
-    }
-
-    public static void setDataSetNameForJar(String name) {
-        datasetName = name;
-    }
     public static void setGraphDbUrlForJar(String url) { graphDbUrl = url;}
     public static void setGraphDbRepository(String repo) {graphDbRepository = repo;}
     public static void setPruningThresholds(String thresholds) {

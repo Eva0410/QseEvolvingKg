@@ -1,11 +1,4 @@
-<<<<<<< HEAD:QseEvolvingKgWebApp/notes/demo_bugs_kashif/qse-main2/qse-main/src/main/java/cs/mg/MetaNodeChild.java
-=======
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
 
->>>>>>> RQ4copied:qse/src/main/java/cs/mg/MetaNodeChild.java
 package cs.mg;
 
 public class MetaNodeChild {
