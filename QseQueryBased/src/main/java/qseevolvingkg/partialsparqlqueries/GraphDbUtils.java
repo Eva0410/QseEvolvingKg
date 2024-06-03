@@ -124,6 +124,12 @@ public class GraphDbUtils {
                     PropertyShape propertyShape = new PropertyShape();
                     propertyShape.iri = shapeIri;
                     propertyShape.nodeKind = nodeKind;
+                    if(dataType != null && classIri != null)
+                        throw new RuntimeException("Datatype and class are not null");
+                    if(dataType == null)
+                        propertyShape.dataTypeOrClass = classIri;
+                    else
+                        propertyShape.dataTypeOrClass = dataType;
                     propertyShape.dataType = dataType;
                     propertyShape.classIri = classIri;
                     propertyShape.path = path;
@@ -157,8 +163,10 @@ public class GraphDbUtils {
         }
     }
 
+    //update with only one target class
     public void checkNodeShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
-        var targetClasses = nodeShapes.stream().flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
+        //        var targetClasses = nodeShapes.stream().flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
+        var targetClasses = nodeShapes.stream().map(ns -> ns.targetClass.toString()).collect(Collectors.toList());
         var filterString = String.join("> <", targetClasses);
 
         String sparql = "SELECT DISTINCT ?class (COUNT(DISTINCT ?s) AS ?classCount) FROM <http://www.ontotext.com/explicit> where {\n" +
@@ -172,8 +180,9 @@ public class GraphDbUtils {
                 BindingSet bindingSet = result.next();
                 var shapeIri = (IRI) bindingSet.getValue("class");
                 var support = Integer.parseInt(bindingSet.getValue("classCount").stringValue());
-                var nodeShape = nodeShapes.stream().filter(ns -> ns.targetClasses.stream().anyMatch(s -> s.equals(shapeIri))).findFirst().get();
-                nodeShape.support += support;
+                //                var nodeShape = nodeShapes.stream().filter(ns -> ns.targetClasses.stream().anyMatch(s -> s.equals(shapeIri))).findFirst().get();
+                var nodeShape = nodeShapes.stream().filter(ns -> ns.targetClass.equals(shapeIri)).findFirst().get();
+                nodeShape.support = support; //Was += before
             }
         }
     }
@@ -181,7 +190,8 @@ public class GraphDbUtils {
     public void checkPropertyShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
         for(var nodeShape : nodeShapes) {
             if (nodeShape.support != 0) { //performance
-                var targetClasses = nodeShape.targetClasses.stream().map(Object::toString).toList();
+//                var targetClasses = nodeShape.targetClasses.stream().map(Object::toString).toList();
+                var targetClasses = nodeShapes.stream().map(ns -> ns.targetClass.toString()).collect(Collectors.toList());
                 var filterString = String.join("> <", targetClasses);
                 //todo better way for performance?
                 for (var propertyShape : nodeShape.propertyShapes) {

@@ -4,6 +4,7 @@ import cs.utils.Constants;
 import org.apache.jena.base.Sys;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.junit.Test;
+import qseevolvingkg.partialsparqlqueries.ExtractedShapes;
 import qseevolvingkg.partialsparqlqueries.GraphDbUtils;
 import qseevolvingkg.partialsparqlqueries.RegexUtils;
 import qseevolvingkg.partialsparqlqueries.ShaclOrListItem;
@@ -170,6 +171,38 @@ public class Tests {
         System.out.println(deletedShape);
         assertEquals("Finished shapes do not match",expected, deletedShape);
     }
+
+    //with new QSE-shactor version
+
+    @Test
+    public void getObjectsFromQseRun() {
+        Main.setResourcesPathForJar(resourcesPath);
+        Main.setOutputFilePathForJar(outputPath);
+        Main.setPruningThresholds(pruningThresholds);
+        Main.annotateSupportConfidence = "true";
+        Main.datasetName = firstVersionName;
+
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+
+        var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setNodeShapes(nodeShapes);
+
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", extractedShapes.getNodeShapes());
+        RegexUtils regexUtils = new RegexUtils();
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(copiedFile, extractedShapes.getNodeShapes());
+        regexUtils.saveStringAsFile(content, copiedFile);
+
+        assertTrue("Files are not equal", compareFiles(copiedFile,
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl"));
+    }
+
+
 
     public static boolean compareFiles(String filePath1, String filePath2) {
         try (BufferedReader reader1 = new BufferedReader(new FileReader(filePath1));

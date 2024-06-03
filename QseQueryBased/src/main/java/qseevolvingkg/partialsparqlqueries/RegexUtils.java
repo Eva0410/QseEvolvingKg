@@ -77,12 +77,12 @@ public class RegexUtils {
     private String deleteIriFromString(String iri, String file, boolean errorDuringGeneration) {
         if(errorDuringGeneration)
             return file;
-        String iriWithEscapedChars = iri.toString().replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+        String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
         String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
-            System.out.println("Delete did not work for " + iri.toString());
+            System.out.println("Delete did not work for " + iri);
         }
         String match = matcher.group();
         return file.replace(match, "");
