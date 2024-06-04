@@ -54,6 +54,20 @@ public class RegexUtils {
         return fileContent;
     }
 
+    public static String removeLinesWithPrefix(String input) {
+        StringBuilder result = new StringBuilder();
+        String[] lines = input.split("\\r?\\n");
+
+        for (String line : lines) {
+            if (!line.startsWith("@prefix")) {
+                result.append(line).append("\n");
+            }
+        }
+
+        //remove leading and trailing new lines
+        return result.toString().replaceFirst("^\\n+", "").replaceAll("\\n+$", "");
+    }
+
     public void saveStringAsFile(String content, String filePath) {
         byte[] bytes = content.getBytes();
 

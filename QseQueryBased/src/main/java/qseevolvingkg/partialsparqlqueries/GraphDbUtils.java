@@ -7,13 +7,8 @@ import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.*;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -229,11 +224,14 @@ public class GraphDbUtils {
         }
     }
 
-    public static void shapeAsJenaModel(String shape, String parentIri) {
+    public static String deleteOrListAndConnectToParentNode(String shape, String parentIri) {
         var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+        //problem with "," in confidence, this is read as two statements
+        shape = shape.replaceAll("(?<=\\d),(?=\\d)", ".");
+
         model.read(new java.io.StringReader(shape), null, "TURTLE");
         Resource propertyShape = ResourceFactory.createResource(parentIri);
-        //Get or blank node
+
         String queryString = String.format("SELECT ?orList ?p ?o WHERE { " +
                 "    <%s> <http://www.w3.org/ns/shacl#or> ?orList ." +
                 "   ?orList <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?f. " +
@@ -242,7 +240,7 @@ public class GraphDbUtils {
         Query query = QueryFactory.create(queryString);
         QueryExecution qexec = QueryExecutionFactory.create(query, model);
         var statements = new ArrayList<Statement>();
-        Resource orListItem;
+        Resource orListItem = null;
 
         try {
             ResultSet results = qexec.execSelect();
@@ -260,8 +258,27 @@ public class GraphDbUtils {
         //connect all connected statements to parent node
         model.add(statements);
 
-        //Delete or list an all recursive statements
-        System.out.println(model);
+        //Delete or list and all recursive statements
+        model.removeAll(null, null, orListItem);
+        removeRecursively(model, orListItem);
+
+        TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+        OutputStream outputStream = new ByteArrayOutputStream();
+        formatter.accept(model, outputStream);
+        return outputStream.toString().replaceAll("\n+$", "");
+    }
+
+    private static Model removeRecursively(Model model, Resource resourceToDelete) {
+        var statementQueue = model.listStatements(resourceToDelete, null, (RDFNode) null).toList();
+        while (statementQueue.size()!= 0) {
+            var nextStatement = statementQueue.get(0);
+            if(nextStatement.getObject().isAnon()) {
+                statementQueue.addAll(model.listStatements((Resource) nextStatement.getObject(), null, (RDFNode)null ).toList());
+            }
+            model.remove(nextStatement);
+            statementQueue.remove(nextStatement);
+        }
+        return model;
     }
 
     private static int getSupportForIriPropertyShape(IRI path, IRI classIri, String targetClass, RepositoryConnection conn) {

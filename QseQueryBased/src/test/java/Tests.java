@@ -154,7 +154,9 @@ public class Tests {
         //actually SHACL should not contain or list anymore, when only one item is left
         var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
         RegexUtils regexUtils = new RegexUtils();
-        String shape = regexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", regexUtils.getFileAsString(sourceFile));
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.fileContentPath = sourceFile;
+        String shape = regexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", extractedShapes.getFileAsString());
         ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
         String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
         var expected = "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
@@ -171,19 +173,11 @@ public class Tests {
     }
 
     @Test
-    public void test4() {
-        //actually SHACL should not contain or list anymore, when only one item is left
-//        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-//        RegexUtils regexUtils = new RegexUtils();
-//        String shape = regexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", regexUtils.getFileAsString(sourceFile));
-//        ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
-//        String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
-        //todo prefix lines need to be read later
+    public void testDeleteWhenOnlyOneOrItemIsLeftWithGivenShape() {
         var shape = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
                 "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" +
                 "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
                 "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n" +
-                "@prefix dcterms: <http://purl.org/dc/terms/> ." +
                 "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "  <http://www.w3.org/ns/shacl#or> ([\n" +
                 "    <http://shaclshapes.org/confidence> 1.6667E-1 ;\n" + //problem with , in double
@@ -192,11 +186,46 @@ public class Tests {
                 "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
                 "  ] ) ;\n" +
                 "  <http://www.w3.org/ns/shacl#path> rdfs:label .\n";
-        GraphDbUtils.shapeAsJenaModel(shape, "http://shaclshapes.org/labelGenreShapeProperty");
+        var deletedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty");
 
-//        System.out.println(expected);
-//        System.out.println(deletedShape);
-//        assertEquals("Finished shapes do not match",expected, deletedShape);
+        var expected = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\r\n" +
+                "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" +
+                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+                "" +
+                "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://shaclshapes.org/confidence> 1,6667E-1 ;\n" + //problem with , in double
+                "  <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
+                "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "  <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> rdfs:label .";
+        System.out.println(expected);
+        System.out.println(deletedShape);
+        assertEquals("Finished shapes do not match",expected.replace("\r\n", "\n"), deletedShape.replace("\r\n", "\n"));
+    }
+
+    @Test
+    public void testDeleteWhenOnlyOneOrItemIsLeft() {
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        RegexUtils regexUtils = new RegexUtils();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.fileContentPath = sourceFile;
+        extractedShapes.getFileAsString(); //read prefix lines todo maybe optimization
+        String shape = regexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", regexUtils.getFileAsString(sourceFile));
+        ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
+        String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
+        shape = extractedShapes.prefixLines + deletedShape;
+        var adaptedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty");
+        //todo remove prefix lines of shape
+        var shapeWithoutPrefix = RegexUtils.removeLinesWithPrefix(adaptedShape);
+        var expected = "<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://shaclshapes.org/confidence> 1,6667E-1 ;\n" + //problem with , in double
+                "  <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
+                "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "  <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> rdfs:label .";
+        System.out.println(expected);
+        System.out.println(shapeWithoutPrefix);
+        assertEquals("Finished shapes do not match",expected.replace("\r\n", "\n"), shapeWithoutPrefix.replace("\r\n", "\n"));
     }
 
     @Test

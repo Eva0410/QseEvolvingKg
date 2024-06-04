@@ -26,7 +26,7 @@ public class ExtractedShapes {
 
     List<String> classes;
 
-    String fileContentPath;
+    public String fileContentPath;
 
     String fileContentDefaultShapesPath;
 
