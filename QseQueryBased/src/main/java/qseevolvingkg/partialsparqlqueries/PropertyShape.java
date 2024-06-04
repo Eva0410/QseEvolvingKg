@@ -21,13 +21,12 @@ public class PropertyShape {
     List<ShaclOrListItem> orItems;
     boolean errorDuringGeneration = false;
     IRI dataTypeOrClass;
-    List<ShaclOrListItem> shaclOrListItems; //never used
 
     PropertyShape(PS ps) {
         iri = ps.getIri();
         path = Values.iri(ps.getPath());
         nodeKind = getNodeKindFromQSE(ps.getNodeKind());
-        dataTypeOrClass = Values.iri(ps.getDataTypeOrClass()); //todo works?
+        dataTypeOrClass = ps.getDataTypeOrClass() == null ? null : Values.iri(ps.getDataTypeOrClass());
         support = getValueFromQse(ps.getSupport());
         confidence = getValueFromQse(ps.getConfidence());
         if(ps.getConfidence() == null)
@@ -52,7 +51,7 @@ public class PropertyShape {
             }
             support = maxConfidenceItem.getSupport();
             confidence = maxConfidenceItem.getConfidence();
-            this.shaclOrListItems = shaclOrListItems;
+            this.orItems = shaclOrListItems;
         }
     }
 

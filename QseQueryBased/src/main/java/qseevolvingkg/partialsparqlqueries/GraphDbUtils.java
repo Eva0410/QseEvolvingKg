@@ -6,10 +6,11 @@ import cs.utils.FilesUtil;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.commons.io.FileUtils;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
@@ -175,6 +176,10 @@ public class GraphDbUtils {
                 "Group by ?class";
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
+        //set all support values to 0
+        //todo problems here?
+        nodeShapes.forEach(n -> n.support = 0);
+
         try (TupleQueryResult result = query.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
@@ -191,25 +196,27 @@ public class GraphDbUtils {
         for(var nodeShape : nodeShapes) {
             if (nodeShape.support != 0) { //performance
 //                var targetClasses = nodeShape.targetClasses.stream().map(Object::toString).toList();
-                var targetClasses = nodeShapes.stream().map(ns -> ns.targetClass.toString()).collect(Collectors.toList());
-                var filterString = String.join("> <", targetClasses);
+                var targetClass = nodeShape.targetClass.toString();
                 //todo better way for performance?
                 for (var propertyShape : nodeShape.propertyShapes) {
+                    //Todo merge methods?
+                    if(propertyShape.iri.toString().contains("hasFilmStudioFilmShapeProperty"))
+                        System.out.println("y");
                     if (propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
-                        propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataType, filterString, conn);
+                        propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
                     }
                     else if(propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
-                        propertyShape.support = getSupportForIriPropertyShape(propertyShape.path, propertyShape.classIri, filterString, conn);
+                        propertyShape.support = getSupportForIriPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
                     }
                     else if (propertyShape.nodeKind == null) {
                         //Ignore special case when nodeKind is null, but there are also no nested items (QSE error)
                         if(propertyShape.orItems != null)  {
                             for(var orItem : propertyShape.orItems) {
                                 if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
-                                    orItem.support = getSupportForLiteralPropertyShape(propertyShape.path, orItem.dataType, filterString, conn);
+                                    orItem.support = getSupportForLiteralPropertyShape(propertyShape.path, orItem.dataTypeOrClass, targetClass, conn);
                                 }
                                 else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
-                                    orItem.support = getSupportForIriPropertyShape(propertyShape.path, orItem.classIri, filterString, conn);
+                                    orItem.support = getSupportForIriPropertyShape(propertyShape.path, orItem.dataTypeOrClass, targetClass, conn);
                                 }
                             }
                         }
@@ -222,13 +229,48 @@ public class GraphDbUtils {
         }
     }
 
-    private static int getSupportForIriPropertyShape(IRI path, IRI classIri, String filterString, RepositoryConnection conn) {
+    public static void shapeAsJenaModel(String shape, String parentIri) {
+        var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+        model.read(new java.io.StringReader(shape), null, "TURTLE");
+        Resource propertyShape = ResourceFactory.createResource(parentIri);
+        //Get or blank node
+        String queryString = String.format("SELECT ?orList ?p ?o WHERE { " +
+                "    <%s> <http://www.w3.org/ns/shacl#or> ?orList ." +
+                "   ?orList <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?f. " +
+                "   ?f ?p ?o. }", parentIri);
+
+        Query query = QueryFactory.create(queryString);
+        QueryExecution qexec = QueryExecutionFactory.create(query, model);
+        var statements = new ArrayList<Statement>();
+        Resource orListItem;
+
+        try {
+            ResultSet results = qexec.execSelect();
+            while ( results.hasNext() ) {
+                QuerySolution soln = results.nextSolution();
+                var o = soln.get("o");
+                var p = soln.get("p").as(Property.class);
+                orListItem = soln.getResource("orList");
+                Statement s = ResourceFactory.createStatement(propertyShape, p, o);
+                statements.add(s);
+            }
+        } finally {
+            qexec.close();
+        }
+        //connect all connected statements to parent node
+        model.add(statements);
+
+        //Delete or list an all recursive statements
+        System.out.println(model);
+    }
+
+    private static int getSupportForIriPropertyShape(IRI path, IRI classIri, String targetClass, RepositoryConnection conn) {
         String sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) " +
                 "FROM <http://www.ontotext.com/explicit> WHERE { " +
                 " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class ." +
                 " ?s <" + path + "> ?obj . " +
                 " ?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <"+ classIri+">" +
-                " VALUES ?class { <" + filterString + "> }}";
+                " VALUES ?class { <" + targetClass + "> }}";
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
         try (TupleQueryResult result = query.evaluate()) {
@@ -244,13 +286,13 @@ public class GraphDbUtils {
         }
     }
 
-    private static int getSupportForLiteralPropertyShape(IRI path, IRI dataType, String filterString, RepositoryConnection conn) {
+    private static int getSupportForLiteralPropertyShape(IRI path, IRI dataType, String targetClass, RepositoryConnection conn) {
         String sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) " +
                 "FROM <http://www.ontotext.com/explicit> WHERE { " +
                 " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class ." +
                 " ?s <" + path + "> ?obj . " +
                 " FILTER(dataType(?obj) = <" + dataType + "> )" +
-                " VALUES ?class { <" + filterString + "> }}";
+                " VALUES ?class { <" + targetClass + "> }}";
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
         try (TupleQueryResult result = query.evaluate()) {

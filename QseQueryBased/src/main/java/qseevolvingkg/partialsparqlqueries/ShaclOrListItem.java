@@ -8,7 +8,7 @@ public class ShaclOrListItem {
     IRI classIri;
     int support;
     IRI dataType;
-    String dataTypeOrClass;
+    IRI dataTypeOrClass;
     boolean errorDuringGeneration = false;
     Double confidence;
 
@@ -24,7 +24,7 @@ public class ShaclOrListItem {
 
     public ShaclOrListItem(String nodeKind, String dataTypeOrClass, Integer support, Double confidence) {
         this.nodeKind = PropertyShape.getNodeKindFromQSE(nodeKind);
-        this.dataTypeOrClass = dataTypeOrClass;
+        this.dataTypeOrClass = dataTypeOrClass == null || dataTypeOrClass.isEmpty() || dataTypeOrClass.isBlank() ? null : Values.iri(dataTypeOrClass);
         this.support = PropertyShape.getValueFromQse(support);
         this.confidence = PropertyShape.getValueFromQse(confidence);
     }

@@ -1,7 +1,6 @@
 import cs.Main;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
-import org.apache.jena.base.Sys;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.junit.Test;
 import qseevolvingkg.partialsparqlqueries.ExtractedShapes;
@@ -12,8 +11,6 @@ import qseevolvingkg.partialsparqlqueries.ShaclOrListItem;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -154,6 +151,7 @@ public class Tests {
 
     @Test
     public void deleteFromOrItems() {
+        //actually SHACL should not contain or list anymore, when only one item is left
         var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
         RegexUtils regexUtils = new RegexUtils();
         String shape = regexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", regexUtils.getFileAsString(sourceFile));
@@ -161,7 +159,7 @@ public class Tests {
         String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
         var expected = "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "  <http://www.w3.org/ns/shacl#or> ([\n" +
-                "    <http://shaclshapes.org/confidence> 0E0 ;\n" +
+                "    <http://shaclshapes.org/confidence> 1,6667E-1 ;\n" +
                 "    <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
                 "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
                 "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
@@ -172,16 +170,81 @@ public class Tests {
         assertEquals("Finished shapes do not match",expected, deletedShape);
     }
 
-    //with new QSE-shactor version
+    @Test
+    public void test4() {
+        //actually SHACL should not contain or list anymore, when only one item is left
+//        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+//        RegexUtils regexUtils = new RegexUtils();
+//        String shape = regexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", regexUtils.getFileAsString(sourceFile));
+//        ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
+//        String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
+        //todo prefix lines need to be read later
+        var shape = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
+                "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" +
+                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n" +
+                "@prefix dcterms: <http://purl.org/dc/terms/> ." +
+                "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ([\n" +
+                "    <http://shaclshapes.org/confidence> 1.6667E-1 ;\n" + //problem with , in double
+                "    <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> rdfs:label .\n";
+        GraphDbUtils.shapeAsJenaModel(shape, "http://shaclshapes.org/labelGenreShapeProperty");
+
+//        System.out.println(expected);
+//        System.out.println(deletedShape);
+//        assertEquals("Finished shapes do not match",expected, deletedShape);
+    }
 
     @Test
-    public void getObjectsFromQseRun() {
+    public void deleteFromMultipleOrItems() {
+        //actually SHACL should not contain or list anymore, when only one item is left
+        RegexUtils regexUtils = new RegexUtils();
+        String shape = "<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "<http://www.w3.org/ns/shacl#or> ( [\n" +
+                "   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "   <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "] [\n" +
+                "   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "   <http://www.w3.org/ns/shacl#datatype> rdf:integer ;\n" +
+                "] [\n" +
+                "   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "   <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
+                "] ) ;\n" +
+                "<http://www.w3.org/ns/shacl#path> rdfs:label .";
+        ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
+        String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
+        var expected = "<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "<http://www.w3.org/ns/shacl#or> ( [\n" +
+                "   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "   <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "] [\n" +
+                "   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "   <http://www.w3.org/ns/shacl#datatype> rdf:integer ;\n" +
+                "] ) ;\n" +
+                "<http://www.w3.org/ns/shacl#path> rdfs:label .";
+        System.out.println(expected);
+        System.out.println(deletedShape);
+        assertEquals("Finished shapes do not match",expected, deletedShape);
+    }
+
+    //with new QSE-shactor version
+
+    private void prepareTest() {
         Main.setResourcesPathForJar(resourcesPath);
         Main.setOutputFilePathForJar(outputPath);
         Main.setPruningThresholds(pruningThresholds);
         Main.annotateSupportConfidence = "true";
         Main.datasetName = firstVersionName;
+        Main.configPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\emptyconfig.txt"; //avoid exceptions in QSE
+    }
 
+    @Test
+    public void testDeletePropertyShapeWithIRI() {
+        prepareTest();
         QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
         qbParser.run();
 
@@ -192,6 +255,7 @@ public class Tests {
         GraphDbUtils graphDbUtils = new GraphDbUtils();
         graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", extractedShapes.getNodeShapes());
         RegexUtils regexUtils = new RegexUtils();
+
         var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL.ttl";
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
@@ -200,6 +264,54 @@ public class Tests {
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
                 "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl"));
+    }
+
+    @Test
+    public void testDeletePropertyShapeWithLiteral() {
+        prepareTest();
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+
+        var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setNodeShapes(nodeShapes);
+
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", extractedShapes.getNodeShapes());
+        RegexUtils regexUtils = new RegexUtils();
+
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_noGender.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(copiedFile, extractedShapes.getNodeShapes());
+        regexUtils.saveStringAsFile(content, copiedFile);
+
+        assertTrue("Files are not equal", compareFiles(copiedFile,
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACLNoGender.ttl"));
+    }
+
+    @Test
+    public void testDeleteNoFilmStudio() {
+        prepareTest();
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+
+        var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setNodeShapes(nodeShapes);
+
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", extractedShapes.getNodeShapes());
+        RegexUtils regexUtils = new RegexUtils();
+
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_NoFilmStudio.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(copiedFile, extractedShapes.getNodeShapes());
+        regexUtils.saveStringAsFile(content, copiedFile);
+
+        assertTrue("Files are not equal", compareFiles(copiedFile,
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACLNoFilmStudio.ttl"));
     }
 
 

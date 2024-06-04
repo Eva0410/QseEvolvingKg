@@ -34,7 +34,8 @@ public class RegexUtils {
             }
             else {
                 for(var propertyShape : nodeShape.propertyShapes) {
-                    if(propertyShape.support == 0 && propertyShape.orItems == null) {
+                    var allOrItemsSupportZero = propertyShape.orItems != null && propertyShape.orItems.stream().mapToInt(o -> o.support).sum() == 0;
+                    if((propertyShape.support == 0 && propertyShape.orItems == null) || allOrItemsSupportZero) {
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                         fileContent = deletePropertyShapeReferenceWithIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                     }
@@ -102,6 +103,7 @@ public class RegexUtils {
         return file.replace(match, "");
     }
 
+    //only works if at least one or item stays
     public String deleteShaclOrItemWithIriFromString(ShaclOrListItem orItem, String shape, boolean errorDuringGeneration) {
         if(errorDuringGeneration)
             return shape;
@@ -112,7 +114,7 @@ public class RegexUtils {
         else if(orItem.classIri != null)
             regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.classIri);
 
-        String regexPattern = String.format(" \\[.*?<http://www.w3.org/ns/shacl#NodeKind> <%s>.*?%s.*?\\] ", orItem.nodeKind, regexPart);
+        String regexPattern = String.format(" \\[[^\\[\\]]*?<http://www.w3.org/ns/shacl#NodeKind> <%s>[^\\[\\]]*?%s[^\\]\\[]*?\\]", orItem.nodeKind, regexPart);
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(shape);
         if (!matcher.find()) {
