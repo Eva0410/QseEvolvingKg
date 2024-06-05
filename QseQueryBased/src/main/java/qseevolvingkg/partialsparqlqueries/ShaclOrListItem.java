@@ -11,6 +11,7 @@ public class ShaclOrListItem {
     IRI dataTypeOrClass;
     boolean errorDuringGeneration = false;
     Double confidence;
+    public PropertyShape propertyShape;
 
     public ShaclOrListItem() {
 
@@ -22,11 +23,12 @@ public class ShaclOrListItem {
         this.dataType = dataType;
     }
 
-    public ShaclOrListItem(String nodeKind, String dataTypeOrClass, Integer support, Double confidence) {
+    public ShaclOrListItem(String nodeKind, String dataTypeOrClass, Integer support, Double confidence, PropertyShape propertyShape) {
         this.nodeKind = PropertyShape.getNodeKindFromQSE(nodeKind);
         this.dataTypeOrClass = dataTypeOrClass == null || dataTypeOrClass.isEmpty() || dataTypeOrClass.isBlank() ? null : Values.iri(dataTypeOrClass);
         this.support = PropertyShape.getValueFromQse(support);
         this.confidence = PropertyShape.getValueFromQse(confidence);
+        this.propertyShape = propertyShape;
     }
 
     @Override

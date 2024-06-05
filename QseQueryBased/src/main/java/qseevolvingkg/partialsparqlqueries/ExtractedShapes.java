@@ -30,10 +30,7 @@ public class ExtractedShapes {
 
     String fileContentDefaultShapesPath;
 
-    List<NodeShape> nodeShapes;
-
-    List<NodeShape> nodeShapesDefault;
-
+    public List<NodeShape> nodeShapes;
     Model model;
     org.apache.jena.rdf.model.Model jenaModel;
 
@@ -117,8 +114,10 @@ public class ExtractedShapes {
         for(var item : ns) {
             //Bug in QSE...
             var nsAlreadyExists = nsAlreadyExists(list, item);
-            if(item.getSupport() > this.support && !nsAlreadyExists)
-                list.add(new NodeShape(item));
+            if(item.getSupport() > this.support && !nsAlreadyExists) {
+                list.add(new NodeShape(item, this));
+
+            }
         }
         this.nodeShapes = list;
     }
@@ -145,10 +144,6 @@ public class ExtractedShapes {
 
     public boolean isDefaultshape() {
         return confidence == 0 && support == 0;
-    }
-
-    public List<NodeShape> getNodeShapesDefault() {
-        return nodeShapesDefault;
     }
 
     public String getFileContentPath() {

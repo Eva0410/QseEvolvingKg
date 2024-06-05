@@ -21,6 +21,7 @@ public class PropertyShape {
     List<ShaclOrListItem> orItems;
     boolean errorDuringGeneration = false;
     IRI dataTypeOrClass;
+    public NodeShape nodeShape;
 
     PropertyShape(PS ps) {
         iri = ps.getIri();
@@ -41,7 +42,7 @@ public class PropertyShape {
             var shaclOrListItems = new ArrayList<ShaclOrListItem>();
             for (var item:
                     ps.getShaclOrListItems()) {
-                shaclOrListItems.add(new ShaclOrListItem(item.getNodeKind(),item.getDataTypeOrClass(), item.getSupport(), item.getConfidence()));
+                shaclOrListItems.add(new ShaclOrListItem(item.getNodeKind(),item.getDataTypeOrClass(), item.getSupport(), item.getConfidence(), this));
                 if (maxConfidenceItem == null) {
                     maxConfidenceItem = item;
                 }

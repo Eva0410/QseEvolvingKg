@@ -8,6 +8,7 @@ import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.vocabulary.XSD;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -224,7 +225,7 @@ public class GraphDbUtils {
         }
     }
 
-    public static String deleteOrListAndConnectToParentNode(String shape, String parentIri) {
+    public static String deleteOrListAndConnectToParentNode(String shape, String parentIri, int newSupport) {
         var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
         //problem with "," in confidence, this is read as two statements
         shape = shape.replaceAll("(?<=\\d),(?=\\d)", ".");
@@ -261,11 +262,34 @@ public class GraphDbUtils {
         //Delete or list and all recursive statements
         model.removeAll(null, null, orListItem);
         removeRecursively(model, orListItem);
+        var iriConfidence = ResourceFactory.createProperty("http://shaclshapes.org/confidence");
+        var iriSupport = ResourceFactory.createProperty("http://shaclshapes.org/support");
+        Literal confidenceLiteral = model.createTypedLiteral("1E0", XSD.xdouble.getURI());
+        Literal supportLiteral = model.createTypedLiteral(newSupport);
+
+        //set confidence to 100 % and new support
+        setSupportOrConfidence(model, propertyShape, iriConfidence, confidenceLiteral);
+        setSupportOrConfidence(model, propertyShape, iriSupport, supportLiteral);
+
 
         TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
         OutputStream outputStream = new ByteArrayOutputStream();
         formatter.accept(model, outputStream);
         return outputStream.toString().replaceAll("\n+$", "");
+    }
+
+    private static void setSupportOrConfidence(Model model, Resource propertyShape, Property iri, Literal newLiteral) {
+        StmtIterator iterConfidence = model.listStatements(propertyShape, iri, (RDFNode) null);
+        List<Statement> statementsToRemove = new ArrayList<>();
+        while (iterConfidence.hasNext()) {
+            Statement stmt = iterConfidence.nextStatement();
+            statementsToRemove.add(stmt);
+        }
+        iterConfidence.close();
+        for (Statement stmt : statementsToRemove) {
+            model.remove(stmt);
+        }
+        model.add(propertyShape, iri, newLiteral);
     }
 
     private static Model removeRecursively(Model model, Resource resourceToDelete) {
