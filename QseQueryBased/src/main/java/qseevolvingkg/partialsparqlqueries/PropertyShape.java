@@ -22,6 +22,7 @@ public class PropertyShape {
     boolean errorDuringGeneration = false;
     IRI dataTypeOrClass;
     public NodeShape nodeShape;
+    public String generatedText;
 
     PropertyShape(PS ps) {
         iri = ps.getIri();

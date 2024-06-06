@@ -644,32 +644,18 @@
   <http://www.w3.org/ns/shacl#path> owl:minCardinality .
 
 <http://shaclshapes.org/rangeDatatypePropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://www.w3.org/ns/shacl#or> ( [
-    <http://shaclshapes.org/confidence> 7,1429E-1 ;
-    <http://shaclshapes.org/support> "5"^^xsd:int ;
-    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-    <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
-  ] [
-    <http://shaclshapes.org/confidence> 2,8571E-1 ;
-    <http://shaclshapes.org/support> "2"^^xsd:int ;
-    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-    <http://www.w3.org/ns/shacl#class> rdfs:Datatype ;
-  ] ) ;
+  <http://shaclshapes.org/confidence> 1E0 ;
+  <http://shaclshapes.org/support> "2"^^xsd:int ;
+  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+  <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
   <http://www.w3.org/ns/shacl#path> rdfs:range .
 
 <http://shaclshapes.org/rangeFunctionalPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
+  <http://shaclshapes.org/confidence> 1E0 ;
+  <http://shaclshapes.org/support> "2"^^xsd:int ;
+  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+  <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
   <http://www.w3.org/ns/shacl#node> <http://shaclshapes.org/DatatypeShape> ;
-  <http://www.w3.org/ns/shacl#or> ( [
-    <http://shaclshapes.org/confidence> 3,3333E-1 ;
-    <http://shaclshapes.org/support> "1"^^xsd:int ;
-    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-    <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
-  ] [
-    <http://shaclshapes.org/confidence> 6,6667E-1 ;
-    <http://shaclshapes.org/support> "2"^^xsd:int ;
-    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-    <http://www.w3.org/ns/shacl#class> rdfs:Datatype ;
-  ] ) ;
   <http://www.w3.org/ns/shacl#path> rdfs:range .
 
 <http://shaclshapes.org/rangeObjectPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;

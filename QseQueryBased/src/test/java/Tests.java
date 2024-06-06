@@ -32,6 +32,7 @@ public class Tests {
         Main.setPruningThresholds(pruningThresholds);
         Main.annotateSupportConfidence = "true";
         Main.datasetName = firstVersionName;
+//        Main.datasetName = "film-v4labelgenreoneoritem";
 
         QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
         qbParser.run();
@@ -263,6 +264,7 @@ public class Tests {
         var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
         regexUtils.saveStringAsFile(content, copiedFile);
 
+        //Weird result for rangeDatatypePropertyShapeProperty: points to IRI undefined and is therefore filtered in next version
         assertTrue("Files are not equal", compareFiles(copiedFile,
                 "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl"));
     }

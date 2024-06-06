@@ -149,7 +149,7 @@ public class RegexUtils {
         return shape.replace(match, "");
     }
 
-    public String getFileAsString(String path) {
+    public static String getFileAsString(String path) {
         StringBuilder fileContent = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             String line;
@@ -162,7 +162,7 @@ public class RegexUtils {
         return fileContent.toString();
     }
 
-    public String getShapeAsString(String iri, String file) {
+    public static String getShapeAsString(String iri, String file) {
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
         String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
