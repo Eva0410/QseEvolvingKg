@@ -1,9 +1,10 @@
 package qseevolvingkg.partialsparqlqueries;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Duration;
 import java.util.ArrayList;
 
 public class ComparisonDiff {
@@ -11,26 +12,16 @@ public class ComparisonDiff {
     public ArrayList<String> deletedPropertShapes;
     public ArrayList<EditedShapesComparisonObject> editedNodeShapes;
     public ArrayList<EditedShapesComparisonObject> editedPropertyShapes;
+    Duration durationQse1;
+    Duration durationSecondStep;
+    Duration durationComparison;
+    Duration durationTotal;
 
     public ComparisonDiff() {
         deletedNodeShapes = new ArrayList<>();
         deletedPropertShapes = new ArrayList<>();
         editedNodeShapes = new ArrayList<>();
         editedPropertyShapes = new ArrayList<>();
-    }
-
-    public void exportComparisonToFile(String filePath) {
-        try {
-            String fileName = filePath+ File.separator+"Comparison" + LocalDateTime.now();
-            File outputFile = new File(fileName);
-            if(outputFile.createNewFile()) {
-                FileWriter writer = new FileWriter(fileName);
-                writer.write(this.toString());
-                writer.close();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public String toString() {
@@ -67,6 +58,11 @@ public class ComparisonDiff {
                 sb.append(str).append("\n");
             }
         }
+        sb.append("\nExecution Time QSE 1: " + durationQse1.getSeconds() + " seconds");
+        sb.append("\nExecution Time Second Step (QSE or Sparql-Script): " + durationSecondStep.getSeconds() + " seconds");
+        sb.append("\nExecution Time Comparison: " + durationComparison.getSeconds() + " seconds");
+        sb.append("\nExecution Time Total: " + durationTotal.getSeconds() + " seconds");
+
         return sb.toString();
     }
 }
