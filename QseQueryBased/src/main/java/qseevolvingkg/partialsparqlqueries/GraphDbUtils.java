@@ -139,7 +139,7 @@ public class GraphDbUtils {
         nodeShape.propertyShapes = propertyShapes;
     }
 
-    public void checkShapesInNewGraph(String url, String repositoryName, List<NodeShape> nodeShapes) {
+    public static void checkShapesInNewGraph(String url, String repositoryName, List<NodeShape> nodeShapes) {
         RepositoryManager repositoryManager = new RemoteRepositoryManager(url);
         try {
             Repository repo = repositoryManager.getRepository(repositoryName);
@@ -161,7 +161,7 @@ public class GraphDbUtils {
     }
 
     //update with only one target class
-    public void checkNodeShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
+    public static void checkNodeShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
         //        var targetClasses = nodeShapes.stream().flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
         var targetClasses = nodeShapes.stream().map(ns -> ns.targetClass.toString()).collect(Collectors.toList());
         var filterString = String.join("> <", targetClasses);
@@ -188,7 +188,7 @@ public class GraphDbUtils {
         }
     }
 
-    public void checkPropertyShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
+    public static void checkPropertyShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
         for(var nodeShape : nodeShapes) {
             if (nodeShape.support != 0) { //performance
 //                var targetClasses = nodeShape.targetClasses.stream().map(Object::toString).toList();

@@ -1,8 +1,17 @@
 package qseevolvingkg.partialsparqlqueries;
 
+import de.atextor.turtle.formatter.FormattingStyle;
+import de.atextor.turtle.formatter.TurtleFormatter;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.ResourceFactory;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,13 +31,15 @@ public class RegexUtils {
         }
     }
 
-    public String deleteFromFileWhereSupportIsZero(ExtractedShapes extractedShapes) {
+    public static String deleteFromFileWhereSupportIsZero(ExtractedShapes extractedShapes, ComparisonDiff comparisonDiff) {
         String fileContent = extractedShapes.getFileAsString();
 
         for (var nodeShape : extractedShapes.getNodeShapes()) {
             if(nodeShape.support == 0) {
+                comparisonDiff.deletedNodeShapes.add(nodeShape.iri.toString());
                 fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent, nodeShape.errorDuringGeneration);
                 for (var propertyShape : nodeShape.propertyShapes) {
+                    comparisonDiff.deletedPropertShapes.add(propertyShape.iri.toString());
                     fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                 }
             }
@@ -36,6 +47,7 @@ public class RegexUtils {
                 for(var propertyShape : nodeShape.propertyShapes) {
                     var allOrItemsSupportZero = propertyShape.orItems != null && propertyShape.orItems.stream().mapToInt(o -> o.support).sum() == 0;
                     if((propertyShape.support == 0 && propertyShape.orItems == null) || allOrItemsSupportZero) {
+                        comparisonDiff.deletedPropertShapes.add(propertyShape.iri.toString());
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                         fileContent = deletePropertyShapeReferenceWithIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                     }
@@ -78,7 +90,7 @@ public class RegexUtils {
         return result.toString().replaceFirst("^\\n+", "");
     }
 
-    public void saveStringAsFile(String content, String filePath) {
+    public static void saveStringAsFile(String content, String filePath) {
         byte[] bytes = content.getBytes();
 
         try {
@@ -89,7 +101,7 @@ public class RegexUtils {
         }
     }
 
-    public void copyFile(String sourceFilePath, String destinationFilePath) {
+    public static void copyFile(String sourceFilePath, String destinationFilePath) {
         Path sourcePath = Paths.get(sourceFilePath);
         Path destinationPath = Paths.get(destinationFilePath);
         try {
@@ -99,7 +111,7 @@ public class RegexUtils {
         }
     }
 
-    private String deleteIriFromString(String iri, String file, boolean errorDuringGeneration) {
+    private static String deleteIriFromString(String iri, String file, boolean errorDuringGeneration) {
         if(errorDuringGeneration)
             return file;
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
@@ -113,7 +125,7 @@ public class RegexUtils {
         return file.replace(match, "");
     }
 
-    private String deletePropertyShapeReferenceWithIriFromString(String iri, String file, boolean errorDuringGeneration) {
+    private static String deletePropertyShapeReferenceWithIriFromString(String iri, String file, boolean errorDuringGeneration) {
         if(errorDuringGeneration)
             return file;
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
@@ -128,7 +140,7 @@ public class RegexUtils {
     }
 
     //only works if at least one or item stays
-    public String deleteShaclOrItemWithIriFromString(ShaclOrListItem orItem, String shape, boolean errorDuringGeneration) {
+    public static String deleteShaclOrItemWithIriFromString(ShaclOrListItem orItem, String shape, boolean errorDuringGeneration) {
         if(errorDuringGeneration)
             return shape;
 
@@ -171,6 +183,106 @@ public class RegexUtils {
             System.out.println("Could not find shape " + iri);
         }
         return matcher.group();
+    }
+
+    //TODO copied from webapp
+    public static String getShapeAsStringFormatted(String iri, String file, String prefixLines) {
+        String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+        String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
+        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(file);
+        if (!matcher.find()) {
+            System.out.println("Could not find shape " + iri);
+        }
+        String match = matcher.group();
+        var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
+        model.read(new java.io.StringReader(prefixLines + match), null, "TURTLE");
+
+        org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
+        org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
+
+        String queryString = String.format("CONSTRUCT {?s ?p ?o} WHERE { ?s ?p ?o. FILTER (?p != <%s> && ?p != <%s>)}", iriSupport, iriConfidence);
+
+        var query = QueryFactory.create(queryString);
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+            org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
+            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
+            OutputStream outputStream = new ByteArrayOutputStream();
+            formatter.accept(jenaModel, outputStream);
+            String cleanedString = reorderShaclInItems(outputStream.toString());
+            String cleanedStringOrItems = reOrderOrItems(cleanedString);
+            return cleanedStringOrItems.replaceAll("\n+$", "");
+        }
+    }
+
+    public static String reOrderOrItems(String input) {
+        try {
+            String orItemString = "<http://www.w3.org/ns/shacl#or>"; //highly dependent on turtlePrettyFormatter
+            String patternString = orItemString + " \\(.*\\)"; //would not work for names with '('
+
+            Pattern patternOrParent = Pattern.compile(patternString, Pattern.DOTALL);
+            Matcher matcherOrParent = patternOrParent.matcher(input);
+            if (matcherOrParent.find()) { //no or items
+                var firstResultParent = matcherOrParent.group(); //only works for first item
+                var patternOrObjects = Pattern.compile("\\[[^\\]]*\\]", Pattern.DOTALL);
+                var matcherObjects = patternOrObjects.matcher(firstResultParent);
+                List<String> objects = new ArrayList<>();
+                while (matcherObjects.find()) {
+                    String object = matcherObjects.group().trim(); // Extract contents of brackets and trim whitespace
+                    objects.add(object);
+                }
+                objects.sort(Comparator.comparing(o -> o));
+                var newString = input;
+                StringBuilder newOrItems = new StringBuilder();
+                for (var m : objects) {
+                    newString = newString.replace(m, "");
+                    newOrItems.append(m).append(" ");
+                }
+                return insertAfter(newString, orItemString + " ( ", newOrItems.toString());
+            } else
+                return input;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return input;
+        }
+    }
+
+    private static String reorderShaclInItems(String input) {
+        String searchString = "shacl#in";
+        if (input.contains(searchString) && input.indexOf(searchString) != input.lastIndexOf(searchString)) {
+            String[] lines = input.split("\n");
+            List<String> inLines = new ArrayList<>();
+            for (String line : lines) {
+                if (line.contains(searchString))
+                    inLines.add(line.trim());
+            }
+            Collections.sort(inLines);
+            List<String> orderedLines = new ArrayList<>();
+            int remainingIndex = 0;
+            for (String line : lines) {
+                if (line.contains(searchString)) {
+                    orderedLines.add(inLines.get(remainingIndex));
+                    remainingIndex++;
+                } else
+                    orderedLines.add(line);
+            }
+            StringBuilder orderedText = new StringBuilder();
+            orderedText.append(String.join("\n", orderedLines));
+
+            return orderedText.toString();
+        } else
+            return input;
+    }
+
+    public static String insertAfter(String original, String searchString, String toInsert) {
+        int index = original.indexOf(searchString);
+        if (index == -1) {
+            return original;
+        }
+        String part1 = original.substring(0, index + searchString.length());
+        String part2 = original.substring(index + searchString.length()).trim();
+
+        return part1 + toInsert + part2;
     }
 
 }

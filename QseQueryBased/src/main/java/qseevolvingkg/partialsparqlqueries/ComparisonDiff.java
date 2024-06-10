@@ -12,6 +12,12 @@ public class ComparisonDiff {
     public ArrayList<EditedShapesComparisonObject> editedNodeShapes;
     public ArrayList<EditedShapesComparisonObject> editedPropertyShapes;
 
+    public ComparisonDiff() {
+        deletedNodeShapes = new ArrayList<>();
+        deletedPropertShapes = new ArrayList<>();
+        editedNodeShapes = new ArrayList<>();
+        editedPropertyShapes = new ArrayList<>();
+    }
 
     public void exportComparisonToFile(String filePath) {
         try {

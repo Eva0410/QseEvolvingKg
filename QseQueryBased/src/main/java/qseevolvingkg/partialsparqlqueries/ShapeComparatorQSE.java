@@ -1,19 +1,16 @@
 package qseevolvingkg.partialsparqlqueries;
 
-import com.ontotext.trree.query.functions.math.E;
 import cs.Main;
 import cs.qse.common.structure.NS;
-import cs.qse.common.structure.PS;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
-import org.apache.zookeeper.server.quorum.CommitProcessor;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShapeComparatorQSETwice {
+public class ShapeComparatorQSE {
     String graphDbUrl;
     String dataSetName1;
     String dataSetName2;
@@ -26,7 +23,7 @@ public class ShapeComparatorQSETwice {
     public static final String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/";
 //    public static final String pruningThresholds = "{(-1,0)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
 
-    public ShapeComparatorQSETwice(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
+    public ShapeComparatorQSE(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
         this.graphDbUrl = graphDbUrl;
         this.dataSetName1 = dataSetName1;
         this.dataSetName2 = dataSetName2;
@@ -71,10 +68,14 @@ public class ShapeComparatorQSETwice {
         ComparisonDiff comparisonDiff = new ComparisonDiff();
         getDeletedNodeShapes(comparisonDiff);
         getDeletedPropertyShapes(comparisonDiff);
-        var file1String = RegexUtils.getFileAsString(shapePath1);
-        var file2String = RegexUtils.getFileAsString(shapePath2);
-        getEditedNodeShapes(comparisonDiff, file1String, file2String);
-        getEditedPropertyShapes(comparisonDiff, file1String, file2String);
+        ExtractedShapes extractedShapes1 = new ExtractedShapes();
+        ExtractedShapes extractedShapes2 = new ExtractedShapes();
+        extractedShapes1.fileContentPath = shapePath1;
+        extractedShapes2.fileContentPath = shapePath2;
+        extractedShapes1.getFileAsString();
+        extractedShapes2.getFileAsString();
+        getEditedNodeShapes(comparisonDiff, extractedShapes1, extractedShapes2);
+        getEditedPropertyShapes(comparisonDiff, extractedShapes1, extractedShapes2);
         Instant endComparison = Instant.now();
         Duration durationComparison = Duration.between(startComparison, endComparison);
         System.out.println("Execution Time Comparison: " + durationComparison.getSeconds() + " seconds"); //todo save to log
@@ -85,26 +86,26 @@ public class ShapeComparatorQSETwice {
         return comparisonDiff;
     }
 
-    private void getEditedPropertyShapes(ComparisonDiff comparisonDiff,  String file1String, String file2String) {
+    private void getEditedPropertyShapes(ComparisonDiff comparisonDiff, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2) {
         var propertyShapesToCheck = firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString()))
                 .filter(ps -> !comparisonDiff.deletedPropertShapes.contains(ps)).toList();
-        var editedShapes = generateEditeShapesObjects(propertyShapesToCheck, file1String, file2String);
+        var editedShapes = generateEditeShapesObjects(propertyShapesToCheck, extractedShapes1, extractedShapes2);
         comparisonDiff.editedNodeShapes = editedShapes;
     }
 
-    private void getEditedNodeShapes(ComparisonDiff comparisonDiff, String file1String, String file2String) {
+    private void getEditedNodeShapes(ComparisonDiff comparisonDiff, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2) {
         var nodeShapesToCheck = firstNodeShapes.stream().filter(ns -> !comparisonDiff.deletedNodeShapes.contains(ns.getIri().toString())).map(ns -> ns.getIri().toString()).toList();
-        var editedShapes = generateEditeShapesObjects(nodeShapesToCheck, file1String, file2String);
+        var editedShapes = generateEditeShapesObjects(nodeShapesToCheck, extractedShapes1, extractedShapes2);
         comparisonDiff.editedNodeShapes = editedShapes;
     }
 
-    private static ArrayList<EditedShapesComparisonObject> generateEditeShapesObjects(List<String> shapesToCheck, String file1String, String file2String) {
+    private static ArrayList<EditedShapesComparisonObject> generateEditeShapesObjects(List<String> shapesToCheck, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2) {
         var editedShapesComparisonObjects = new ArrayList<EditedShapesComparisonObject>();
         for(var shape : shapesToCheck) {
             EditedShapesComparisonObject editedShapesComparisonObject = new EditedShapesComparisonObject();
             editedShapesComparisonObject.shapeName = shape;
-            var shapeString1 = RegexUtils.getShapeAsString(shape, file1String);
-            var shapeString2 = RegexUtils.getShapeAsString(shape, file2String);
+            var shapeString1 = RegexUtils.getShapeAsStringFormatted(shape, extractedShapes1.fileAsString, extractedShapes1.prefixLines);
+            var shapeString2 = RegexUtils.getShapeAsStringFormatted(shape, extractedShapes2.fileAsString, extractedShapes2.prefixLines);
             if(!shapeString1.equals(shapeString2)) {
                 editedShapesComparisonObject.shapeAsTextNew = shapeString2;
                 editedShapesComparisonObject.shapeAsTextOld = shapeString1;

@@ -3,10 +3,7 @@ import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.junit.Test;
-import qseevolvingkg.partialsparqlqueries.ExtractedShapes;
-import qseevolvingkg.partialsparqlqueries.GraphDbUtils;
-import qseevolvingkg.partialsparqlqueries.RegexUtils;
-import qseevolvingkg.partialsparqlqueries.ShaclOrListItem;
+import qseevolvingkg.partialsparqlqueries.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -82,7 +79,8 @@ public class Tests {
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_copy.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
 //        var targetDb = graphDbUtils.cloneSailRepository(localPath, "secondVersion");
@@ -119,7 +117,8 @@ public class Tests {
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_copyPropertyShape.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
     }
 
@@ -136,7 +135,8 @@ public class Tests {
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -158,7 +158,8 @@ public class Tests {
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
     }
 
@@ -261,7 +262,8 @@ public class Tests {
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         //Weird result for rangeDatatypePropertyShapeProperty: points to IRI undefined and is therefore filtered in next version
@@ -330,8 +332,8 @@ public class Tests {
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
-
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes,comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -356,8 +358,8 @@ public class Tests {
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_noGender.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
-
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -382,8 +384,8 @@ public class Tests {
         var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_NoFilmStudio.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
-
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes);
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
