@@ -34,6 +34,36 @@ import static cs.Main.setOutputFilePathForJar;
 public class Test {
 
     @org.junit.Test
+    public void testOrItems() {
+        var testshape = "<http://shaclshapes.org/religion_1PersonShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ( [\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xrdf:langString ;\n" +
+                "  ] [\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ( [\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xsd:gMonthDay ;\n" +
+                "  ] [\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  ] [\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ( [\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xsd:gMonthDay ;\n" +
+                "  ] [\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  ] [\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <ahttp://www.w3.org/ns/shacl#IRI> ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> <http://dbpedia.org/property/religion> .\n";
+        System.out.println(Utils.reOrderOrItems(testshape));
+    }
+    @org.junit.Test
     public void testFileBased() {
         Main.setResourcesPathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources");
         setOutputFilePathForJar("/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/Output/TEMP/fileBased/");

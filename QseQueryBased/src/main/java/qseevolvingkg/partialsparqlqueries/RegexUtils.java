@@ -218,12 +218,13 @@ public class RegexUtils {
     public static String reOrderOrItems(String input) {
         try {
             String orItemString = "<http://www.w3.org/ns/shacl#or>"; //highly dependent on turtlePrettyFormatter
-            String patternString = orItemString + " \\(.*\\)"; //would not work for names with '('
-
+            String patternString = orItemString + " \\([^\\)]*\\) ;"; //would not work for names with '('
             Pattern patternOrParent = Pattern.compile(patternString, Pattern.DOTALL);
             Matcher matcherOrParent = patternOrParent.matcher(input);
-            if (matcherOrParent.find()) { //no or items
-                var firstResultParent = matcherOrParent.group(); //only works for first item
+            var inputCopy = input;
+            List<String> orObjects = new ArrayList<>();
+            while(matcherOrParent.find()) {
+                var firstResultParent = matcherOrParent.group();
                 var patternOrObjects = Pattern.compile("\\[[^\\]]*\\]", Pattern.DOTALL);
                 var matcherObjects = patternOrObjects.matcher(firstResultParent);
                 List<String> objects = new ArrayList<>();
@@ -232,15 +233,29 @@ public class RegexUtils {
                     objects.add(object);
                 }
                 objects.sort(Comparator.comparing(o -> o));
-                var newString = input;
+                var newString = firstResultParent;
                 StringBuilder newOrItems = new StringBuilder();
                 for (var m : objects) {
                     newString = newString.replace(m, "");
                     newOrItems.append(m).append(" ");
                 }
-                return insertAfter(newString, orItemString + " ( ", newOrItems.toString());
-            } else
+                var newOrItemString = insertAfter(newString, orItemString + " ( ", newOrItems.toString());
+                inputCopy = inputCopy.replace(firstResultParent, newOrItemString);
+                orObjects.add(newOrItemString);
+            }
+
+            //reorder or-objects in general (in case of multiple
+            orObjects.sort(Comparator.comparing(o -> o));
+            StringBuilder newOrItems = new StringBuilder();
+            for (var m : orObjects) {
+                inputCopy = inputCopy.replace(m, "");
+                newOrItems.append(m).append(" \r\n");
+            }
+            int index = input.indexOf(orItemString);
+            if (index == -1)
                 return input;
+            inputCopy = insertAfter(inputCopy, input.substring(0, index), newOrItems.toString());
+            return inputCopy;
         } catch (Exception ex) {
             ex.printStackTrace();
             return input;

@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-05-14T08:00:20.010Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="ERES25rI6ka5EaM8BTe-" version="24.4.0" type="device">
+<mxfile host="app.diagrams.net" modified="2024-06-11T08:50:38.227Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="RtCaM2Ier3ClHiSlCYkF" version="24.4.9" type="device" pages="2">
   <diagram name="Page-1" id="8N3XWA4QchF8TUvQweEX">
     <mxGraphModel dx="1434" dy="738" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -24,6 +24,77 @@
         </mxCell>
         <mxCell id="-ZtLET40_uy0QwlSn1np-8" value="Object" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="310" y="250" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="BHpfjqG416VqSBUKp55q" name="Page-2">
+    <mxGraphModel dx="1290" dy="522" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="fEZMnwb492uWOY82GJNW-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-1" target="fEZMnwb492uWOY82GJNW-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-1" target="fEZMnwb492uWOY82GJNW-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-1" value="RQ4&lt;div&gt;QSE-QueryBased&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="420" y="30" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-2" target="fEZMnwb492uWOY82GJNW-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-2" value="Run QSE on V1" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="240" y="120" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-3" target="fEZMnwb492uWOY82GJNW-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-3" value="Run QSE on V2" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="240" y="200" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-6" target="fEZMnwb492uWOY82GJNW-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-6" target="fEZMnwb492uWOY82GJNW-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-6" value="Compare QSE results with Regex-Logic used in Web app" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="220" y="310" width="140" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-8" target="fEZMnwb492uWOY82GJNW-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-8" value="Run QSE on V1" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="660" y="120" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-10" target="fEZMnwb492uWOY82GJNW-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-10" value="SPARQL Script on V2" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="660" y="210" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-12" target="fEZMnwb492uWOY82GJNW-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-12" value="Compare results by using objects and Regex-Logic used in Web app" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="640" y="310" width="140" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-16" value="Deleted node shapes&lt;div&gt;Deleted property shapes&lt;/div&gt;&lt;div&gt;Edited node shapes&lt;/div&gt;&lt;div&gt;Edited property shapes&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.document2;whiteSpace=wrap;size=0.25;" vertex="1" parent="1">
+          <mxGeometry x="422.5" y="280" width="145" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-12" target="fEZMnwb492uWOY82GJNW-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-19" value="Meta comparison between comparisons" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="425" y="460" width="140" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="fEZMnwb492uWOY82GJNW-22" target="fEZMnwb492uWOY82GJNW-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fEZMnwb492uWOY82GJNW-22" value="Count support for all node shapes&lt;div&gt;Count support for all property shapes / or items&lt;/div&gt;&lt;div&gt;Result as objects&lt;/div&gt;&lt;div&gt;Result as file, cleaned by using Regex + Jena&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_1;align=left;pointerEvents=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="185" width="50" height="100" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

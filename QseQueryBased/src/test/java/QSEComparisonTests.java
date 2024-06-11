@@ -41,4 +41,17 @@ public class QSEComparisonTests {
         System.out.println(metaComparator.compare());
         ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
     }
+
+    @Test
+    public void bearBV1V2Test() {
+        MetaComparator metaComparator = new MetaComparator();
+        String dataSetName1 = "Bear-B-1";
+        String dataSetName2 = "Bear-B2";
+        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
+        metaComparator.diffQse = comparatorQSETwice.doComparison();
+        ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
+        metaComparator.diffSparql = comparatorSparql.doComparison();
+        System.out.println(metaComparator.compare());
+        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
+    }
 }
