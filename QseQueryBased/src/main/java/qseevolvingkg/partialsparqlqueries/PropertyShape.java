@@ -18,13 +18,14 @@ public class PropertyShape {
     IRI dataType;
 
     IRI classIri;
-    List<ShaclOrListItem> orItems;
+    List<ShaclOrListItem> orItems = new ArrayList<>();
     boolean errorDuringGeneration = false;
     IRI dataTypeOrClass;
     public NodeShape nodeShape;
     public String generatedText;
 
-    PropertyShape(PS ps) {
+    PropertyShape(PS ps, NodeShape nodeShape) {
+        this.nodeShape = nodeShape;
         iri = ps.getIri();
         path = Values.iri(ps.getPath());
         nodeKind = getNodeKindFromQSE(ps.getNodeKind());

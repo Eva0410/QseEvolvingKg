@@ -1,5 +1,6 @@
 package qseevolvingkg.partialsparqlqueries;
 
+import cs.qse.common.ExperimentsUtil;
 import cs.qse.common.structure.NS;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 
 public class ShapeComparatorSparql {
@@ -30,10 +32,10 @@ public class ShapeComparatorSparql {
         this.logFilePath = logFilePath+dataSetName1+"_"+dataSetName2+ File.separator;
     }
 
-    public ComparisonDiff doComparison() {
+    public ComparisonDiff doComparison(String threshold) {
         cs.Main.setResourcesPathForJar(resourcesPath);
         cs.Main.annotateSupportConfidence = "true";
-        cs.Main.setPruningThresholds("{(-1,0)}"); //for default shapes
+        cs.Main.setPruningThresholds(threshold);
         cs.Main.configPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\emptyconfig.txt"; //avoid exceptions in QSE
         ComparisonDiff comparisonDiff = new ComparisonDiff();
 
@@ -57,6 +59,8 @@ public class ShapeComparatorSparql {
         extractedShapes1.setNodeShapes(firstNodeShapes);
         ExtractedShapes extractedShapes2 = new ExtractedShapes();
         extractedShapes2.setNodeShapes(firstNodeShapes);
+        HashMap<Double, List<Integer>> pruningThresholds = ExperimentsUtil.getSupportConfRange();
+        extractedShapes2.support = pruningThresholds.entrySet().iterator().next().getValue().get(0);
         extractedShapes1.fileContentPath = shapePath1;
 
         GraphDbUtils.checkShapesInNewGraph(graphDbUrl, this.dataSetName2, extractedShapes2.getNodeShapes());

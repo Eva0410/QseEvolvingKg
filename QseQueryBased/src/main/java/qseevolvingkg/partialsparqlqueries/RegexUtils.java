@@ -33,9 +33,9 @@ public class RegexUtils {
 
     public static String deleteFromFileWhereSupportIsZero(ExtractedShapes extractedShapes, ComparisonDiff comparisonDiff) {
         String fileContent = extractedShapes.getFileAsString();
-
+        int supportThreshold = extractedShapes.support;
         for (var nodeShape : extractedShapes.getNodeShapes()) {
-            if(nodeShape.support == 0) {
+            if(nodeShape.support <= supportThreshold) { //QSE also compares with <=, not with <
                 comparisonDiff.deletedNodeShapes.add(nodeShape.iri.toString());
                 fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent, nodeShape.errorDuringGeneration);
                 for (var propertyShape : nodeShape.propertyShapes) {
@@ -45,23 +45,25 @@ public class RegexUtils {
             }
             else {
                 for(var propertyShape : nodeShape.propertyShapes) {
-                    var allOrItemsSupportZero = propertyShape.orItems != null && propertyShape.orItems.stream().mapToInt(o -> o.support).sum() == 0;
-                    if((propertyShape.support == 0 && propertyShape.orItems == null) || allOrItemsSupportZero) {
+//                    var allOrItemsSupportZero = propertyShape.orItems != null && propertyShape.orItems.stream().mapToInt(o -> o.support).sum() == 0; //cannot remember  usecase
+                    if(propertyShape.support <= supportThreshold && (propertyShape.orItems == null || propertyShape.orItems.isEmpty())) {
                         comparisonDiff.deletedPropertShapes.add(propertyShape.iri.toString());
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                         fileContent = deletePropertyShapeReferenceWithIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                     }
-                    else if(propertyShape.support != 0 && propertyShape.orItems != null) {
-                        var numberOfOrItemsLeft = propertyShape.orItems.stream().filter(o -> o.support != 0).count();
+                    else if(propertyShape.support > supportThreshold && propertyShape.orItems != null) {
+                        var numberOfOrItemsLeft = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold).count();
                         String originalShape = getShapeAsString(propertyShape.iri.toString(), fileContent);
+                        if(!originalShape.contains("<http://www.w3.org/ns/shacl#or>"))
+                            continue;
                         String modifiedShape = originalShape;
                         for(var orItem : propertyShape.orItems) {
-                            if(orItem.support == 0) {
+                            if(orItem.support <= supportThreshold) {
                                 modifiedShape = deleteShaclOrItemWithIriFromString(orItem, modifiedShape, false);
                             }
                         }
                         if(numberOfOrItemsLeft == 1 && propertyShape.orItems.size() != 1) {
-                            int newSupport = propertyShape.orItems.stream().filter(o -> o.support != 0).findFirst().get().support;
+                            int newSupport = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold).findFirst().get().support;
 
                             modifiedShape = extractedShapes.prefixLines + modifiedShape;
                             modifiedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(modifiedShape, propertyShape.iri.toString(), newSupport);
@@ -120,6 +122,7 @@ public class RegexUtils {
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
             System.out.println("Delete did not work for " + iri);
+            return file;
         }
         String match = matcher.group();
         return file.replace(match, "");
@@ -134,6 +137,7 @@ public class RegexUtils {
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
             System.out.println("Delete did not work for " + iri);
+            return file;
         }
         String match = matcher.group();
         return file.replace(match, "");

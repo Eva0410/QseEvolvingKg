@@ -30,10 +30,10 @@ public class ShapeComparatorQSE {
         this.logFilePath = logFilePath+dataSetName1+"_"+dataSetName2+ File.separator;
     }
 
-    public ComparisonDiff doComparison() {
+    public ComparisonDiff doComparison(String threshold) {
         cs.Main.setResourcesPathForJar(resourcesPath);
         cs.Main.annotateSupportConfidence = "true";
-        Main.setPruningThresholds("{(-1,0)}"); //for default shapes
+        Main.setPruningThresholds(threshold);
         Main.configPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\emptyconfig.txt"; //avoid exceptions in QSE
 
         //First Run

@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 
 //todo use version from web-app?
 public class ExtractedShapes {
-    int support;
-    double confidence;
+    int support = 0;
+    double confidence = 0;
 
     List<String> classes;
 
@@ -136,19 +136,7 @@ public class ExtractedShapes {
         this.confidence = confidence;
     }
 
-    public void setClasses(List<String> classes) {
-        this.classes = classes;
-    }
-
-    public boolean isDefaultshape() {
-        return confidence == 0 && support == 0;
-    }
-
     public String getFileContentPath() {
         return fileContentPath;
-    }
-
-    public String getFileContentDefaultShapesPath() {
-        return fileContentDefaultShapesPath;
     }
 }

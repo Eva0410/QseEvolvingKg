@@ -14,11 +14,11 @@ import static org.junit.Assert.assertTrue;
 
 public class Tests {
     public static final String resourcesPath = "/Users/evapu/Documents/GitHub/qse/src/main/resources";
-    public static final String firstVersionName = "film";
+    public static String firstVersionName = "film";
 
-    public static final String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+    public static String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
     //QSE QueryBases does not calculate confidence, therefore it is always 0 and filtering works with > 0 -> filter to -1
-    public static final String pruningThresholds = "{(-1,0)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
+    public static final String pruningThresholds = "{(-1)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
     public static final String graphDbUrl = "http://localhost:7201/";
 
 
@@ -390,6 +390,94 @@ public class Tests {
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
                 "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACLNoFilmStudio.ttl"));
+
+    }
+
+    @Test
+    public void testSupportThresholdWithSameDataSet() {
+        prepareTest();
+        Main.setPruningThresholds("{(-1,5)}");
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+
+        var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setSupport(5);
+        extractedShapes.setNodeShapes(nodeShapes);
+
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, firstVersionName, extractedShapes.getNodeShapes());
+        RegexUtils regexUtils = new RegexUtils();
+
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_-1.0_5_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_-1.0_5_SHACL_Support.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        extractedShapes.fileContentPath = copiedFile;
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        regexUtils.saveStringAsFile(content, copiedFile);
+
+        assertTrue("Files are not equal", compareFiles(copiedFile,
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_-1.0_5_SHACL.ttl"));
+    }
+
+    @Test
+    public void testSupportThresholdWithNoGender() {
+        prepareTest();
+        Main.setPruningThresholds("{(-1,5)}");
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+
+        var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setSupport(5);
+        extractedShapes.setNodeShapes(nodeShapes);
+
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", extractedShapes.getNodeShapes());
+        RegexUtils regexUtils = new RegexUtils();
+
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_-1.0_5_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_-1.0_5_SHACL_SupportNoGender.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        extractedShapes.fileContentPath = copiedFile;
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        regexUtils.saveStringAsFile(content, copiedFile);
+
+        assertTrue("Files are not equal", compareFiles(copiedFile,
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_-1.0_5_SHACLNoGender.ttl"));
+    }
+
+    @Test
+    public void testSupportThresholdWithPeople() {
+        firstVersionName = "PeopleV2";
+        outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+        prepareTest();
+        Main.setPruningThresholds("{(-1,2)}");
+
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+
+        var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setSupport(2);
+        extractedShapes.setNodeShapes(nodeShapes);
+
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
+        RegexUtils regexUtils = new RegexUtils();
+
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_-1.0_2_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_-1.0_2_SHACL_V3.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        extractedShapes.fileContentPath = copiedFile;
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        regexUtils.saveStringAsFile(content, copiedFile);
+
+        assertTrue("Files are not equal", compareFiles(copiedFile,
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\PeopleV2_QSE_-1.0_2_SHACL.ttl"));
     }
 
     public static boolean compareFiles(String filePath1, String filePath2) {
