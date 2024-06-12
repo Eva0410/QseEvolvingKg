@@ -1,5 +1,6 @@
 package qseevolvingkg.partialsparqlqueries;
 
+import cs.Main;
 import cs.qse.common.ExperimentsUtil;
 import cs.qse.common.structure.NS;
 import cs.qse.querybased.nonsampling.QbParser;
@@ -18,30 +19,31 @@ public class ShapeComparatorSparql {
     String dataSetName1;
     String dataSetName2;
     String logFilePath;
-    public static final String resourcesPath = "/Users/evapu/Documents/GitHub/qse/src/main/resources";
     List<NS> firstNodeShapes;
     String shapePath1;
     ExtractedShapes extractedShapes2;
-    public static final String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/";
-//    public static final String pruningThresholds = "{(-1,0)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
+    public String outputPath;
 
     public ShapeComparatorSparql(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
         this.graphDbUrl = graphDbUrl;
         this.dataSetName1 = dataSetName1;
         this.dataSetName2 = dataSetName2;
         this.logFilePath = logFilePath+dataSetName1+"_"+dataSetName2+ File.separator;
+        this.outputPath = System.getProperty("user.dir")+ File.separator + "Output" + File.separator;
     }
 
     public ComparisonDiff doComparison(String threshold) {
-        cs.Main.setResourcesPathForJar(resourcesPath);
+        cs.Main.setResourcesPathForJar(ConfigManager.getRelativeResourcesPathFromQse());
         cs.Main.annotateSupportConfidence = "true";
         cs.Main.setPruningThresholds(threshold);
-        cs.Main.configPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\emptyconfig.txt"; //avoid exceptions in QSE
+        File currentDir = new File(System.getProperty("user.dir"));
+        File emptyConfig = new File(currentDir, "src/test/expected_test_results/emptyconfig.txt");
+        Main.configPath = emptyConfig.getAbsolutePath(); //avoid exceptions in QSE
         ComparisonDiff comparisonDiff = new ComparisonDiff();
 
         //First Run
         cs.Main.datasetName = dataSetName1;
-        cs.Main.setOutputFilePathForJar(outputPath+dataSetName1+"/");
+        cs.Main.setOutputFilePathForJar(outputPath+dataSetName1+File.separator);
 
         Instant startQSE1 = Instant.now();
         QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, dataSetName1);

@@ -15,12 +15,11 @@ public class ShapeComparatorQSE {
     String dataSetName1;
     String dataSetName2;
     String logFilePath;
-    public static final String resourcesPath = "/Users/evapu/Documents/GitHub/qse/src/main/resources";
     List<NS> firstNodeShapes;
     List<NS> secondNodeShapes;
     String shapePath1;
     String shapePath2;
-    public static final String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/";
+    public String outputPath;// = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/";
 //    public static final String pruningThresholds = "{(-1,0)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
 
     public ShapeComparatorQSE(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
@@ -28,17 +27,20 @@ public class ShapeComparatorQSE {
         this.dataSetName1 = dataSetName1;
         this.dataSetName2 = dataSetName2;
         this.logFilePath = logFilePath+dataSetName1+"_"+dataSetName2+ File.separator;
+        this.outputPath = System.getProperty("user.dir")+ File.separator + "Output" + File.separator;
     }
 
     public ComparisonDiff doComparison(String threshold) {
-        cs.Main.setResourcesPathForJar(resourcesPath);
+        cs.Main.setResourcesPathForJar(ConfigManager.getRelativeResourcesPathFromQse());
         cs.Main.annotateSupportConfidence = "true";
         Main.setPruningThresholds(threshold);
-        Main.configPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\emptyconfig.txt"; //avoid exceptions in QSE
+        File currentDir = new File(System.getProperty("user.dir"));
+        File emptyConfig = new File(currentDir, "src/test/expected_test_results/emptyconfig.txt");
+        Main.configPath = emptyConfig.getAbsolutePath(); //avoid exceptions in QSE
 
         //First Run
         Main.datasetName = dataSetName1;
-        cs.Main.setOutputFilePathForJar(outputPath+dataSetName1+"/");
+        cs.Main.setOutputFilePathForJar(outputPath+dataSetName1+File.separator);
         ComparisonDiff comparisonDiff = new ComparisonDiff();
 
         Instant startQSE1 = Instant.now();
@@ -53,7 +55,7 @@ public class ShapeComparatorQSE {
 
         //Second Run
         Main.datasetName = dataSetName2;
-        cs.Main.setOutputFilePathForJar(outputPath+dataSetName2+"/");
+        cs.Main.setOutputFilePathForJar(outputPath+dataSetName2+File.separator);
 
         Instant startQSE2 = Instant.now();
         qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, dataSetName2);

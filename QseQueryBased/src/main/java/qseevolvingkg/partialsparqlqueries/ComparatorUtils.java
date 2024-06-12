@@ -49,11 +49,10 @@ public class ComparatorUtils {
                     return;
                 }
             }
-            if(outputFile.createNewFile()) {
-                FileWriter writer = new FileWriter(fileName);
-                writer.write(content);
-                writer.close();
-            }
+            FileWriter writer = new FileWriter(fileName, false);
+            writer.write(content);
+            writer.close();
+            System.out.println("Saved file " + fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
