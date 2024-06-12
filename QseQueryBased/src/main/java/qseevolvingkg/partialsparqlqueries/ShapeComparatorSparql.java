@@ -90,7 +90,7 @@ public class ShapeComparatorSparql {
         Duration totalDuration = durationQSE1.plus(durationSparql).plus(durationComparison);
         comparisonDiff.durationTotal = totalDuration;
         System.out.println(comparisonDiff);
-        ComparatorUtils.exportComparisonToFile(logFilePath+"Sparql", this.toString());
+        ComparatorUtils.exportComparisonToFile(logFilePath+"Sparql", comparisonDiff.toString());
         return comparisonDiff;
     }
 }
