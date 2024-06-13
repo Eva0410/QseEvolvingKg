@@ -47,9 +47,9 @@ public class QSEComparisonTests {
         MetaComparator metaComparator = new MetaComparator();
         String dataSetName1 = "Bear-B-1";
         String dataSetName2 = "Bear-B2";
-        String pruningThresholds =  "{(-1,25)}";
-        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
-        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
+        String pruningThresholds =  "{(-1,0)}";
+//        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
+//        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffSparql = comparatorSparql.doFullComparison(pruningThresholds);
         System.out.println(metaComparator.compare());

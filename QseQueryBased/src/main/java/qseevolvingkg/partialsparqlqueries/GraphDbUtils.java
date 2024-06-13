@@ -308,12 +308,25 @@ public class GraphDbUtils {
     }
 
     private static int getSupportForIriPropertyShape(IRI path, IRI classIri, String targetClass, RepositoryConnection conn) {
-        String sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) " +
-                "FROM <http://www.ontotext.com/explicit> WHERE { " +
-                " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class ." +
-                " ?s <" + path + "> ?obj . " +
-                " ?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <"+ classIri+">" +
-                " VALUES ?class { <" + targetClass + "> }}";
+        String sparql;
+        //special case where object does not have a type
+        if(classIri.toString().equals("http://shaclshapes.org/undefined")) {
+            sparql = "PREFIX onto: <http://www.ontotext.com/>\n" +
+                    "SELECT ( COUNT( DISTINCT ?s) AS ?count) FROM onto:explicit WHERE {\n" +
+                    "    ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class .\n" +
+                    "    ?s <" + path + "> ?obj .\n" +
+                    " VALUES ?class { <" + targetClass + "> } \n" +
+                    "    FILTER NOT EXISTS {?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?objDataType}\n" +
+                    "}";
+        }
+        else {
+            sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) \n" +
+                    "FROM <http://www.ontotext.com/explicit> WHERE { \n" +
+                    " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class .\n" +
+                    " ?s <" + path + "> ?obj . \n" +
+                    " ?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <"+ classIri+">\n" +
+                    " VALUES ?class { <" + targetClass + "> }}";
+        }
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
         try (TupleQueryResult result = query.evaluate()) {

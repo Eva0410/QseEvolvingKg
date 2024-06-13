@@ -155,8 +155,13 @@ public class RegexUtils {
         String regexPart = "";
         if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal"))
             regexPart = String.format(" \\<http://www.w3.org/ns/shacl#datatype> <?%s>?", orItem.dataType);
-        else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI"))
-            regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.classIri);
+        else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
+            //special case for "undefined" items, then class is saved in dataTypeOrClass and not in classIri
+            if(orItem.classIri == null && orItem.dataTypeOrClass.toString().equals("http://shaclshapes.org/undefined"))
+                regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.dataTypeOrClass);
+            else
+                regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.classIri);
+        }
 
         String regexPattern = String.format(" \\[[^\\[\\]]*?<http://www.w3.org/ns/shacl#NodeKind> <%s>[^\\[\\]]*?%s[^\\]\\[]*?\\]", orItem.nodeKind, regexPart);
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
