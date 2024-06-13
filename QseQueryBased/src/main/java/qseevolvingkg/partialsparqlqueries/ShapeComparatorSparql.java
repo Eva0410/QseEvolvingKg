@@ -30,6 +30,13 @@ public class ShapeComparatorSparql {
         //First Run
         runQse1(comparisonDiff);
 
+//        var ns = firstNodeShapes.stream().filter(nodes -> nodes.getIri().toString().contains("http://shaclshapes.org/ThingShape")).toList();
+//        for(var n : ns) {
+//            var ps = n.getPropertyShapes();
+//            var psfiltered = ps.stream().filter(p -> p.getIri().toString().contains("http://shaclshapes.org/lengthThingShapeProperty")).toList();
+//            System.out.println();
+//        } //todo remove
+
         //Check shapes with SPARQL
         doComparisonSparql(firstNodeShapes, shapePath1, comparisonDiff);
 

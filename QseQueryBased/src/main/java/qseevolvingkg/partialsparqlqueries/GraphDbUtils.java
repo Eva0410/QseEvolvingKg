@@ -199,6 +199,8 @@ public class GraphDbUtils {
                 var targetClass = nodeShape.targetClass.toString();
                 //todo better way for performance?
                 for (var propertyShape : nodeShape.propertyShapes) {
+//                    if(propertyShape.iri.toString().contains("http://shaclshapes.org/lengthThingShapeProperty"))
+//                        System.out.println(); //todo remove
                     //Todo merge methods?
                     if (propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
                         propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
@@ -320,12 +322,15 @@ public class GraphDbUtils {
                     "}";
         }
         else {
+            //special case where object is actually literal but still has datatype e.g. 3,2^^kilometre
             sparql = "SELECT ( COUNT( DISTINCT ?s) AS ?count) \n" +
                     "FROM <http://www.ontotext.com/explicit> WHERE { \n" +
                     " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class .\n" +
                     " ?s <" + path + "> ?obj . \n" +
-                    " ?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <"+ classIri+">\n" +
-                    " VALUES ?class { <" + targetClass + "> }}";
+                    " optional{?obj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?dataTypeRdfType}. \n" +
+                    " BIND (datatype(?obj) AS ?dataTypeLiteral) \n" +
+                    " VALUES ?class { <" + targetClass + "> }" +
+                    " FILTER (?dataTypeRdfType = <"+classIri+"> || ?dataTypeLiteral = <"+classIri+">)}";
         }
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 

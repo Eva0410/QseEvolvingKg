@@ -30,6 +30,12 @@ public class QSEComparisonTests {
     }
 
     @Test
+    public void basicTestWithCustomGraphSparql() {
+        ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, "testKilometre", "testKilometre", logPath);
+        comparatorSparql.doFullComparison(pruningThresholdsDefault);
+    }
+
+    @Test
     public void basicFilmTest() {
         MetaComparator metaComparator = new MetaComparator();
         String dataSetName1 = "film";

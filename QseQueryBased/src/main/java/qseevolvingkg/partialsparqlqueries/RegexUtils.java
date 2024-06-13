@@ -49,6 +49,8 @@ public class RegexUtils {
             }
             else {
                 for(var propertyShape : nodeShape.propertyShapes) {
+//                    if(propertyShape.iri.toString().contains("http://shaclshapes.org/lengthThingShapeProperty"))
+//                        System.out.println(); //Todo remove
 //                    var allOrItemsSupportZero = propertyShape.orItems != null && propertyShape.orItems.stream().mapToInt(o -> o.support).sum() == 0; //cannot remember  usecase
                     if(propertyShape.support <= supportThreshold && (propertyShape.orItems == null || propertyShape.orItems.isEmpty())) {
                         comparisonDiff.deletedPropertShapes.add(propertyShape.iri.toString());
@@ -156,8 +158,7 @@ public class RegexUtils {
         if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal"))
             regexPart = String.format(" \\<http://www.w3.org/ns/shacl#datatype> <?%s>?", orItem.dataType);
         else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
-            //special case for "undefined" items, then class is saved in dataTypeOrClass and not in classIri
-            if(orItem.classIri == null && orItem.dataTypeOrClass.toString().equals("http://shaclshapes.org/undefined"))
+            if(orItem.classIri == null)
                 regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.dataTypeOrClass);
             else
                 regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.classIri);
