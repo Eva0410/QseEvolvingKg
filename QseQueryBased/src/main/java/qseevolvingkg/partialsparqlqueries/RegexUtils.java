@@ -13,10 +13,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexUtils {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
     public void getAllNodeShapesfromFile(String filePath) {
         String regexPattern = String.format("\n.* <http:\\/\\/www.w3.org\\/ns\\/shacl#NodeShape> ;");
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
@@ -99,7 +102,7 @@ public class RegexUtils {
             Path path = Paths.get(filePath);
             Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            System.err.println("Failed to save the file: " + e.getMessage());
+            LOGGER.severe("Failed to save the file: " + e.getMessage());
         }
     }
 
@@ -109,7 +112,7 @@ public class RegexUtils {
         try {
             Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            System.err.println("Failed to copy the file: " + e.getMessage());
+            LOGGER.severe("Failed to copy the file: " + e.getMessage());
         }
     }
 
@@ -121,7 +124,7 @@ public class RegexUtils {
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
-            System.out.println("Delete did not work for " + iri);
+           LOGGER.warning("Delete did not work for " + iri);
             return file;
         }
         String match = matcher.group();
@@ -136,7 +139,7 @@ public class RegexUtils {
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
-            System.out.println("Delete did not work for " + iri);
+            LOGGER.warning("Delete did not work for " + iri);
             return file;
         }
         String match = matcher.group();
@@ -158,7 +161,7 @@ public class RegexUtils {
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(shape);
         if (!matcher.find()) {
-            System.out.println("Delete did not work for " + orItem.propertyShape.iri.toString() + ", " + orItem.toString());
+            LOGGER.warning("Delete did not work for " + orItem.propertyShape.iri.toString() + ", " + orItem.toString());
             return shape;
         }
         String match = matcher.group();
@@ -184,7 +187,7 @@ public class RegexUtils {
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
-            System.out.println("Could not find shape " + iri);
+            LOGGER.warning("Could not find shape " + iri);
         }
         return matcher.group();
     }
@@ -196,7 +199,7 @@ public class RegexUtils {
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
-            System.out.println("Could not find shape " + iri);
+            LOGGER.warning("Could not find shape " + iri);
         }
         String match = matcher.group();
         var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();

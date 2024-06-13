@@ -196,8 +196,6 @@ public class GraphDbUtils {
                 //todo better way for performance?
                 for (var propertyShape : nodeShape.propertyShapes) {
                     //Todo merge methods?
-                    if(propertyShape.iri.toString().contains("hasFilmStudioFilmShapeProperty"))
-                        System.out.println("y");
                     if (propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
                         propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
                     }

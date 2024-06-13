@@ -84,7 +84,6 @@ public class ShapeComparatorQSE {
 
         Duration totalDuration = durationQSE1.plus(durationQSE2).plus(durationComparison);
         comparisonDiff.durationTotal = totalDuration;
-        System.out.println(comparisonDiff);
         ComparatorUtils.exportComparisonToFile(logFilePath+"QSE", comparisonDiff.toString());
         return comparisonDiff;
     }

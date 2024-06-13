@@ -8,8 +8,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ComparatorUtils {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
     public static void getEditedPropertyShapes(ComparisonDiff comparisonDiff, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2, List<NS> firstNodeShapes) {
         var propertyShapesToCheck = firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString()))
                 .filter(ps -> !comparisonDiff.deletedPropertShapes.contains(ps)).toList();
@@ -52,7 +55,7 @@ public class ComparatorUtils {
             FileWriter writer = new FileWriter(fileName, false);
             writer.write(content);
             writer.close();
-            System.out.println("Saved file " + fileName);
+            LOGGER.info("Saved file " + fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

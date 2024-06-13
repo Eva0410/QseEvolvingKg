@@ -1,15 +1,17 @@
 package qseevolvingkg.partialsparqlqueries;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Main {
-//    public static final String resourcesPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/qse/src/main/resources";
-//    public static final String firstVersionName = "lubm-mini";
-//
-//    public static final String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
-//    //QSE QueryBases does not calculate confidence, therefore it is always 0 and filtering works with > 0 -> filter to -1
-//    public static final String pruningThresholds = "{(-1,10)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
     public static void main(String[] args) {
+        setupLogger();
+
         MetaComparator metaComparator = new MetaComparator();
         String dataSetName1 = ConfigManager.getProperty("dataSetName1");
         String dataSetName2 = ConfigManager.getProperty("dataSetName2");
@@ -21,7 +23,17 @@ public class Main {
         metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffSparql = comparatorSparql.doComparison(pruningThresholds);
-        System.out.println(metaComparator.compare());
         ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
+    }
+
+    private static void setupLogger() {
+        try {
+            FileHandler fileHandler = null;
+            fileHandler = new FileHandler("application.log");
+            fileHandler.setFormatter(new SimpleFormatter());
+            LOGGER.addHandler(fileHandler);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
