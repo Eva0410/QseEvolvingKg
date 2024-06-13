@@ -26,7 +26,7 @@ public class QSEComparisonTests {
     @Test
     public void basicQseTestWithFilmSparql() {
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, "film", "Film-NoGender", logPath);
-        comparatorSparql.doComparison(pruningThresholdsDefault);
+        comparatorSparql.doFullComparison(pruningThresholdsDefault);
     }
 
     @Test
@@ -37,7 +37,7 @@ public class QSEComparisonTests {
         ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholdsDefault);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
-        metaComparator.diffSparql = comparatorSparql.doComparison(pruningThresholdsDefault);
+        metaComparator.diffSparql = comparatorSparql.doFullComparison(pruningThresholdsDefault);
         System.out.println(metaComparator.compare());
         ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
     }
@@ -51,7 +51,7 @@ public class QSEComparisonTests {
         ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
-        metaComparator.diffSparql = comparatorSparql.doComparison(pruningThresholds);
+        metaComparator.diffSparql = comparatorSparql.doFullComparison(pruningThresholds);
         System.out.println(metaComparator.compare());
         ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
     }

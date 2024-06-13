@@ -9,18 +9,16 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 //todo use version from web-app?
 public class ExtractedShapes {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
     int support = 0;
     double confidence = 0;
 
@@ -47,7 +45,7 @@ public class ExtractedShapes {
             try(FileInputStream inputStream = new FileInputStream(fileContentPath)) {
                 this.model = Rio.parse(inputStream, "", RDFFormat.TURTLE);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LOGGER.log(Level.SEVERE, "Exception occurred", e);
             }
         }
         return this.model;

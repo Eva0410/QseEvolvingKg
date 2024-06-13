@@ -1,7 +1,5 @@
 package qseevolvingkg.partialsparqlqueries;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 
 public class EditedShapesComparisonObject{

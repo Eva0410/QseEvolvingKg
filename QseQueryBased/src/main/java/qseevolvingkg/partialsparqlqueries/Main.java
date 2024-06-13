@@ -22,7 +22,7 @@ public class Main {
         ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
-        metaComparator.diffSparql = comparatorSparql.doComparison(pruningThresholds);
+        metaComparator.diffSparql = comparatorSparql.doComparison(pruningThresholds, comparatorQSETwice);
         ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
     }
 

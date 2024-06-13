@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -161,7 +162,7 @@ public class RegexUtils {
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(shape);
         if (!matcher.find()) {
-            LOGGER.warning("Delete did not work for " + orItem.propertyShape.iri.toString() + ", " + orItem.toString());
+            LOGGER.warning("Delete did not work for " + orItem.propertyShape.iri.toString() + ", " + orItem);
             return shape;
         }
         String match = matcher.group();
@@ -176,7 +177,7 @@ public class RegexUtils {
                 fileContent.append(line).append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occurred", e);
         }
         return fileContent.toString();
     }
@@ -264,7 +265,7 @@ public class RegexUtils {
             inputCopy = insertAfter(inputCopy, input.substring(0, index), newOrItems.toString());
             return inputCopy;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occurred", ex);
             return input;
         }
     }

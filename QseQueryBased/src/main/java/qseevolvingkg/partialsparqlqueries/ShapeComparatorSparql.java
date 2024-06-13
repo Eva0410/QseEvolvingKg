@@ -5,6 +5,7 @@ import cs.qse.common.ExperimentsUtil;
 import cs.qse.common.structure.NS;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -21,8 +22,29 @@ public class ShapeComparatorSparql {
     String logFilePath;
     List<NS> firstNodeShapes;
     String shapePath1;
-    ExtractedShapes extractedShapes2;
     public String outputPath;
+
+    public ComparisonDiff doFullComparison(String threshold) {
+        ComparisonDiff comparisonDiff = prepareQSE(threshold);
+
+        //First Run
+        runQse1(comparisonDiff);
+
+        //Check shapes with SPARQL
+        doComparisonSparql(firstNodeShapes, shapePath1, comparisonDiff);
+
+        return comparisonDiff;
+    }
+
+    public ComparisonDiff doComparison(String threshold, ShapeComparatorQSE shapeComparatorQSE) {
+        ComparisonDiff comparisonDiff = prepareQSE(threshold);
+        comparisonDiff.durationQse1 = shapeComparatorQSE.comparisonDiff.durationQse1;
+
+        //Check shapes with SPARQL
+        doComparisonSparql(shapeComparatorQSE.firstNodeShapes, shapeComparatorQSE.shapePath1, comparisonDiff);
+
+        return comparisonDiff;
+    }
 
     public ShapeComparatorSparql(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
         this.graphDbUrl = graphDbUrl;
@@ -32,30 +54,32 @@ public class ShapeComparatorSparql {
         this.outputPath = System.getProperty("user.dir")+ File.separator + "Output" + File.separator;
     }
 
-    public ComparisonDiff doComparison(String threshold) {
-        cs.Main.setResourcesPathForJar(ConfigManager.getRelativeResourcesPathFromQse());
-        cs.Main.annotateSupportConfidence = "true";
-        cs.Main.setPruningThresholds(threshold);
-        File currentDir = new File(System.getProperty("user.dir"));
-        File emptyConfig = new File(currentDir, "src/test/expected_test_results/emptyconfig.txt");
-        Main.configPath = emptyConfig.getAbsolutePath(); //avoid exceptions in QSE
-        ComparisonDiff comparisonDiff = new ComparisonDiff();
-
-        //First Run
-        cs.Main.datasetName = dataSetName1;
-        cs.Main.setOutputFilePathForJar(outputPath+dataSetName1+File.separator);
+    private void runQse1(ComparisonDiff comparisonDiff) {
+        Main.datasetName = dataSetName1;
+        Main.setOutputFilePathForJar(outputPath+dataSetName1+File.separator);
 
         Instant startQSE1 = Instant.now();
         QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, dataSetName1);
         qbParser.run();
         Instant endQSE1 = Instant.now();
-        Duration durationQSE1 = Duration.between(startQSE1, endQSE1);
-        comparisonDiff.durationQse1 = durationQSE1;
+        comparisonDiff.durationQse1 = Duration.between(startQSE1, endQSE1);
 
         firstNodeShapes = qbParser.shapesExtractor.getNodeShapes();
         shapePath1 = qbParser.shapesExtractor.getOutputFileAddress();
+    }
 
-        //Check shapes with SPARQL
+    @NotNull
+    private static ComparisonDiff prepareQSE(String threshold) {
+        Main.setResourcesPathForJar(ConfigManager.getRelativeResourcesPathFromQse());
+        Main.annotateSupportConfidence = "true";
+        Main.setPruningThresholds(threshold);
+        File currentDir = new File(System.getProperty("user.dir"));
+        File emptyConfig = new File(currentDir, "src/test/expected_test_results/emptyconfig.txt");
+        Main.configPath = emptyConfig.getAbsolutePath(); //avoid exceptions in QSE
+        return new ComparisonDiff();
+    }
+
+    private void doComparisonSparql(List<NS> firstNodeShapes, String shapePath1, ComparisonDiff comparisonDiff) {
         Instant startSparql = Instant.now();
         ExtractedShapes extractedShapes1 = new ExtractedShapes();
         extractedShapes1.setNodeShapes(firstNodeShapes);
@@ -75,8 +99,7 @@ public class ShapeComparatorSparql {
         var content = RegexUtils.deleteFromFileWhereSupportIsZero(extractedShapes2, comparisonDiff);
         RegexUtils.saveStringAsFile(content, copiedFile);
         Instant endSparql = Instant.now();
-        Duration durationSparql = Duration.between(startSparql, endSparql);
-        comparisonDiff.durationSecondStep = durationSparql;
+        comparisonDiff.durationSecondStep = Duration.between(startSparql, endSparql);
 
         Instant startComparison = Instant.now();
         extractedShapes1.getFileAsString();
@@ -84,12 +107,9 @@ public class ShapeComparatorSparql {
         ComparatorUtils.getEditedNodeShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
         ComparatorUtils.getEditedPropertyShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
         Instant endComparison = Instant.now();
-        Duration durationComparison = Duration.between(startComparison, endComparison);
-        comparisonDiff.durationComparison = durationComparison;
+        comparisonDiff.durationComparison = Duration.between(startComparison, endComparison);
 
-        Duration totalDuration = durationQSE1.plus(durationSparql).plus(durationComparison);
-        comparisonDiff.durationTotal = totalDuration;
+        comparisonDiff.durationTotal = comparisonDiff.durationQse1.plus(comparisonDiff.durationSecondStep).plus(comparisonDiff.durationComparison);
         ComparatorUtils.exportComparisonToFile(logFilePath+"Sparql", comparisonDiff.toString());
-        return comparisonDiff;
     }
 }

@@ -26,9 +26,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class GraphDbUtils {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
     public List<NodeShape> getNodeShapesWithTargetClassFromRepo(String localDbFilePath) {
         Repository db = new SailRepository(new NativeStore(new File(localDbFilePath)));
         var nodeShapes = new ArrayList<NodeShape>();
@@ -148,13 +152,13 @@ public class GraphDbUtils {
                 checkNodeShapesInNewGraph(conn, nodeShapes);
                 checkPropertyShapesInNewGraph(conn, nodeShapes);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Exception occurred", ex);
             } finally {
                 repo.shutDown();
             }
         }
         catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occurred", ex);
         } finally {
             repositoryManager.shutDown();
         }
@@ -292,7 +296,7 @@ public class GraphDbUtils {
 
     private static Model removeRecursively(Model model, Resource resourceToDelete) {
         var statementQueue = model.listStatements(resourceToDelete, null, (RDFNode) null).toList();
-        while (statementQueue.size()!= 0) {
+        while (!statementQueue.isEmpty()) {
             var nextStatement = statementQueue.get(0);
             if(nextStatement.getObject().isAnon()) {
                 statementQueue.addAll(model.listStatements((Resource) nextStatement.getObject(), null, (RDFNode)null ).toList());
@@ -320,7 +324,7 @@ public class GraphDbUtils {
             throw new Exception("No support returned");
         }
         catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occurred", ex);
             return 0;
         }
     }
@@ -342,7 +346,7 @@ public class GraphDbUtils {
             throw new Exception("No support returned");
         }
         catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occurred", ex);
             return 0;
         }
     }
@@ -356,7 +360,7 @@ public class GraphDbUtils {
             try {
                 FileUtils.deleteDirectory(targetFolder);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Exception occurred", e);
             }
         }
         targetFolder.mkdir();
@@ -364,7 +368,7 @@ public class GraphDbUtils {
         try {
             FileUtils.copyDirectory(originalFolder, targetFolder);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occurred", e);
         }
         return targetFolder.getAbsolutePath();
     }

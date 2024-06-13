@@ -15,13 +15,12 @@ public class ShapeComparatorQSE {
     String dataSetName1;
     String dataSetName2;
     String logFilePath;
-    List<NS> firstNodeShapes;
+    public List<NS> firstNodeShapes;
     List<NS> secondNodeShapes;
-    String shapePath1;
+    public String shapePath1;
     String shapePath2;
     public String outputPath;// = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/";
-//    public static final String pruningThresholds = "{(-1,0)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
-
+    public ComparisonDiff comparisonDiff;
     public ShapeComparatorQSE(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
         this.graphDbUrl = graphDbUrl;
         this.dataSetName1 = dataSetName1;
@@ -85,6 +84,7 @@ public class ShapeComparatorQSE {
         Duration totalDuration = durationQSE1.plus(durationQSE2).plus(durationComparison);
         comparisonDiff.durationTotal = totalDuration;
         ComparatorUtils.exportComparisonToFile(logFilePath+"QSE", comparisonDiff.toString());
+        this.comparisonDiff = comparisonDiff;
         return comparisonDiff;
     }
 

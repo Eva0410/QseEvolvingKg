@@ -1,13 +1,14 @@
 package qseevolvingkg.partialsparqlqueries;
 
-import cs.Main;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 //Copied from QSE
 public class ConfigManager {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     public static String getProperty(String property) {
         try {
@@ -18,7 +19,7 @@ public class ConfigManager {
                 configFile.close();
             return prop.getProperty(property);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occurred", ex);
             return null;
         }
     }

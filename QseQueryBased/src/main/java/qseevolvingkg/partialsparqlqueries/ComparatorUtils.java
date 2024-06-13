@@ -2,7 +2,6 @@ package qseevolvingkg.partialsparqlqueries;
 
 import cs.qse.common.structure.NS;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
