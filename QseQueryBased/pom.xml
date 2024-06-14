@@ -8,8 +8,8 @@
     <artifactId>QSEQueryBased</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-<!--    <build>-->
-<!--        <plugins>-->
+    <build>
+        <plugins>
 <!--            <plugin>-->
 <!--                <groupId>org.example</groupId>-->
 <!--                <artifactId>QSEQueryBased</artifactId>-->
@@ -19,26 +19,26 @@
 <!--                    <classpathScope>compile</classpathScope>-->
 <!--                </configuration>-->
 <!--            </plugin>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-dependency-plugin</artifactId>-->
-<!--                <version>3.1.2</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>copy-dependencies</id>-->
-<!--                        <phase>prepare-package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>copy-dependencies</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <outputDirectory>${project.build.directory}/dependency/</outputDirectory>-->
-<!--                            <includeScope>runtime</includeScope>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--    </build>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/dependency/</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
