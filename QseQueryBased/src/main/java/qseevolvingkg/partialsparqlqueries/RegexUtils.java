@@ -35,9 +35,10 @@ public class RegexUtils {
         }
     }
 
-    public static String deleteFromFileWhereSupportIsZero(ExtractedShapes extractedShapes, ComparisonDiff comparisonDiff) {
+    public static String deleteFromFileWithPruning(ExtractedShapes extractedShapes, ComparisonDiff comparisonDiff) {
         String fileContent = extractedShapes.getFileAsString();
         int supportThreshold = extractedShapes.support;
+        double confidenceThreshold = extractedShapes.confidence;
         for (var nodeShape : extractedShapes.getNodeShapes()) {
             if(nodeShape.support <= supportThreshold) { //QSE also compares with <=, not with <
                 comparisonDiff.deletedNodeShapes.add(nodeShape.iri.toString());
@@ -52,27 +53,29 @@ public class RegexUtils {
 //                    if(propertyShape.iri.toString().contains("http://shaclshapes.org/lengthThingShapeProperty"))
 //                        System.out.println(); //Todo remove
 //                    var allOrItemsSupportZero = propertyShape.orItems != null && propertyShape.orItems.stream().mapToInt(o -> o.support).sum() == 0; //cannot remember  usecase
-                    if(propertyShape.support <= supportThreshold && (propertyShape.orItems == null || propertyShape.orItems.isEmpty())) {
+                    if((propertyShape.support <= supportThreshold || propertyShape.confidence <= confidenceThreshold) && (propertyShape.orItems == null || propertyShape.orItems.isEmpty())) {
                         comparisonDiff.deletedPropertShapes.add(propertyShape.iri.toString());
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                         fileContent = deletePropertyShapeReferenceWithIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                     }
-                    else if(propertyShape.support > supportThreshold && propertyShape.orItems != null) {
-                        var numberOfOrItemsLeft = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold).count();
+                    else if(propertyShape.support > supportThreshold && propertyShape.confidence > confidenceThreshold && propertyShape.orItems != null) {
+                        var numberOfOrItemsLeft = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold && o.confidence > confidenceThreshold).count();
                         String originalShape = getShapeAsString(propertyShape.iri.toString(), fileContent);
                         if(!originalShape.contains("<http://www.w3.org/ns/shacl#or>"))
                             continue;
                         String modifiedShape = originalShape;
                         for(var orItem : propertyShape.orItems) {
-                            if(orItem.support <= supportThreshold) {
+                            if(orItem.support <= supportThreshold || orItem.confidence <= confidenceThreshold) {
                                 modifiedShape = deleteShaclOrItemWithIriFromString(orItem, modifiedShape, false);
                             }
                         }
                         if(numberOfOrItemsLeft == 1 && propertyShape.orItems.size() != 1) {
-                            int newSupport = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold).findFirst().get().support;
+                            var item = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold && o.confidence > confidenceThreshold).findFirst().get();
+                            int newSupport = item.support;
+                            double newConfidence = item.confidence;
 
                             modifiedShape = extractedShapes.prefixLines + modifiedShape;
-                            modifiedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(modifiedShape, propertyShape.iri.toString(), newSupport);
+                            modifiedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(modifiedShape, propertyShape.iri.toString(), newSupport, newConfidence);
                             modifiedShape = RegexUtils.removeLinesWithPrefix(modifiedShape);
                         }
                         fileContent = fileContent.replace(originalShape, modifiedShape);

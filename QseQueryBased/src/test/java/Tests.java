@@ -80,7 +80,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
 //        var targetDb = graphDbUtils.cloneSailRepository(localPath, "secondVersion");
@@ -118,7 +118,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
     }
 
@@ -136,7 +136,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -159,7 +159,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
     }
 
@@ -200,7 +200,7 @@ public class Tests {
                 "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
                 "  ] ) ;\n" +
                 "  <http://www.w3.org/ns/shacl#path> rdfs:label .\n";
-        var deletedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty", 1);
+        var deletedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty", 1, 1.6667E-1);
 
         var expected = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\r\n" +
                 "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" +
@@ -228,7 +228,7 @@ public class Tests {
         ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
         String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
         shape = extractedShapes.prefixLines + deletedShape;
-        var adaptedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty", 1);
+        var adaptedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty", 1, 1);
         //todo remove prefix lines of shape
         var shapeWithoutPrefix = RegexUtils.removeLinesWithPrefix(adaptedShape);
         var expected = "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
@@ -263,7 +263,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         //Weird result for rangeDatatypePropertyShapeProperty: points to IRI undefined and is therefore filtered in next version
@@ -333,7 +333,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes,comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes,comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -359,7 +359,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -385,7 +385,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -414,7 +414,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -442,7 +442,7 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
@@ -473,7 +473,39 @@ public class Tests {
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWhereSupportIsZero(extractedShapes, comparisonDiff);
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        regexUtils.saveStringAsFile(content, copiedFile);
+
+        assertTrue("Files are not equal", compareFiles(copiedFile,
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\PeopleV2_QSE_-1.0_2_SHACL.ttl"));
+    }
+
+    @Test
+    public void testConfidenceThresholdWithPeople() {
+        firstVersionName = "PeopleV2";
+        outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+        prepareTest();
+        Main.setPruningThresholds("{(0.7,0)}");
+
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+
+        var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.setSupport(0);
+        extractedShapes.setConfidence(0.7);
+        extractedShapes.setNodeShapes(nodeShapes);
+
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
+        RegexUtils regexUtils = new RegexUtils();
+
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_0.7_0_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_0.7_0_SHACL_V3.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        extractedShapes.fileContentPath = copiedFile;
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,

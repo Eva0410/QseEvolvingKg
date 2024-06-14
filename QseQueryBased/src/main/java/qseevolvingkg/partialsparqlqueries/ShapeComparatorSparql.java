@@ -94,6 +94,8 @@ public class ShapeComparatorSparql {
         extractedShapes2.setNodeShapes(firstNodeShapes);
         HashMap<Double, List<Integer>> pruningThresholds = ExperimentsUtil.getSupportConfRange();
         extractedShapes2.support = pruningThresholds.entrySet().iterator().next().getValue().get(0);
+        extractedShapes2.confidence = pruningThresholds.keySet().iterator().next();
+
         extractedShapes1.fileContentPath = shapePath1;
 
         GraphDbUtils.checkShapesInNewGraph(graphDbUrl, this.dataSetName2, extractedShapes2.getNodeShapes());
@@ -103,7 +105,7 @@ public class ShapeComparatorSparql {
         RegexUtils.copyFile(extractedShapes1.fileContentPath, copiedFile);
         extractedShapes2.fileContentPath = copiedFile;
 
-        var content = RegexUtils.deleteFromFileWhereSupportIsZero(extractedShapes2, comparisonDiff);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes2, comparisonDiff);
         RegexUtils.saveStringAsFile(content, copiedFile);
         Instant endSparql = Instant.now();
         comparisonDiff.durationSecondStep = Duration.between(startSparql, endSparql);

@@ -30,6 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static org.eclipse.rdf4j.sail.shacl.ast.constraintcomponents.ConstraintComponent.Scope.propertyShape;
+
 public class GraphDbUtils {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
@@ -195,7 +197,6 @@ public class GraphDbUtils {
     public static void checkPropertyShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
         for(var nodeShape : nodeShapes) {
             if (nodeShape.support != 0) { //performance
-//                var targetClasses = nodeShape.targetClasses.stream().map(Object::toString).toList();
                 var targetClass = nodeShape.targetClass.toString();
                 //todo better way for performance?
                 for (var propertyShape : nodeShape.propertyShapes) {
@@ -204,9 +205,11 @@ public class GraphDbUtils {
                     //Todo merge methods?
                     if (propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
                         propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
+                        setConfidence(nodeShape, propertyShape);
                     }
                     else if(propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
                         propertyShape.support = getSupportForIriPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
+                        setConfidence(nodeShape, propertyShape);
                     }
                     else if (propertyShape.nodeKind == null) {
                         //Ignore special case when nodeKind is null, but there are also no nested items (QSE error)
@@ -214,9 +217,12 @@ public class GraphDbUtils {
                             for(var orItem : propertyShape.orItems) {
                                 if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
                                     orItem.support = getSupportForLiteralPropertyShape(propertyShape.path, orItem.dataTypeOrClass, targetClass, conn);
+                                    setConfidence(nodeShape, orItem);
+
                                 }
                                 else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
                                     orItem.support = getSupportForIriPropertyShape(propertyShape.path, orItem.dataTypeOrClass, targetClass, conn);
+                                    setConfidence(nodeShape, orItem);
                                 }
                             }
                         }
@@ -229,7 +235,14 @@ public class GraphDbUtils {
         }
     }
 
-    public static String deleteOrListAndConnectToParentNode(String shape, String parentIri, int newSupport) {
+    private static void setConfidence(NodeShape nodeShape, PropertyShape propertyShape) {
+        propertyShape.confidence = ((double) propertyShape.support / (double) nodeShape.support);
+    }
+    private static void setConfidence(NodeShape nodeShape, ShaclOrListItem orItem) {
+        orItem.confidence = ((double) orItem.support / (double) nodeShape.support);
+    }
+
+    public static String deleteOrListAndConnectToParentNode(String shape, String parentIri, int newSupport, double newConfidence) {
         var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
         //problem with "," in confidence, this is read as two statements
         shape = shape.replaceAll("(?<=\\d),(?=\\d)", ".");
@@ -268,10 +281,10 @@ public class GraphDbUtils {
         removeRecursively(model, orListItem);
         var iriConfidence = ResourceFactory.createProperty("http://shaclshapes.org/confidence");
         var iriSupport = ResourceFactory.createProperty("http://shaclshapes.org/support");
-        Literal confidenceLiteral = model.createTypedLiteral("1E0", XSD.xdouble.getURI());
+        Literal confidenceLiteral = model.createTypedLiteral(newConfidence, XSD.xdouble.getURI());
         Literal supportLiteral = model.createTypedLiteral(newSupport);
 
-        //set confidence to 100 % and new support
+        //set confidence and new support
         setSupportOrConfidence(model, propertyShape, iriConfidence, confidenceLiteral);
         setSupportOrConfidence(model, propertyShape, iriSupport, supportLiteral);
 
