@@ -8,21 +8,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-//TODO use from Web-App?
+//Copied from WebApp
 public class PropertyShape {
     IRI iri;
     int support;
-    double confidence; //unused
+    double confidence;
     IRI nodeKind;
     IRI path;
     IRI dataType;
-
     IRI classIri;
     List<ShaclOrListItem> orItems = new ArrayList<>();
     boolean errorDuringGeneration = false;
     IRI dataTypeOrClass;
     public NodeShape nodeShape;
-    public String generatedText;
+
+    public  PropertyShape() {
+
+    }
 
     PropertyShape(PS ps, NodeShape nodeShape) {
         this.nodeShape = nodeShape;
@@ -59,7 +61,6 @@ public class PropertyShape {
     }
 
     public static IRI getNodeKindFromQSE(String nodeKind) {
-        //todo replace with static strings
         if(nodeKind != null && nodeKind.equals("Literal"))
             return Values.iri("http://www.w3.org/ns/shacl#Literal");
         if(nodeKind != null && nodeKind.equals("IRI"))
@@ -81,10 +82,6 @@ public class PropertyShape {
             return value;
     }
 
-    public  PropertyShape() {
-
-    }
-
     public PropertyShape(IRI iri, int support, double confidence) {
         this.iri = iri;
         this.support = support;
@@ -95,29 +92,5 @@ public class PropertyShape {
         if(this.orItems == null)
             this.orItems = new ArrayList<>();
         this.orItems.add(new ShaclOrListItem(nodeKind, classIri, dataType));
-    }
-
-    public IRI getIri() {
-        return iri;
-    }
-
-    public void setIri(IRI iri) {
-        this.iri = iri;
-    }
-
-    public int getSupport() {
-        return support;
-    }
-
-    public void setSupport(int support) {
-        this.support = support;
-    }
-
-    public double getConfidence() {
-        return confidence;
-    }
-
-    public void setConfidence(double confidence) {
-        this.confidence = confidence;
     }
 }

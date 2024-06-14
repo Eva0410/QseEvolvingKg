@@ -6,22 +6,19 @@ import org.eclipse.rdf4j.model.IRI;
 import java.util.ArrayList;
 import java.util.List;
 
+//Copied from WebApp
 public class NodeShape {
-    List<IRI> targetClasses;
     IRI targetClass;
     IRI iri;
     String iriLocalName;
-
     int support;
     List<PropertyShape> propertyShapes;
     boolean errorDuringGeneration = false;
     ExtractedShapes extractedShapes;
-    String generatedText;
 
     public NodeShape() {
 
     }
-
 
     public NodeShape(NS ns, ExtractedShapes extractedShapes) {
         this.iri = ns.getIri();
@@ -40,27 +37,5 @@ public class NodeShape {
 
         }
         this.iriLocalName = iri.getLocalName();
-    }
-    public List<PropertyShape> getPropertyShapes() {
-        return propertyShapes;
-    }
-
-    public void setPropertyShapes(List<PropertyShape> propertyShapes) {
-        this.propertyShapes = propertyShapes;
-    }
-
-    //not used anymore, only one targetclass is supported
-    public void addTargetClasses(IRI targetClasses) {
-        if(this.targetClasses == null)
-            this.targetClasses = new ArrayList<>();
-        this.targetClasses.add(targetClasses);
-    }
-
-    public void setIri(IRI iri) {
-        this.iri = iri;
-    }
-
-    public void setSupport(int support) {
-        this.support = support;
     }
 }

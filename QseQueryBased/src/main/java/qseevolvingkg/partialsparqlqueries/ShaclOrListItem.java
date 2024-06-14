@@ -6,17 +6,18 @@ import org.eclipse.rdf4j.model.util.Values;
 public class ShaclOrListItem {
     IRI nodeKind;
     IRI classIri;
-    int support;
+    int support = 0;
+    Double confidence = 0.0;
     IRI dataType;
     IRI dataTypeOrClass;
     boolean errorDuringGeneration = false;
-    Double confidence;
     public PropertyShape propertyShape;
 
     public ShaclOrListItem() {
 
     }
 
+    //unused
     public ShaclOrListItem(IRI nodeKind, IRI classIri, IRI dataType) {
         this.nodeKind = nodeKind;
         this.classIri = classIri;

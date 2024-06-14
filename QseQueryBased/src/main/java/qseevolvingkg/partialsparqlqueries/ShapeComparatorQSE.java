@@ -19,8 +19,9 @@ public class ShapeComparatorQSE {
     List<NS> secondNodeShapes;
     public String shapePath1;
     String shapePath2;
-    public String outputPath;// = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/";
+    public String outputPath;
     public ComparisonDiff comparisonDiff;
+
     public ShapeComparatorQSE(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
         this.graphDbUrl = graphDbUrl;
         this.dataSetName1 = dataSetName1;
@@ -81,8 +82,7 @@ public class ShapeComparatorQSE {
         Duration durationComparison = Duration.between(startComparison, endComparison);
         comparisonDiff.durationComparison = durationComparison;
 
-        Duration totalDuration = durationQSE1.plus(durationQSE2).plus(durationComparison);
-        comparisonDiff.durationTotal = totalDuration;
+        comparisonDiff.durationTotal = durationQSE1.plus(durationQSE2).plus(durationComparison);
         ComparatorUtils.exportComparisonToFile(logFilePath+"QSE", comparisonDiff.toString());
         this.comparisonDiff = comparisonDiff;
         return comparisonDiff;
@@ -92,7 +92,7 @@ public class ShapeComparatorQSE {
         var propertyShapes1 = new java.util.ArrayList<>(firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).toList());
         var propertyShapes2 = secondNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).toList();
         propertyShapes1.removeAll(propertyShapes2);
-        comparisonDiff.deletedPropertShapes = propertyShapes1;
+        comparisonDiff.deletedPropertyShapes = propertyShapes1;
     }
 
     private void getDeletedNodeShapes(ComparisonDiff comparisonDiff) {

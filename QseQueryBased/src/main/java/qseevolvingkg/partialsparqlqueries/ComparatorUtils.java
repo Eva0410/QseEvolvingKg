@@ -14,7 +14,7 @@ public class ComparatorUtils {
 
     public static void getEditedPropertyShapes(ComparisonDiff comparisonDiff, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2, List<NS> firstNodeShapes) {
         var propertyShapesToCheck = firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString()))
-                .filter(ps -> !comparisonDiff.deletedPropertShapes.contains(ps)).toList();
+                .filter(ps -> !comparisonDiff.deletedPropertyShapes.contains(ps)).toList();
         var editedShapes = generateEditedShapesObjects(propertyShapesToCheck, extractedShapes1, extractedShapes2);
         comparisonDiff.editedPropertyShapes = editedShapes;
     }

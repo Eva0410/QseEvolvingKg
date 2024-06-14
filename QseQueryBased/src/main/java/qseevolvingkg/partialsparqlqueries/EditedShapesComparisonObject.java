@@ -8,13 +8,11 @@ public class EditedShapesComparisonObject{
     String shapeAsTextOld;
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("--- ").append(shapeName);
-        sb.append("\nNew Version: \n").append(shapeAsTextNew);
-        sb.append("\n");
-        sb.append("\nOld Version: \n").append(shapeAsTextOld);
-        sb.append("\n");
-        return sb.toString();
+        return "--- " + shapeName +
+                "\nNew Version: \n" + shapeAsTextNew +
+                "\n" +
+                "\nOld Version: \n" + shapeAsTextOld +
+                "\n";
     }
 
     @Override

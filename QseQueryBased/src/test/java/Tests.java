@@ -12,6 +12,8 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+//Tests are only used for local execution
+
 public class Tests {
     public static final String resourcesPath = "/Users/evapu/Documents/GitHub/qse/src/main/resources";
     public static String firstVersionName = "film";
@@ -402,7 +404,7 @@ public class Tests {
 
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setSupport(5);
+        extractedShapes.support = 5;
         extractedShapes.setNodeShapes(nodeShapes);
 
         GraphDbUtils graphDbUtils = new GraphDbUtils();
@@ -430,7 +432,7 @@ public class Tests {
 
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setSupport(5);
+        extractedShapes.support = 5;
         extractedShapes.setNodeShapes(nodeShapes);
 
         GraphDbUtils graphDbUtils = new GraphDbUtils();
@@ -461,7 +463,7 @@ public class Tests {
 
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setSupport(2);
+        extractedShapes.support = 2;
         extractedShapes.setNodeShapes(nodeShapes);
 
         GraphDbUtils graphDbUtils = new GraphDbUtils();
@@ -492,8 +494,8 @@ public class Tests {
 
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setSupport(0);
-        extractedShapes.setConfidence(0.7);
+        extractedShapes.support = 0;
+        extractedShapes.confidence = 0.7;
         extractedShapes.setNodeShapes(nodeShapes);
 
         GraphDbUtils graphDbUtils = new GraphDbUtils();

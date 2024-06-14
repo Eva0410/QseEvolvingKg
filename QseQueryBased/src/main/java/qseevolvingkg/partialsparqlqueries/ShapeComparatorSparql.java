@@ -30,13 +30,6 @@ public class ShapeComparatorSparql {
         //First Run
         runQse1(comparisonDiff);
 
-//        var ns = firstNodeShapes.stream().filter(nodes -> nodes.getIri().toString().contains("http://shaclshapes.org/ThingShape")).toList();
-//        for(var n : ns) {
-//            var ps = n.getPropertyShapes();
-//            var psfiltered = ps.stream().filter(p -> p.getIri().toString().contains("http://shaclshapes.org/lengthThingShapeProperty")).toList();
-//            System.out.println();
-//        } //todo remove
-
         //Check shapes with SPARQL
         doComparisonSparql(firstNodeShapes, shapePath1, comparisonDiff);
 
@@ -100,7 +93,7 @@ public class ShapeComparatorSparql {
 
         GraphDbUtils.checkShapesInNewGraph(graphDbUrl, this.dataSetName2, extractedShapes2.getNodeShapes());
 
-        Path parentDir = Paths.get(extractedShapes1.getFileContentPath()).getParent();
+        Path parentDir = Paths.get(extractedShapes1.fileContentPath).getParent();
         var copiedFile = parentDir.resolve(dataSetName2+"_QSEQueryBased.ttl").toString();
         RegexUtils.copyFile(extractedShapes1.fileContentPath, copiedFile);
         extractedShapes2.fileContentPath = copiedFile;

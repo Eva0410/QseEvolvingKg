@@ -6,6 +6,7 @@ import qseevolvingkg.partialsparqlqueries.ShapeComparatorSparql;
 
 import java.io.File;
 
+//Tests are only used for local execution
 public class QSEComparisonTests {
 
     public static final String resourcesPath = "/Users/evapu/Documents/GitHub/qse/src/main/resources";

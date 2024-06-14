@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class ComparisonDiff {
     public ArrayList<String> deletedNodeShapes;
-    public ArrayList<String> deletedPropertShapes;
+    public ArrayList<String> deletedPropertyShapes;
     public ArrayList<EditedShapesComparisonObject> editedNodeShapes;
     public ArrayList<EditedShapesComparisonObject> editedPropertyShapes;
     Duration durationQse1;
@@ -15,7 +15,7 @@ public class ComparisonDiff {
 
     public ComparisonDiff() {
         deletedNodeShapes = new ArrayList<>();
-        deletedPropertShapes = new ArrayList<>();
+        deletedPropertyShapes = new ArrayList<>();
         editedNodeShapes = new ArrayList<>();
         editedPropertyShapes = new ArrayList<>();
     }
@@ -27,7 +27,7 @@ public class ComparisonDiff {
             sb.append(str).append("\n");
         }
         sb.append("=== Deleted Property Shapes ===\n");
-        for (String str : deletedPropertShapes) {
+        for (String str : deletedPropertyShapes) {
             sb.append(str).append("\n");
         }
         sb.append("=== Edited Node Shape Names ===\n");
@@ -54,10 +54,10 @@ public class ComparisonDiff {
                 sb.append(str).append("\n");
             }
         }
-        sb.append("\nExecution Time QSE 1: " + durationQse1.getSeconds() + " seconds");
-        sb.append("\nExecution Time Second Step (QSE or Sparql-Script): " + durationSecondStep.getSeconds() + " seconds");
-        sb.append("\nExecution Time Comparison: " + durationComparison.getSeconds() + " seconds");
-        sb.append("\nExecution Time Total: " + durationTotal.getSeconds() + " seconds");
+        sb.append("\nExecution Time QSE 1: ").append(durationQse1.getSeconds()).append(" seconds");
+        sb.append("\nExecution Time Second Step (QSE or Sparql-Script): ").append(durationSecondStep.getSeconds()).append(" seconds");
+        sb.append("\nExecution Time Comparison: ").append(durationComparison.getSeconds()).append(" seconds");
+        sb.append("\nExecution Time Total: ").append(durationTotal.getSeconds()).append(" seconds");
 
         return sb.toString();
     }

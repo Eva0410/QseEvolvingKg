@@ -21,20 +21,6 @@ import java.util.regex.Pattern;
 public class RegexUtils {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
-    public void getAllNodeShapesfromFile(String filePath) {
-        String regexPattern = String.format("\n.* <http:\\/\\/www.w3.org\\/ns\\/shacl#NodeShape> ;");
-        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
-
-        Matcher matcher = pattern.matcher(getFileAsString(filePath));
-        List<String> matches = new ArrayList<>();
-
-        while (matcher.find()) {
-            String match = matcher.group();
-            String nodeShapeName = match.split(">")[0] + ">";
-            matches.add(nodeShapeName);
-        }
-    }
-
     public static String deleteFromFileWithPruning(ExtractedShapes extractedShapes, ComparisonDiff comparisonDiff) {
         String fileContent = extractedShapes.getFileAsString();
         int supportThreshold = extractedShapes.support;
@@ -44,17 +30,14 @@ public class RegexUtils {
                 comparisonDiff.deletedNodeShapes.add(nodeShape.iri.toString());
                 fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent, nodeShape.errorDuringGeneration);
                 for (var propertyShape : nodeShape.propertyShapes) {
-                    comparisonDiff.deletedPropertShapes.add(propertyShape.iri.toString());
+                    comparisonDiff.deletedPropertyShapes.add(propertyShape.iri.toString());
                     fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                 }
             }
             else {
                 for(var propertyShape : nodeShape.propertyShapes) {
-//                    if(propertyShape.iri.toString().contains("http://shaclshapes.org/lengthThingShapeProperty"))
-//                        System.out.println(); //Todo remove
-//                    var allOrItemsSupportZero = propertyShape.orItems != null && propertyShape.orItems.stream().mapToInt(o -> o.support).sum() == 0; //cannot remember  usecase
                     if((propertyShape.support <= supportThreshold || propertyShape.confidence <= confidenceThreshold) && (propertyShape.orItems == null || propertyShape.orItems.isEmpty())) {
-                        comparisonDiff.deletedPropertShapes.add(propertyShape.iri.toString());
+                        comparisonDiff.deletedPropertyShapes.add(propertyShape.iri.toString());
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                         fileContent = deletePropertyShapeReferenceWithIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                     }
@@ -178,32 +161,12 @@ public class RegexUtils {
         return shape.replace(match, "");
     }
 
-    public static String getFileAsString(String path) {
-        StringBuilder fileContent = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                fileContent.append(line).append("\n");
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Exception occurred", e);
-        }
-        return fileContent.toString();
-    }
-
     public static String getShapeAsString(String iri, String file) {
-        String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
-        String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
-        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(file);
-        if (!matcher.find()) {
-            LOGGER.warning("Could not find shape " + iri);
-        }
+        Matcher matcher = getIriWithEscapedCharacters(iri, file);
         return matcher.group();
     }
 
-    //TODO copied from webapp
-    public static String getShapeAsStringFormatted(String iri, String file, String prefixLines) {
+    private static Matcher getIriWithEscapedCharacters(String iri, String file) {
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
         String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
@@ -211,6 +174,12 @@ public class RegexUtils {
         if (!matcher.find()) {
             LOGGER.warning("Could not find shape " + iri);
         }
+        return matcher;
+    }
+
+    //Copied from WebApp
+    public static String getShapeAsStringFormatted(String iri, String file, String prefixLines) {
+        Matcher matcher = getIriWithEscapedCharacters(iri, file);
         String match = matcher.group();
         var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
         model.read(new java.io.StringReader(prefixLines + match), null, "TURTLE");
@@ -232,6 +201,7 @@ public class RegexUtils {
         }
     }
 
+    //Copied from WebApp
     public static String reOrderOrItems(String input) {
         try {
             String orItemString = "<http://www.w3.org/ns/shacl#or>"; //highly dependent on turtlePrettyFormatter
@@ -279,6 +249,7 @@ public class RegexUtils {
         }
     }
 
+    //Copied from WebApp (unused, ShaclItems cannot appear in QueryBased version of QSE)
     private static String reorderShaclInItems(String input) {
         String searchString = "shacl#in";
         if (input.contains(searchString) && input.indexOf(searchString) != input.lastIndexOf(searchString)) {
@@ -317,4 +288,32 @@ public class RegexUtils {
         return part1 + toInsert + part2;
     }
 
+    //Unused methods
+
+    public void getAllNodeShapesfromFile(String filePath) {
+        String regexPattern = String.format("\n.* <http:\\/\\/www.w3.org\\/ns\\/shacl#NodeShape> ;");
+        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
+
+        Matcher matcher = pattern.matcher(getFileAsString(filePath));
+        List<String> matches = new ArrayList<>();
+
+        while (matcher.find()) {
+            String match = matcher.group();
+            String nodeShapeName = match.split(">")[0] + ">";
+            matches.add(nodeShapeName);
+        }
+    }
+
+    public static String getFileAsString(String path) {
+        StringBuilder fileContent = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                fileContent.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Exception occurred", e);
+        }
+        return fileContent.toString();
+    }
 }

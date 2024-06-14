@@ -13,48 +13,47 @@ public class MetaComparator {
         sb.append("=== Deleted Node Shapes ===\n");
         List<String> uniqueToFirstList = getDifference(diffQse.deletedNodeShapes, diffSparql.deletedNodeShapes);
         List<String> uniqueToSecondList = getDifference(diffSparql.deletedNodeShapes, diffQse.deletedNodeShapes);
-        if (!uniqueToFirstList.isEmpty())
-            sb.append("== Unique in QSE-Comparison ==\n");
-        uniqueToFirstList.forEach(s -> sb.append(s).append("\n"));
-        if (!uniqueToSecondList.isEmpty())
-            sb.append("== Unique in Sparql-Comparison ==\n");
-        uniqueToSecondList.forEach(s -> sb.append(s).append("\n"));
+        appendUniqueNamesToStringBuilder(uniqueToFirstList, sb, uniqueToSecondList);
 
         sb.append("=== Deleted Property Shapes ===\n");
-        uniqueToFirstList = getDifference(diffQse.deletedPropertShapes, diffSparql.deletedPropertShapes);
-        uniqueToSecondList = getDifference(diffSparql.deletedPropertShapes, diffQse.deletedPropertShapes);
-        if (!uniqueToFirstList.isEmpty())
-            sb.append("== Unique in QSE-Comparison ==\n");
-        uniqueToFirstList.forEach(s -> sb.append(s).append("\n"));
-        if (!uniqueToSecondList.isEmpty())
-            sb.append("== Unique in Sparql-Comparison ==\n");
-        uniqueToSecondList.forEach(s -> sb.append(s).append("\n"));
+        uniqueToFirstList = getDifference(diffQse.deletedPropertyShapes, diffSparql.deletedPropertyShapes);
+        uniqueToSecondList = getDifference(diffSparql.deletedPropertyShapes, diffQse.deletedPropertyShapes);
+        appendUniqueNamesToStringBuilder(uniqueToFirstList, sb, uniqueToSecondList);
 
         sb.append("=== Edited Node Shape Names ===\n");
         if(diffQse.editedNodeShapes != null && diffSparql.editedNodeShapes != null) {
             var uniqueToFirstListObjects = getDifferenceBetweenObjectLists(diffQse.editedNodeShapes, diffSparql.editedNodeShapes);
             var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffSparql.editedNodeShapes, diffQse.editedNodeShapes);
-            if (!uniqueToFirstListObjects.isEmpty())
-                sb.append("== Unique in QSE-Comparison ==\n");
-            uniqueToFirstListObjects.forEach(s -> sb.append(s.shapeName).append("\n"));
-            if (!uniqueToSecondListObjects.isEmpty())
-                sb.append("== Unique in Sparql-Comparison ==\n");
-            uniqueToSecondListObjects.forEach(s -> sb.append(s.shapeName).append("\n"));
+            appendUniqeNamesToStringBuilder(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
         }
         sb.append("=== Edited Property Shape Names ===\n");
         if(diffQse.editedPropertyShapes != null && diffSparql.editedPropertyShapes != null) {
             var uniqueToFirstListObjects = getDifferenceBetweenObjectLists(diffQse.editedPropertyShapes, diffSparql.editedPropertyShapes);
             var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffSparql.editedPropertyShapes, diffQse.editedPropertyShapes);
-            if (!uniqueToFirstListObjects.isEmpty())
-                sb.append("== Unique in QSE-Comparison ==\n");
-            uniqueToFirstListObjects.forEach(s -> sb.append(s.shapeName).append("\n"));
-            if (!uniqueToSecondListObjects.isEmpty())
-                sb.append("== Unique in Sparql-Comparison ==\n");
-            uniqueToSecondListObjects.forEach(s -> sb.append(s.shapeName).append("\n"));
+            appendUniqeNamesToStringBuilder(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
         }
-        sb.append("Execution Time QSE Total: " + diffQse.durationTotal.getSeconds() + " seconds, Execution Time Sparql Total: " + diffSparql.durationTotal.getSeconds() + " seconds");
+        sb.append("Execution Time QSE Total: ").append(diffQse.durationTotal.getSeconds()).append(" seconds, Execution Time Sparql Total: ").append(diffSparql.durationTotal.getSeconds()).append(" seconds");
         return sb.toString();
     }
+
+    private static void appendUniqeNamesToStringBuilder(List<EditedShapesComparisonObject> uniqueToFirstListObjects, StringBuilder sb, List<EditedShapesComparisonObject> uniqueToSecondListObjects) {
+        if (!uniqueToFirstListObjects.isEmpty())
+            sb.append("== Unique in QSE-Comparison ==\n");
+        uniqueToFirstListObjects.forEach(s -> sb.append(s.shapeName).append("\n"));
+        if (!uniqueToSecondListObjects.isEmpty())
+            sb.append("== Unique in Sparql-Comparison ==\n");
+        uniqueToSecondListObjects.forEach(s -> sb.append(s.shapeName).append("\n"));
+    }
+
+    private static void appendUniqueNamesToStringBuilder(List<String> uniqueToFirstList, StringBuilder sb, List<String> uniqueToSecondList) {
+        if (!uniqueToFirstList.isEmpty())
+            sb.append("== Unique in QSE-Comparison ==\n");
+        uniqueToFirstList.forEach(s -> sb.append(s).append("\n"));
+        if (!uniqueToSecondList.isEmpty())
+            sb.append("== Unique in Sparql-Comparison ==\n");
+        uniqueToSecondList.forEach(s -> sb.append(s).append("\n"));
+    }
+
     public static List<String> getDifference(List<String> list1, List<String> list2) {
         List<String> difference = new ArrayList<>(list1);
         difference.removeAll(list2);

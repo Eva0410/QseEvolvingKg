@@ -16,7 +16,7 @@ public class ConfigManager {
             java.util.Properties prop = new java.util.Properties();
             FileInputStream configFile = new FileInputStream(configPath);
             prop.load(configFile);
-                configFile.close();
+            configFile.close();
             return prop.getProperty(property);
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Exception occurred", ex);

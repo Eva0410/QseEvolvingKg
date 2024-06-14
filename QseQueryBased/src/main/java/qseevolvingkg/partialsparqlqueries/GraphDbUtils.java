@@ -30,120 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static org.eclipse.rdf4j.sail.shacl.ast.constraintcomponents.ConstraintComponent.Scope.propertyShape;
-
 public class GraphDbUtils {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
-
-    public List<NodeShape> getNodeShapesWithTargetClassFromRepo(String localDbFilePath) {
-        Repository db = new SailRepository(new NativeStore(new File(localDbFilePath)));
-        var nodeShapes = new ArrayList<NodeShape>();
-        try (RepositoryConnection conn = db.getConnection()) {
-            conn.setNamespace("shape", Constants.SHAPES_NAMESPACE);
-            conn.setNamespace("shape", Constants.SHACL_NAMESPACE);
-
-            var sparql = "select distinct ?shape ?targetClass where " +
-                    "{?shape <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/shacl#NodeShape>." +
-                    "?shape <http://www.w3.org/ns/shacl#targetClass> ?targetClass. }";
-            TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
-            try (TupleQueryResult result = query.evaluate()) {
-                while (result.hasNext()) {
-                    BindingSet bindingSet = result.next();
-                    var shapeIri = (IRI) bindingSet.getValue("shape");
-                    var targetClass = (IRI)bindingSet.getValue("targetClass");
-                    var optionalExistingNS = nodeShapes.stream().filter(n -> n.iri.equals(shapeIri)).findFirst();
-                    if(optionalExistingNS.isPresent()) {
-                        optionalExistingNS.get().addTargetClasses(targetClass);
-                    }
-                    else {
-                        NodeShape nodeShape = new NodeShape();
-                        nodeShape.iri = shapeIri;
-                        nodeShape.addTargetClasses(targetClass);
-                        getPropertyShapesForNodeShape(nodeShape, conn);
-                        nodeShapes.add(nodeShape);
-                    }
-                }
-            }
-        } finally {
-            db.shutDown();
-        }
-        return nodeShapes;
-    }
-
-
-    private void getPropertyShapesForNodeShape(NodeShape nodeShape, RepositoryConnection conn) {
-        var sparql = "select distinct ?ps ?nodeKind ?dataType ?path ?class ?nodeKindNested ?classNested ?dataTypeNested where { " +
-                "?shape <http://www.w3.org/ns/shacl#property> ?ps." +
-                "?ps <http://www.w3.org/ns/shacl#path> ?path . " +
-                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#NodeKind> ?nodeKind }" +
-                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#datatype> ?dataType } " +
-                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#class> ?class } " +
-                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#or> ?orList ." +
-                "  ?orList rdf:rest*/rdf:first ?el . " +
-                "  ?el <http://www.w3.org/ns/shacl#NodeKind> ?nodeKindNested. " +
-                "   OPTIONAL { ?el <http://www.w3.org/ns/shacl#datatype> ?dataTypeNested. } " +
-                "   OPTIONAL {?el <http://www.w3.org/ns/shacl#class> ?classNested } } " +
-                " filter(?shape = <"+nodeShape.iri+">)}";
-
-        //todo get more infos for property shape with in lists
-        TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
-        List<PropertyShape> propertyShapes = new ArrayList<>();
-        try (TupleQueryResult result = query.evaluate()) {
-            while (result.hasNext()) {
-                BindingSet bindingSet = result.next();
-                var shapeIri = (IRI) bindingSet.getValue("ps");
-                var nodeKindValue = (IRI) bindingSet.getValue("nodeKind");
-                var dataTypeValue = bindingSet.getValue("dataType");
-                var classIriValue = bindingSet.getValue("class");
-                var nodeKindNestedValue = bindingSet.getValue("nodeKindNested");
-                var classIriNestedValue = bindingSet.getValue("classNested");
-                var dataTypeNestedValue = bindingSet.getValue("dataTypeNested");
-
-                IRI dataType = null;
-                if(dataTypeValue != null)
-                    dataType = (IRI) dataTypeValue;
-                IRI classIri = null;
-                if(classIriValue != null)
-                    classIri = (IRI) classIriValue;
-                IRI nodeKind = null;
-                if(nodeKindValue != null)
-                    nodeKind = (IRI) nodeKindValue;
-                IRI nodeKindNested = null;
-                if(nodeKindNestedValue != null)
-                    nodeKindNested = (IRI) nodeKindNestedValue;
-                IRI classIriNested = null;
-                if(classIriNestedValue != null)
-                    classIriNested = (IRI) classIriNestedValue;
-                IRI dataTypeNested = null;
-                if(dataTypeNestedValue != null)
-                    dataTypeNested = (IRI) dataTypeNestedValue;
-                var path = (IRI) bindingSet.getValue("path");
-
-                var optionalExistingPs = propertyShapes.stream().filter(n -> n.iri.equals(shapeIri)).findFirst();
-                if(optionalExistingPs.isPresent()) {
-                   optionalExistingPs.get().addOrListItem(nodeKindNested, classIriNested, dataTypeNested);
-                }
-                else {
-                    PropertyShape propertyShape = new PropertyShape();
-                    propertyShape.iri = shapeIri;
-                    propertyShape.nodeKind = nodeKind;
-                    if(dataType != null && classIri != null)
-                        throw new RuntimeException("Datatype and class are not null");
-                    if(dataType == null)
-                        propertyShape.dataTypeOrClass = classIri;
-                    else
-                        propertyShape.dataTypeOrClass = dataType;
-                    propertyShape.dataType = dataType;
-                    propertyShape.classIri = classIri;
-                    propertyShape.path = path;
-                    if(nodeKindNested != null && classIriNested != null)
-                        propertyShape.addOrListItem(nodeKindNested, classIriNested, dataTypeNested);
-                    propertyShapes.add(propertyShape);
-                }
-            }
-        }
-        nodeShape.propertyShapes = propertyShapes;
-    }
 
     public static void checkShapesInNewGraph(String url, String repositoryName, List<NodeShape> nodeShapes) {
         RepositoryManager repositoryManager = new RemoteRepositoryManager(url);
@@ -166,10 +54,8 @@ public class GraphDbUtils {
         }
     }
 
-    //update with only one target class
     public static void checkNodeShapesInNewGraph(RepositoryConnection conn, List<NodeShape> nodeShapes) {
-        //        var targetClasses = nodeShapes.stream().flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
-        var targetClasses = nodeShapes.stream().map(ns -> ns.targetClass.toString()).collect(Collectors.toList());
+        var targetClasses = nodeShapes.stream().map(ns -> ns.targetClass.toString()).collect(Collectors.toList()); //each nodeshape can only have on targetclass
         var filterString = String.join("> <", targetClasses);
 
         String sparql = "SELECT DISTINCT ?class (COUNT(DISTINCT ?s) AS ?classCount) FROM <http://www.ontotext.com/explicit> where {\n" +
@@ -178,8 +64,6 @@ public class GraphDbUtils {
                 "Group by ?class";
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
-        //set all support values to 0
-        //todo problems here?
         nodeShapes.forEach(n -> n.support = 0);
 
         try (TupleQueryResult result = query.evaluate()) {
@@ -187,9 +71,13 @@ public class GraphDbUtils {
                 BindingSet bindingSet = result.next();
                 var shapeIri = (IRI) bindingSet.getValue("class");
                 var support = Integer.parseInt(bindingSet.getValue("classCount").stringValue());
-                //                var nodeShape = nodeShapes.stream().filter(ns -> ns.targetClasses.stream().anyMatch(s -> s.equals(shapeIri))).findFirst().get();
-                var nodeShape = nodeShapes.stream().filter(ns -> ns.targetClass.equals(shapeIri)).findFirst().get();
-                nodeShape.support = support; //Was += before
+                var nodeShapeOptional = nodeShapes.stream().filter(ns -> ns.targetClass.equals(shapeIri)).findFirst();
+                if(nodeShapeOptional.isPresent()) {
+                    var nodeShape = nodeShapeOptional.get();
+                    nodeShape.support = support;
+                }
+                else
+                    LOGGER.warning("Could not find node shape " + shapeIri.toString());
             }
         }
     }
@@ -198,11 +86,7 @@ public class GraphDbUtils {
         for(var nodeShape : nodeShapes) {
             if (nodeShape.support != 0) { //performance
                 var targetClass = nodeShape.targetClass.toString();
-                //todo better way for performance?
                 for (var propertyShape : nodeShape.propertyShapes) {
-//                    if(propertyShape.iri.toString().contains("http://shaclshapes.org/lengthThingShapeProperty"))
-//                        System.out.println(); //todo remove
-                    //Todo merge methods?
                     if (propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
                         propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
                         setConfidence(nodeShape, propertyShape);
@@ -218,7 +102,6 @@ public class GraphDbUtils {
                                 if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
                                     orItem.support = getSupportForLiteralPropertyShape(propertyShape.path, orItem.dataTypeOrClass, targetClass, conn);
                                     setConfidence(nodeShape, orItem);
-
                                 }
                                 else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
                                     orItem.support = getSupportForIriPropertyShape(propertyShape.path, orItem.dataTypeOrClass, targetClass, conn);
@@ -273,6 +156,7 @@ public class GraphDbUtils {
         } finally {
             qexec.close();
         }
+
         //connect all connected statements to parent node
         model.add(statements);
 
@@ -287,7 +171,6 @@ public class GraphDbUtils {
         //set confidence and new support
         setSupportOrConfidence(model, propertyShape, iriConfidence, confidenceLiteral);
         setSupportOrConfidence(model, propertyShape, iriSupport, supportLiteral);
-
 
         TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
         OutputStream outputStream = new ByteArrayOutputStream();
@@ -309,7 +192,7 @@ public class GraphDbUtils {
         model.add(propertyShape, iri, newLiteral);
     }
 
-    private static Model removeRecursively(Model model, Resource resourceToDelete) {
+    private static void removeRecursively(Model model, Resource resourceToDelete) {
         var statementQueue = model.listStatements(resourceToDelete, null, (RDFNode) null).toList();
         while (!statementQueue.isEmpty()) {
             var nextStatement = statementQueue.get(0);
@@ -319,7 +202,6 @@ public class GraphDbUtils {
             model.remove(nextStatement);
             statementQueue.remove(nextStatement);
         }
-        return model;
     }
 
     private static int getSupportForIriPropertyShape(IRI path, IRI classIri, String targetClass, RepositoryConnection conn) {
@@ -348,7 +230,7 @@ public class GraphDbUtils {
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
         try (TupleQueryResult result = query.evaluate()) {
-            while (result.hasNext()) {
+            if (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 return Integer.parseInt(bindingSet.getValue("count").stringValue());
             }
@@ -370,7 +252,7 @@ public class GraphDbUtils {
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
         try (TupleQueryResult result = query.evaluate()) {
-            while (result.hasNext()) {
+            if (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 return Integer.parseInt(bindingSet.getValue("count").stringValue());
             }
@@ -382,6 +264,7 @@ public class GraphDbUtils {
         }
     }
 
+    //Unused methods
     public String cloneSailRepository(String originalFileRepo, String secondVersionName) {
         File originalFolder = new File(originalFileRepo);
         File parentFolder = originalFolder.getParentFile();
@@ -424,22 +307,21 @@ public class GraphDbUtils {
 //    }
 
     public void deleteFromRepoWhereSupportIsZero(String filePath, List<NodeShape> nodeShapes) {
-
-        Repository db = new SailRepository(new NativeStore(new File(filePath)));
-        try (RepositoryConnection conn = db.getConnection()) {
-            var targetClasses = nodeShapes.stream().filter(ns -> ns.support == 0).flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
-            //no better way found to delete multiple triples
-            for (var targetClass : targetClasses) {
-                String sparql = "delete where {\n" +
-                        "\t ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/shacl#NodeShape> .\n " +
-                        " ?s <http://www.w3.org/ns/shacl#targetClass> <"+targetClass+"> . " +
-                        " ?s ?p ?o ." +
-                        " }";
-                conn.prepareUpdate(QueryLanguage.SPARQL, sparql).execute();
-            }
-        } finally {
-            db.shutDown();
-        }
+//        Repository db = new SailRepository(new NativeStore(new File(filePath)));
+//        try (RepositoryConnection conn = db.getConnection()) {
+//            var targetClasses = nodeShapes.stream().filter(ns -> ns.support == 0).flatMap(ns -> ns.targetClasses.stream().map(Object::toString)).collect(Collectors.toList());
+//            //no better way found to delete multiple triples
+//            for (var targetClass : targetClasses) {
+//                String sparql = "delete where {\n" +
+//                        "\t ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/shacl#NodeShape> .\n " +
+//                        " ?s <http://www.w3.org/ns/shacl#targetClass> <"+targetClass+"> . " +
+//                        " ?s ?p ?o ." +
+//                        " }";
+//                conn.prepareUpdate(QueryLanguage.SPARQL, sparql).execute();
+//            }
+//        } finally {
+//            db.shutDown();
+//        }
     }
 
     public void constructDefaultShapes(String path) {
@@ -478,5 +360,115 @@ public class GraphDbUtils {
 //            return cleanedStringOrItems.replaceAll("\n+$", "");
 //        }
         return "";
+    }
+
+    //Unused, would be useful if only SHACL file would be available and no objects
+    public List<NodeShape> getNodeShapesWithTargetClassFromRepo(String localDbFilePath) {
+        Repository db = new SailRepository(new NativeStore(new File(localDbFilePath)));
+        var nodeShapes = new ArrayList<NodeShape>();
+//        try (RepositoryConnection conn = db.getConnection()) {
+//            conn.setNamespace("shape", Constants.SHAPES_NAMESPACE);
+//            conn.setNamespace("shape", Constants.SHACL_NAMESPACE);
+//
+//            var sparql = "select distinct ?shape ?targetClass where " +
+//                    "{?shape <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/shacl#NodeShape>." +
+//                    "?shape <http://www.w3.org/ns/shacl#targetClass> ?targetClass. }";
+//            TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
+//            try (TupleQueryResult result = query.evaluate()) {
+//                while (result.hasNext()) {
+//                    BindingSet bindingSet = result.next();
+//                    var shapeIri = (IRI) bindingSet.getValue("shape");
+//                    var targetClass = (IRI)bindingSet.getValue("targetClass");
+//                    var optionalExistingNS = nodeShapes.stream().filter(n -> n.iri.equals(shapeIri)).findFirst();
+//                    if(optionalExistingNS.isPresent()) {
+//                        optionalExistingNS.get().addTargetClasses(targetClass);
+//                    }
+//                    else {
+//                        NodeShape nodeShape = new NodeShape();
+//                        nodeShape.iri = shapeIri;
+//                        nodeShape.addTargetClasses(targetClass);
+//                        getPropertyShapesForNodeShape(nodeShape, conn);
+//                        nodeShapes.add(nodeShape);
+//                    }
+//                }
+//            }
+//        } finally {
+//            db.shutDown();
+//        }
+        return nodeShapes;
+    }
+
+    private void getPropertyShapesForNodeShape(NodeShape nodeShape, RepositoryConnection conn) {
+        var sparql = "select distinct ?ps ?nodeKind ?dataType ?path ?class ?nodeKindNested ?classNested ?dataTypeNested where { " +
+                "?shape <http://www.w3.org/ns/shacl#property> ?ps." +
+                "?ps <http://www.w3.org/ns/shacl#path> ?path . " +
+                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#NodeKind> ?nodeKind }" +
+                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#datatype> ?dataType } " +
+                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#class> ?class } " +
+                " OPTIONAL { ?ps <http://www.w3.org/ns/shacl#or> ?orList ." +
+                "  ?orList rdf:rest*/rdf:first ?el . " +
+                "  ?el <http://www.w3.org/ns/shacl#NodeKind> ?nodeKindNested. " +
+                "   OPTIONAL { ?el <http://www.w3.org/ns/shacl#datatype> ?dataTypeNested. } " +
+                "   OPTIONAL {?el <http://www.w3.org/ns/shacl#class> ?classNested } } " +
+                " filter(?shape = <"+nodeShape.iri+">)}";
+
+        //todo get more infos for property shape with in lists
+        TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
+        List<PropertyShape> propertyShapes = new ArrayList<>();
+        try (TupleQueryResult result = query.evaluate()) {
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                var shapeIri = (IRI) bindingSet.getValue("ps");
+                var nodeKindValue = (IRI) bindingSet.getValue("nodeKind");
+                var dataTypeValue = bindingSet.getValue("dataType");
+                var classIriValue = bindingSet.getValue("class");
+                var nodeKindNestedValue = bindingSet.getValue("nodeKindNested");
+                var classIriNestedValue = bindingSet.getValue("classNested");
+                var dataTypeNestedValue = bindingSet.getValue("dataTypeNested");
+
+                IRI dataType = null;
+                if(dataTypeValue != null)
+                    dataType = (IRI) dataTypeValue;
+                IRI classIri = null;
+                if(classIriValue != null)
+                    classIri = (IRI) classIriValue;
+                IRI nodeKind = null;
+                if(nodeKindValue != null)
+                    nodeKind = (IRI) nodeKindValue;
+                IRI nodeKindNested = null;
+                if(nodeKindNestedValue != null)
+                    nodeKindNested = (IRI) nodeKindNestedValue;
+                IRI classIriNested = null;
+                if(classIriNestedValue != null)
+                    classIriNested = (IRI) classIriNestedValue;
+                IRI dataTypeNested = null;
+                if(dataTypeNestedValue != null)
+                    dataTypeNested = (IRI) dataTypeNestedValue;
+                var path = (IRI) bindingSet.getValue("path");
+
+                var optionalExistingPs = propertyShapes.stream().filter(n -> n.iri.equals(shapeIri)).findFirst();
+                if(optionalExistingPs.isPresent()) {
+                    optionalExistingPs.get().addOrListItem(nodeKindNested, classIriNested, dataTypeNested);
+                }
+                else {
+                    PropertyShape propertyShape = new PropertyShape();
+                    propertyShape.iri = shapeIri;
+                    propertyShape.nodeKind = nodeKind;
+                    if(dataType != null && classIri != null)
+                        throw new RuntimeException("Datatype and class are not null");
+                    if(dataType == null)
+                        propertyShape.dataTypeOrClass = classIri;
+                    else
+                        propertyShape.dataTypeOrClass = dataType;
+                    propertyShape.dataType = dataType;
+                    propertyShape.classIri = classIri;
+                    propertyShape.path = path;
+                    if(nodeKindNested != null && classIriNested != null)
+                        propertyShape.addOrListItem(nodeKindNested, classIriNested, dataTypeNested);
+                    propertyShapes.add(propertyShape);
+                }
+            }
+        }
+        nodeShape.propertyShapes = propertyShapes;
     }
 }
