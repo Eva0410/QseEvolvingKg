@@ -1,8 +1,8 @@
 import org.junit.Test;
-import qseevolvingkg.partialsparqlqueries.ComparatorUtils;
-import qseevolvingkg.partialsparqlqueries.MetaComparator;
-import qseevolvingkg.partialsparqlqueries.ShapeComparatorQSE;
-import qseevolvingkg.partialsparqlqueries.ShapeComparatorSparql;
+import qseevolvingkg.partialsparqlqueries.Comparator.ComparatorUtils;
+import qseevolvingkg.partialsparqlqueries.Comparator.MetaComparator;
+import qseevolvingkg.partialsparqlqueries.Comparator.ShapeComparatorQSE;
+import qseevolvingkg.partialsparqlqueries.Comparator.ShapeComparatorSparql;
 
 import java.io.File;
 

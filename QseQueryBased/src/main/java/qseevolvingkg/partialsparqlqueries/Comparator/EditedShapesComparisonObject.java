@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.Comparator;
 
 import java.util.Objects;
 

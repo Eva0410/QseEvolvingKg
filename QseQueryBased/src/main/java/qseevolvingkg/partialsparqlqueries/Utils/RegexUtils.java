@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.Utils;
 
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
@@ -6,6 +6,10 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
+import qseevolvingkg.partialsparqlqueries.Comparator.ComparisonDiff;
+import qseevolvingkg.partialsparqlqueries.Main;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.ShaclOrListItem;
 
 import java.io.*;
 import java.nio.file.*;

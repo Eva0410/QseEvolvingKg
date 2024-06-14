@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.Utils;
 
 import cs.qse.common.ShapesExtractor;
 import cs.utils.Constants;
@@ -20,6 +20,10 @@ import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
+import qseevolvingkg.partialsparqlqueries.Main;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.NodeShape;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.PropertyShape;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.ShaclOrListItem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

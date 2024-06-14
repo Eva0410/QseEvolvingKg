@@ -1,9 +1,11 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.Comparator;
 
 import cs.Main;
 import cs.qse.common.structure.NS;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
+import qseevolvingkg.partialsparqlqueries.Utils.ConfigManager;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.ExtractedShapes;
 
 import java.io.File;
 import java.time.Duration;

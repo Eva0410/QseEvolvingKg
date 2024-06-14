@@ -1,6 +1,7 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.ShapeObjects;
 
 import cs.qse.common.structure.NS;
+import qseevolvingkg.partialsparqlqueries.Main;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,13 +17,11 @@ public class ExtractedShapes {
     public int support = 0;
     public double confidence = 0;
 
-    List<String> classes;
-
     public String fileContentPath;
 
     public List<NodeShape> nodeShapes;
 
-    String fileAsString;
+    public String fileAsString;
 
     public String prefixLines;
 
@@ -63,5 +62,21 @@ public class ExtractedShapes {
             }
         }
         this.nodeShapes = list;
+    }
+
+    public int getSupport() {
+        return support;
+    }
+
+    public void setSupport(int support) {
+        this.support = support;
+    }
+
+    public double getConfidence() {
+        return confidence;
+    }
+
+    public void setConfidence(double confidence) {
+        this.confidence = confidence;
     }
 }

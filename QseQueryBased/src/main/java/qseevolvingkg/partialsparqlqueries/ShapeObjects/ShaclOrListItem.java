@@ -1,16 +1,16 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.ShapeObjects;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.util.Values;
 
 public class ShaclOrListItem {
-    IRI nodeKind;
-    IRI classIri;
-    int support = 0;
-    Double confidence = 0.0;
-    IRI dataType;
-    IRI dataTypeOrClass;
-    boolean errorDuringGeneration = false;
+    public IRI nodeKind;
+    public IRI classIri;
+    public int support = 0;
+    public Double confidence = 0.0;
+    public IRI dataType;
+    public IRI dataTypeOrClass;
+    public boolean errorDuringGeneration = false;
     public PropertyShape propertyShape;
 
     public ShaclOrListItem() {

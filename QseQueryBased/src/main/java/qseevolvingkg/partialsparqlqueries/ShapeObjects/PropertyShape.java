@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.ShapeObjects;
 
 import cs.qse.common.structure.PS;
 import org.eclipse.rdf4j.model.IRI;
@@ -10,16 +10,16 @@ import java.util.List;
 
 //Copied from WebApp
 public class PropertyShape {
-    IRI iri;
-    int support;
-    double confidence;
-    IRI nodeKind;
-    IRI path;
-    IRI dataType;
-    IRI classIri;
-    List<ShaclOrListItem> orItems = new ArrayList<>();
-    boolean errorDuringGeneration = false;
-    IRI dataTypeOrClass;
+    public IRI iri;
+    public int support;
+    public double confidence;
+    public IRI nodeKind;
+    public IRI path;
+    public IRI dataType;
+    public IRI classIri;
+    public List<ShaclOrListItem> orItems = new ArrayList<>();
+    public boolean errorDuringGeneration = false;
+    public IRI dataTypeOrClass;
     public NodeShape nodeShape;
 
     public  PropertyShape() {

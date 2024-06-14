@@ -3,7 +3,11 @@ import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.junit.Test;
-import qseevolvingkg.partialsparqlqueries.*;
+import qseevolvingkg.partialsparqlqueries.Comparator.ComparisonDiff;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.ShaclOrListItem;
+import qseevolvingkg.partialsparqlqueries.Utils.GraphDbUtils;
+import qseevolvingkg.partialsparqlqueries.Utils.RegexUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

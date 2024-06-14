@@ -1,4 +1,6 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.Utils;
+
+import qseevolvingkg.partialsparqlqueries.Main;
 
 import java.io.File;
 import java.io.FileInputStream;
