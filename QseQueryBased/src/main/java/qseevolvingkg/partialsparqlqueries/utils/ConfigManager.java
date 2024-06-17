@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries.Utils;
+package qseevolvingkg.partialsparqlqueries.utils;
 
 import qseevolvingkg.partialsparqlqueries.Main;
 

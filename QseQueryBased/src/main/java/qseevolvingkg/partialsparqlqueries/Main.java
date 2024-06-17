@@ -1,10 +1,10 @@
 package qseevolvingkg.partialsparqlqueries;
 
-import qseevolvingkg.partialsparqlqueries.Comparator.ComparatorUtils;
-import qseevolvingkg.partialsparqlqueries.Comparator.MetaComparator;
-import qseevolvingkg.partialsparqlqueries.Comparator.ShapeComparatorQSE;
-import qseevolvingkg.partialsparqlqueries.Comparator.ShapeComparatorSparql;
-import qseevolvingkg.partialsparqlqueries.Utils.ConfigManager;
+import qseevolvingkg.partialsparqlqueries.comparator.ComparatorUtils;
+import qseevolvingkg.partialsparqlqueries.comparator.MetaComparator;
+import qseevolvingkg.partialsparqlqueries.comparator.ShapeComparatorQSE;
+import qseevolvingkg.partialsparqlqueries.comparator.ShapeComparatorSparql;
+import qseevolvingkg.partialsparqlqueries.utils.ConfigManager;
 
 import java.io.File;
 import java.io.IOException;

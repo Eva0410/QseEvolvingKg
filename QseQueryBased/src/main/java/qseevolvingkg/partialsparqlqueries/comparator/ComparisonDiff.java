@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries.Comparator;
+package qseevolvingkg.partialsparqlqueries.comparator;
 
 import java.time.Duration;
 import java.util.ArrayList;

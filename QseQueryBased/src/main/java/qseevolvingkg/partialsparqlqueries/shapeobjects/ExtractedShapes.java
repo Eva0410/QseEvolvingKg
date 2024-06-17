@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries.ShapeObjects;
+package qseevolvingkg.partialsparqlqueries.shapeobjects;
 
 import cs.qse.common.structure.NS;
 import qseevolvingkg.partialsparqlqueries.Main;

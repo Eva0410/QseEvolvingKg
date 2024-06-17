@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries.Comparator;
+package qseevolvingkg.partialsparqlqueries.comparator;
 
 import cs.Main;
 import cs.qse.common.ExperimentsUtil;
@@ -6,10 +6,10 @@ import cs.qse.common.structure.NS;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
 import org.jetbrains.annotations.NotNull;
-import qseevolvingkg.partialsparqlqueries.Utils.ConfigManager;
-import qseevolvingkg.partialsparqlqueries.ShapeObjects.ExtractedShapes;
-import qseevolvingkg.partialsparqlqueries.Utils.GraphDbUtils;
-import qseevolvingkg.partialsparqlqueries.Utils.RegexUtils;
+import qseevolvingkg.partialsparqlqueries.utils.ConfigManager;
+import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.utils.GraphDbUtils;
+import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
 import java.nio.file.Path;

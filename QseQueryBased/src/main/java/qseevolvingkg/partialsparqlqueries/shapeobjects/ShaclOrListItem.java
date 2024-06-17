@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries.ShapeObjects;
+package qseevolvingkg.partialsparqlqueries.shapeobjects;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.util.Values;

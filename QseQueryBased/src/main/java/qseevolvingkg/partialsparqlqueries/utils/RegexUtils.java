@@ -1,18 +1,16 @@
-package qseevolvingkg.partialsparqlqueries.Utils;
+package qseevolvingkg.partialsparqlqueries.utils;
 
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.jetbrains.annotations.NotNull;
-import qseevolvingkg.partialsparqlqueries.Comparator.ComparisonDiff;
+import qseevolvingkg.partialsparqlqueries.comparator.ComparisonDiff;
 import qseevolvingkg.partialsparqlqueries.Main;
-import qseevolvingkg.partialsparqlqueries.ShapeObjects.ExtractedShapes;
-import qseevolvingkg.partialsparqlqueries.ShapeObjects.PropertyShape;
-import qseevolvingkg.partialsparqlqueries.ShapeObjects.ShaclOrListItem;
+import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.shapeobjects.ShaclOrListItem;
 
 import java.io.*;
 import java.nio.file.*;

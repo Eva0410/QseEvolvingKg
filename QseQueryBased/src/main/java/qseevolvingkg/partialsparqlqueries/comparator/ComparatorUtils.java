@@ -1,9 +1,9 @@
-package qseevolvingkg.partialsparqlqueries.Comparator;
+package qseevolvingkg.partialsparqlqueries.comparator;
 
 import cs.qse.common.structure.NS;
-import qseevolvingkg.partialsparqlqueries.ShapeObjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
 import qseevolvingkg.partialsparqlqueries.Main;
-import qseevolvingkg.partialsparqlqueries.Utils.RegexUtils;
+import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
 import java.io.FileWriter;
