@@ -34,7 +34,7 @@ public class Main {
 
     private static void setupLogger() {
         try {
-            FileHandler fileHandler = null;
+            FileHandler fileHandler;
             fileHandler = new FileHandler("application.log");
             fileHandler.setFormatter(new SimpleFormatter());
             LOGGER.addHandler(fileHandler);

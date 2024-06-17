@@ -24,19 +24,19 @@ public class MetaComparator {
         if(diffQse.editedNodeShapes != null && diffSparql.editedNodeShapes != null) {
             var uniqueToFirstListObjects = getDifferenceBetweenObjectLists(diffQse.editedNodeShapes, diffSparql.editedNodeShapes);
             var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffSparql.editedNodeShapes, diffQse.editedNodeShapes);
-            appendUniqeNamesToStringBuilder(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
+            appendUniqueNamesToStringBuilderObjects(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
         }
         sb.append("=== Edited Property Shape Names ===\n");
         if(diffQse.editedPropertyShapes != null && diffSparql.editedPropertyShapes != null) {
             var uniqueToFirstListObjects = getDifferenceBetweenObjectLists(diffQse.editedPropertyShapes, diffSparql.editedPropertyShapes);
             var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffSparql.editedPropertyShapes, diffQse.editedPropertyShapes);
-            appendUniqeNamesToStringBuilder(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
+            appendUniqueNamesToStringBuilderObjects(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
         }
         sb.append("Execution Time QSE Total: ").append(diffQse.durationTotal.getSeconds()).append(" seconds, Execution Time Sparql Total: ").append(diffSparql.durationTotal.getSeconds()).append(" seconds");
         return sb.toString();
     }
 
-    private static void appendUniqeNamesToStringBuilder(List<EditedShapesComparisonObject> uniqueToFirstListObjects, StringBuilder sb, List<EditedShapesComparisonObject> uniqueToSecondListObjects) {
+    private static void appendUniqueNamesToStringBuilderObjects(List<EditedShapesComparisonObject> uniqueToFirstListObjects, StringBuilder sb, List<EditedShapesComparisonObject> uniqueToSecondListObjects) {
         if (!uniqueToFirstListObjects.isEmpty())
             sb.append("== Unique in QSE-Comparison ==\n");
         uniqueToFirstListObjects.forEach(s -> sb.append(s.shapeName).append("\n"));

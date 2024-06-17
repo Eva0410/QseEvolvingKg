@@ -231,6 +231,10 @@ public class GraphDbUtils {
                     " VALUES ?class { <" + targetClass + "> }" +
                     " FILTER (?dataTypeRdfType = <"+classIri+"> || ?dataTypeLiteral = <"+classIri+">)}";
         }
+        return getCountFromSparqlQuery(conn, sparql);
+    }
+
+    private static int getCountFromSparqlQuery(RepositoryConnection conn, String sparql) {
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
 
         try (TupleQueryResult result = query.evaluate()) {
@@ -253,19 +257,7 @@ public class GraphDbUtils {
                 " ?s <" + path + "> ?obj . " +
                 " FILTER(dataType(?obj) = <" + dataType + "> )" +
                 " VALUES ?class { <" + targetClass + "> }}";
-        TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
-
-        try (TupleQueryResult result = query.evaluate()) {
-            if (result.hasNext()) {
-                BindingSet bindingSet = result.next();
-                return Integer.parseInt(bindingSet.getValue("count").stringValue());
-            }
-            throw new Exception("No support returned");
-        }
-        catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Exception occurred", ex);
-            return 0;
-        }
+        return getCountFromSparqlQuery(conn, sparql);
     }
 
     //Unused methods

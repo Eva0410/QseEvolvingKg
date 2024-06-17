@@ -27,7 +27,5 @@ webpack.generated.js
 
 /graphs/
 
-/Output/
-
 application.log
 config.properties

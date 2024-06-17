@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.model.util.Values;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 //Copied from WebApp
@@ -69,10 +70,7 @@ public class PropertyShape {
     }
 
     public static int getValueFromQse(Integer value) {
-        if(value == null)
-            return 0;
-        else
-            return value;
+        return Objects.requireNonNullElse(value, 0);
     }
 
     public static double getValueFromQse(Double value) {

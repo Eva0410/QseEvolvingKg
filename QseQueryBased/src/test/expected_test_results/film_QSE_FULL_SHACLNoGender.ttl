@@ -107,6 +107,7 @@
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/creatorOntologyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/descriptionOntologyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/titleOntologyShapeProperty> ;
+  <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/versionIRIOntologyShapeProperty> ;
   <http://www.w3.org/ns/shacl#targetClass> owl:Ontology .
 
 <http://shaclshapes.org/PerformerShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
@@ -726,18 +727,11 @@
   <http://www.w3.org/ns/shacl#path> rdfs:range .
 
 <http://shaclshapes.org/rangeFunctionalPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
+  <http://shaclshapes.org/confidence> 1E0 ;
+  <http://shaclshapes.org/support> "2"^^xsd:int ;
+  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+  <http://www.w3.org/ns/shacl#class> rdfs:Datatype ;
   <http://www.w3.org/ns/shacl#node> <http://shaclshapes.org/DatatypeShape> ;
-  <http://www.w3.org/ns/shacl#or> ( [
-    <http://shaclshapes.org/confidence> 3,3333E-1 ;
-    <http://shaclshapes.org/support> "1"^^xsd:int ;
-    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-    <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
-  ] [
-    <http://shaclshapes.org/confidence> 6,6667E-1 ;
-    <http://shaclshapes.org/support> "2"^^xsd:int ;
-    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-    <http://www.w3.org/ns/shacl#class> rdfs:Datatype ;
-  ] ) ;
   <http://www.w3.org/ns/shacl#path> rdfs:range .
 
 <http://shaclshapes.org/rangeObjectPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
@@ -829,5 +823,13 @@
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#minCount> 1 ;
   <http://www.w3.org/ns/shacl#path> dcterms:title .
+
+<http://shaclshapes.org/versionIRIOntologyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
+  <http://shaclshapes.org/confidence> 1E0 ;
+  <http://shaclshapes.org/support> "1"^^xsd:int ;
+  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+  <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
+  <http://www.w3.org/ns/shacl#minCount> 1 ;
+  <http://www.w3.org/ns/shacl#path> owl:versionIRI .
 
 

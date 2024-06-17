@@ -5,10 +5,13 @@ import de.atextor.turtle.formatter.TurtleFormatter;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.jetbrains.annotations.NotNull;
 import qseevolvingkg.partialsparqlqueries.Comparator.ComparisonDiff;
 import qseevolvingkg.partialsparqlqueries.Main;
 import qseevolvingkg.partialsparqlqueries.ShapeObjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.ShapeObjects.PropertyShape;
 import qseevolvingkg.partialsparqlqueries.ShapeObjects.ShaclOrListItem;
 
 import java.io.*;
@@ -40,7 +43,10 @@ public class RegexUtils {
             }
             else {
                 for(var propertyShape : nodeShape.propertyShapes) {
-                    if((propertyShape.support <= supportThreshold || propertyShape.confidence <= confidenceThreshold) && (propertyShape.orItems == null || propertyShape.orItems.isEmpty())) {
+                    var allOrItemsUnderThreshold = propertyShape.orItems != null && !propertyShape.orItems.isEmpty()
+                            && propertyShape.orItems.stream().allMatch(o -> o.support <= supportThreshold && o.confidence <= confidenceThreshold);
+
+                    if((propertyShape.support <= supportThreshold || propertyShape.confidence <= confidenceThreshold) && (propertyShape.orItems == null || propertyShape.orItems.isEmpty()) || allOrItemsUnderThreshold) {
                         comparisonDiff.deletedPropertyShapes.add(propertyShape.iri.toString());
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                         fileContent = deletePropertyShapeReferenceWithIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
@@ -114,14 +120,7 @@ public class RegexUtils {
             return file;
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
         String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
-        Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(file);
-        if (!matcher.find()) {
-           LOGGER.warning("Delete did not work for " + iri);
-            return file;
-        }
-        String match = matcher.group();
-        return file.replace(match, "");
+        return getReplacedFileWithRegex(iri, file, regexPattern);
     }
 
     private static String deletePropertyShapeReferenceWithIriFromString(String iri, String file, boolean errorDuringGeneration) {
@@ -129,6 +128,11 @@ public class RegexUtils {
             return file;
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
         String regexPattern = String.format("  <http://www.w3.org/ns/shacl#property> <%s> \\;\n", iriWithEscapedChars);
+        return getReplacedFileWithRegex(iri, file, regexPattern);
+    }
+
+    @NotNull
+    private static String getReplacedFileWithRegex(String iri, String file, String regexPattern) {
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {
@@ -146,12 +150,15 @@ public class RegexUtils {
 
         String regexPart = "";
         if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal"))
-            regexPart = String.format(" \\<http://www.w3.org/ns/shacl#datatype> <?%s>?", orItem.dataType);
+            if(orItem.dataType == null)
+                regexPart = String.format(" \\<http://www.w3.org/ns/shacl#datatype> <?[^<]*%s>?", orItem.dataTypeOrClass.getLocalName()); //problem with full name or short name e.g. rdf:label
+            else
+                regexPart = String.format(" \\<http://www.w3.org/ns/shacl#datatype> <?[^<]*%s>?", orItem.dataType);
         else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
             if(orItem.classIri == null)
-                regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.dataTypeOrClass);
+                regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?[^<]*%s>?", orItem.dataTypeOrClass.getLocalName());
             else
-                regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?%s>?", orItem.classIri);
+                regexPart = String.format(" \\<http://www.w3.org/ns/shacl#class> <?[^<]*%s>?", orItem.classIri);
         }
 
         String regexPattern = String.format(" \\[[^\\[\\]]*?<http://www.w3.org/ns/shacl#NodeKind> <%s>[^\\[\\]]*?%s[^\\]\\[]*?\\]", orItem.nodeKind, regexPart);
@@ -273,10 +280,8 @@ public class RegexUtils {
                 } else
                     orderedLines.add(line);
             }
-            StringBuilder orderedText = new StringBuilder();
-            orderedText.append(String.join("\n", orderedLines));
 
-            return orderedText.toString();
+            return String.join("\n", orderedLines);
         } else
             return input;
     }
@@ -295,7 +300,7 @@ public class RegexUtils {
     //Unused methods
 
     public void getAllNodeShapesfromFile(String filePath) {
-        String regexPattern = String.format("\n.* <http:\\/\\/www.w3.org\\/ns\\/shacl#NodeShape> ;");
+        String regexPattern = "\n.* <http:\\/\\/www.w3.org\\/ns\\/shacl#NodeShape> ;";
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
 
         Matcher matcher = pattern.matcher(getFileAsString(filePath));

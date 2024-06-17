@@ -15,7 +15,7 @@
   <http://www.w3.org/ns/shacl#targetClass> owl:AnnotationProperty .
 
 <http://shaclshapes.org/ClassShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
-  <http://shaclshapes.org/support> "11"^^xsd:int ;
+  <http://shaclshapes.org/support> "10"^^xsd:int ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/labelClassShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/subClassOfClassShapeProperty> ;
   <http://www.w3.org/ns/shacl#targetClass> owl:Class .
@@ -26,7 +26,7 @@
   <http://www.w3.org/ns/shacl#targetClass> <http://semantics.id/ns/example/film#Composer> .
 
 <http://shaclshapes.org/DatatypePropertyShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
-  <http://shaclshapes.org/support> "7"^^xsd:int ;
+  <http://shaclshapes.org/support> "6"^^xsd:int ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/domainDatatypePropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/labelDatatypePropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/rangeDatatypePropertyShapeProperty> ;
@@ -54,7 +54,7 @@
   <http://www.w3.org/ns/shacl#targetClass> <http://semantics.id/ns/example/film#Film> .
 
 <http://shaclshapes.org/FunctionalPropertyShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
-  <http://shaclshapes.org/support> "3"^^xsd:int ;
+  <http://shaclshapes.org/support> "2"^^xsd:int ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/domainFunctionalPropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/labelFunctionalPropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/rangeFunctionalPropertyShapeProperty> ;
@@ -83,7 +83,7 @@
   <http://www.w3.org/ns/shacl#targetClass> owl:NamedIndividual .
 
 <http://shaclshapes.org/ObjectPropertyShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
-  <http://shaclshapes.org/support> "13"^^xsd:int ;
+  <http://shaclshapes.org/support> "12"^^xsd:int ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/domainObjectPropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/inverseOfObjectPropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/labelObjectPropertyShapeProperty> ;
@@ -99,6 +99,7 @@
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/creatorOntologyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/descriptionOntologyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/titleOntologyShapeProperty> ;
+  <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/versionIRIOntologyShapeProperty> ;
   <http://www.w3.org/ns/shacl#targetClass> owl:Ontology .
 
 <http://shaclshapes.org/PerformerShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
@@ -189,26 +190,24 @@
   <http://www.w3.org/ns/shacl#path> dcterms:description .
 
 <http://shaclshapes.org/domainDatatypePropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 1E0 ;
-  <http://shaclshapes.org/support> "7"^^xsd:int ;
+  <http://shaclshapes.org/confidence> 8,3333E-1 ;
+  <http://shaclshapes.org/support> "5"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
   <http://www.w3.org/ns/shacl#class> owl:Class ;
-  <http://www.w3.org/ns/shacl#minCount> 1 ;
   <http://www.w3.org/ns/shacl#node> <http://shaclshapes.org/ClassShape> ;
   <http://www.w3.org/ns/shacl#path> rdfs:domain .
 
 <http://shaclshapes.org/domainFunctionalPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 1E0 ;
-  <http://shaclshapes.org/support> "3"^^xsd:int ;
+  <http://shaclshapes.org/confidence> 5E-1 ;
+  <http://shaclshapes.org/support> "1"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
   <http://www.w3.org/ns/shacl#class> owl:Class ;
-  <http://www.w3.org/ns/shacl#minCount> 1 ;
   <http://www.w3.org/ns/shacl#node> <http://shaclshapes.org/ClassShape> ;
   <http://www.w3.org/ns/shacl#path> rdfs:domain .
 
 <http://shaclshapes.org/domainObjectPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://shaclshapes.org/confidence> 1E0 ;
-  <http://shaclshapes.org/support> "13"^^xsd:int ;
+  <http://shaclshapes.org/support> "12"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
   <http://www.w3.org/ns/shacl#class> owl:Class ;
   <http://www.w3.org/ns/shacl#minCount> 1 ;
@@ -425,17 +424,17 @@
     <http://shaclshapes.org/confidence> 3,125E-2 ;
     <http://shaclshapes.org/support> "1"^^xsd:int ;
     <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-    <http://www.w3.org/ns/shacl#class> <http://semantics.id/ns/example/film#Performer> ;
-  ] [
-    <http://shaclshapes.org/confidence> 3,125E-2 ;
-    <http://shaclshapes.org/support> "1"^^xsd:int ;
-    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
     <http://www.w3.org/ns/shacl#class> owl:NamedIndividual ;
   ] [
     <http://shaclshapes.org/confidence> 3,125E-2 ;
     <http://shaclshapes.org/support> "1"^^xsd:int ;
     <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
     <http://www.w3.org/ns/shacl#class> <http://semantics.id/ns/example/film#Composer> ;
+  ] [
+    <http://shaclshapes.org/confidence> 3,125E-2 ;
+    <http://shaclshapes.org/support> "1"^^xsd:int ;
+    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+    <http://www.w3.org/ns/shacl#class> <http://semantics.id/ns/example/film#Performer> ;
   ] ) ;
   <http://www.w3.org/ns/shacl#path> <http://semantics.id/ns/example/film#hasPerformer> .
 
@@ -446,17 +445,17 @@
     <http://shaclshapes.org/confidence> 1E0 ;
     <http://shaclshapes.org/support> "1"^^xsd:int ;
     <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-    <http://www.w3.org/ns/shacl#class> <http://semantics.id/ns/example/film#Performer> ;
-  ] [
-    <http://shaclshapes.org/confidence> 1E0 ;
-    <http://shaclshapes.org/support> "1"^^xsd:int ;
-    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
     <http://www.w3.org/ns/shacl#class> owl:NamedIndividual ;
   ] [
     <http://shaclshapes.org/confidence> 1E0 ;
     <http://shaclshapes.org/support> "1"^^xsd:int ;
     <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
     <http://www.w3.org/ns/shacl#class> <http://semantics.id/ns/example/film#Composer> ;
+  ] [
+    <http://shaclshapes.org/confidence> 1E0 ;
+    <http://shaclshapes.org/support> "1"^^xsd:int ;
+    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+    <http://www.w3.org/ns/shacl#class> <http://semantics.id/ns/example/film#Performer> ;
   ] ) ;
   <http://www.w3.org/ns/shacl#path> <http://semantics.id/ns/example/film#hasPerformer> .
 
@@ -533,12 +532,12 @@
 <http://shaclshapes.org/inverseOfObjectPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://www.w3.org/ns/shacl#node> <http://shaclshapes.org/ObjectPropertyShape> ;
   <http://www.w3.org/ns/shacl#or> ( [
-    <http://shaclshapes.org/confidence> 7,6923E-2 ;
+    <http://shaclshapes.org/confidence> 8,3333E-2 ;
     <http://shaclshapes.org/support> "1"^^xsd:int ;
     <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
     <http://www.w3.org/ns/shacl#class> owl:ObjectProperty ;
   ] [
-    <http://shaclshapes.org/confidence> 7,6923E-2 ;
+    <http://shaclshapes.org/confidence> 8,3333E-2 ;
     <http://shaclshapes.org/support> "1"^^xsd:int ;
     <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
     <http://www.w3.org/ns/shacl#class> owl:TransitiveProperty ;
@@ -561,15 +560,15 @@
   <http://www.w3.org/ns/shacl#path> owl:inverseOf .
 
 <http://shaclshapes.org/labelClassShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 9,0909E-1 ;
-  <http://shaclshapes.org/support> "10"^^xsd:int ;
+  <http://shaclshapes.org/confidence> 9E-1 ;
+  <http://shaclshapes.org/support> "9"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#path> rdfs:label .
 
 <http://shaclshapes.org/labelDatatypePropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://shaclshapes.org/confidence> 1E0 ;
-  <http://shaclshapes.org/support> "7"^^xsd:int ;
+  <http://shaclshapes.org/support> "6"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#minCount> 1 ;
@@ -585,7 +584,7 @@
 
 <http://shaclshapes.org/labelFunctionalPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://shaclshapes.org/confidence> 1E0 ;
-  <http://shaclshapes.org/support> "3"^^xsd:int ;
+  <http://shaclshapes.org/support> "2"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#minCount> 1 ;
@@ -599,15 +598,15 @@
   <http://www.w3.org/ns/shacl#path> rdfs:label .
 
 <http://shaclshapes.org/labelNamedIndividualShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 1E0 ;
+  <http://shaclshapes.org/confidence> 4,6875E-1 ;
   <http://shaclshapes.org/support> "15"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#path> rdfs:label .
 
 <http://shaclshapes.org/labelObjectPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 9,2308E-1 ;
-  <http://shaclshapes.org/support> "12"^^xsd:int ;
+  <http://shaclshapes.org/confidence> 9,1667E-1 ;
+  <http://shaclshapes.org/support> "11"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#path> rdfs:label .
@@ -637,30 +636,38 @@
   <http://www.w3.org/ns/shacl#path> rdfs:label .
 
 <http://shaclshapes.org/minCardinalityObjectPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 3,8462E-1 ;
-  <http://shaclshapes.org/support> "5"^^xsd:int ;
+  <http://shaclshapes.org/confidence> 3,3333E-1 ;
+  <http://shaclshapes.org/support> "4"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;
   <http://www.w3.org/ns/shacl#datatype> xsd:integer ;
   <http://www.w3.org/ns/shacl#path> owl:minCardinality .
 
 <http://shaclshapes.org/rangeDatatypePropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 1E0 ;
-  <http://shaclshapes.org/support> "2"^^xsd:int ;
-  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-  <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
+  <http://www.w3.org/ns/shacl#or> ( [
+    <http://shaclshapes.org/confidence> 6,6667E-1 ;
+    <http://shaclshapes.org/support> "4"^^xsd:int ;
+    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+    <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
+  ] [
+    <http://shaclshapes.org/confidence> 3,3333E-1 ;
+    <http://shaclshapes.org/support> "2"^^xsd:int ;
+    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+    <http://www.w3.org/ns/shacl#class> rdfs:Datatype ;
+  ] ) ;
   <http://www.w3.org/ns/shacl#path> rdfs:range .
 
 <http://shaclshapes.org/rangeFunctionalPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://shaclshapes.org/confidence> 1E0 ;
   <http://shaclshapes.org/support> "2"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
-  <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
+  <http://www.w3.org/ns/shacl#class> rdfs:Datatype ;
+  <http://www.w3.org/ns/shacl#minCount> 1 ;
   <http://www.w3.org/ns/shacl#node> <http://shaclshapes.org/DatatypeShape> ;
   <http://www.w3.org/ns/shacl#path> rdfs:range .
 
 <http://shaclshapes.org/rangeObjectPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://shaclshapes.org/confidence> 1E0 ;
-  <http://shaclshapes.org/support> "13"^^xsd:int ;
+  <http://shaclshapes.org/support> "12"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
   <http://www.w3.org/ns/shacl#class> owl:Class ;
   <http://www.w3.org/ns/shacl#minCount> 1 ;
@@ -716,7 +723,7 @@
   <http://www.w3.org/ns/shacl#path> rdfs:seeAlso .
 
 <http://shaclshapes.org/subClassOfClassShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 5,4545E-1 ;
+  <http://shaclshapes.org/confidence> 6E-1 ;
   <http://shaclshapes.org/support> "6"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
   <http://www.w3.org/ns/shacl#class> owl:Class ;
@@ -724,7 +731,7 @@
   <http://www.w3.org/ns/shacl#path> rdfs:subClassOf .
 
 <http://shaclshapes.org/subPropertyOfObjectPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
-  <http://shaclshapes.org/confidence> 3,8462E-1 ;
+  <http://shaclshapes.org/confidence> 4,1667E-1 ;
   <http://shaclshapes.org/support> "5"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
   <http://www.w3.org/ns/shacl#class> owl:ObjectProperty ;
@@ -747,5 +754,13 @@
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#minCount> 1 ;
   <http://www.w3.org/ns/shacl#path> dcterms:title .
+
+<http://shaclshapes.org/versionIRIOntologyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
+  <http://shaclshapes.org/confidence> 1E0 ;
+  <http://shaclshapes.org/support> "1"^^xsd:int ;
+  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
+  <http://www.w3.org/ns/shacl#class> <http://shaclshapes.org/undefined> ;
+  <http://www.w3.org/ns/shacl#minCount> 1 ;
+  <http://www.w3.org/ns/shacl#path> owl:versionIRI .
 
 
