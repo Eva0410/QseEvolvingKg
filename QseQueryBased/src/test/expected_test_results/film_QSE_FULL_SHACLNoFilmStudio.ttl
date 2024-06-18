@@ -194,7 +194,6 @@
   <http://shaclshapes.org/support> "7"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
   <http://www.w3.org/ns/shacl#class> owl:Class ;
-  <http://www.w3.org/ns/shacl#minCount> 1 ;
   <http://www.w3.org/ns/shacl#node> <http://shaclshapes.org/ClassShape> ;
   <http://www.w3.org/ns/shacl#path> rdfs:domain .
 
@@ -203,7 +202,6 @@
   <http://shaclshapes.org/support> "3"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#IRI> ;
   <http://www.w3.org/ns/shacl#class> owl:Class ;
-  <http://www.w3.org/ns/shacl#minCount> 1 ;
   <http://www.w3.org/ns/shacl#node> <http://shaclshapes.org/ClassShape> ;
   <http://www.w3.org/ns/shacl#path> rdfs:domain .
 

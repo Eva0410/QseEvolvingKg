@@ -40,7 +40,7 @@ public class QSEComparisonTests {
     public void basicFilmTest() {
         MetaComparator metaComparator = new MetaComparator();
         String dataSetName1 = "film";
-        String dataSetName2 = "Film-NoGender";
+        String dataSetName2 = "film3";
         ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholdsDefault);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
@@ -55,8 +55,22 @@ public class QSEComparisonTests {
         String dataSetName1 = "Bear-B-1";
         String dataSetName2 = "Bear-B2";
         String pruningThresholds =  "{(-1,0)}";
-//        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
-//        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
+        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
+        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
+//        ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
+//        metaComparator.diffSparql = comparatorSparql.doFullComparison(pruningThresholds);
+        System.out.println(metaComparator.compare());
+        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
+    }
+
+    @Test
+    public void peopleTest() {
+        MetaComparator metaComparator = new MetaComparator();
+        String dataSetName1 = "PeopleV2";
+        String dataSetName2 = "PeopleV3";
+        String pruningThresholds =  "{(-1,0)}";
+        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
+        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffSparql = comparatorSparql.doFullComparison(pruningThresholds);
         System.out.println(metaComparator.compare());

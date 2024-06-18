@@ -518,6 +518,45 @@ public class Tests {
                 "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\PeopleV2_QSE_-1.0_2_SHACL.ttl"));
     }
 
+    @Test
+    public void testDeleteMinCountWithPeople() {
+        firstVersionName = "PeopleV2";
+        outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+        prepareTest();
+        Main.setPruningThresholds("{(-1,0)}");
+
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+
+        var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
+        ExtractedShapes extractedShapes = new ExtractedShapes();
+        extractedShapes.support = 0;
+        extractedShapes.confidence = 0.0;
+        extractedShapes.setNodeShapes(nodeShapes);
+
+        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
+        RegexUtils regexUtils = new RegexUtils();
+
+        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_FULL_SHACL.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_FULL_SHACL_V3.ttl";
+        regexUtils.copyFile(sourceFile, copiedFile);
+        extractedShapes.fileContentPath = copiedFile;
+        ComparisonDiff comparisonDiff = new ComparisonDiff();
+        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        regexUtils.saveStringAsFile(content, copiedFile);
+        var shape = RegexUtils.getShapeAsString("http://shaclshapes.org/colorCatShapeProperty", content);
+        var expected = "\n" +
+                "<http://shaclshapes.org/colorCatShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://shaclshapes.org/confidence> 1E0 ;\n" +
+                "  <http://shaclshapes.org/support> \"3\"^^xsd:int ;\n" +
+                "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "  <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> <http://example.org/color> .\n";
+
+        assertEquals("Shapes are not equal", expected, shape);
+    }
+
     public static boolean compareFiles(String filePath1, String filePath2) {
         try (BufferedReader reader1 = new BufferedReader(new FileReader(filePath1));
              BufferedReader reader2 = new BufferedReader(new FileReader(filePath2))) {

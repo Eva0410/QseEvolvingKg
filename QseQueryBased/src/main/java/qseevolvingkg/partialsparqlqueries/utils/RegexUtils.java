@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import qseevolvingkg.partialsparqlqueries.comparator.ComparisonDiff;
 import qseevolvingkg.partialsparqlqueries.Main;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.shapeobjects.NodeShape;
+import qseevolvingkg.partialsparqlqueries.shapeobjects.PropertyShape;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ShaclOrListItem;
 
 import java.io.*;
@@ -44,36 +46,51 @@ public class RegexUtils {
                     var allOrItemsUnderThreshold = propertyShape.orItems != null && !propertyShape.orItems.isEmpty()
                             && propertyShape.orItems.stream().allMatch(o -> o.support <= supportThreshold && o.confidence <= confidenceThreshold);
 
-                    if((propertyShape.support <= supportThreshold || propertyShape.confidence <= confidenceThreshold) && (propertyShape.orItems == null || propertyShape.orItems.isEmpty()) || allOrItemsUnderThreshold) {
+                    if ((propertyShape.support <= supportThreshold || propertyShape.confidence <= confidenceThreshold) && (propertyShape.orItems == null || propertyShape.orItems.isEmpty()) || allOrItemsUnderThreshold) {
                         comparisonDiff.deletedPropertyShapes.add(propertyShape.iri.toString());
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
                         fileContent = deletePropertyShapeReferenceWithIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
-                    }
-                    else if(propertyShape.support > supportThreshold && propertyShape.confidence > confidenceThreshold && propertyShape.orItems != null) {
-                        var numberOfOrItemsLeft = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold && o.confidence > confidenceThreshold).count();
-                        String originalShape = getShapeAsString(propertyShape.iri.toString(), fileContent);
-                        if(!originalShape.contains("<http://www.w3.org/ns/shacl#or>"))
-                            continue;
-                        String modifiedShape = originalShape;
-                        for(var orItem : propertyShape.orItems) {
-                            if(orItem.support <= supportThreshold || orItem.confidence <= confidenceThreshold) {
-                                modifiedShape = deleteShaclOrItemWithIriFromString(orItem, modifiedShape, false);
+                    } else if (propertyShape.support > supportThreshold && propertyShape.confidence > confidenceThreshold) {
+                        if(propertyShape.orItems != null) {
+                            var numberOfOrItemsLeft = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold && o.confidence > confidenceThreshold).count();
+                            String originalShape = getShapeAsString(propertyShape.iri.toString(), fileContent);
+                            if (originalShape.contains("<http://www.w3.org/ns/shacl#or>")) {
+                                String modifiedShape = originalShape;
+                                for (var orItem : propertyShape.orItems) {
+                                    if (orItem.support <= supportThreshold || orItem.confidence <= confidenceThreshold) {
+                                        modifiedShape = deleteShaclOrItemWithIriFromString(orItem, modifiedShape, false);
+                                    }
+                                }
+                                if (numberOfOrItemsLeft == 1 && propertyShape.orItems.size() != 1) {
+                                    var item = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold && o.confidence > confidenceThreshold).findFirst().get();
+                                    int newSupport = item.support;
+                                    double newConfidence = item.confidence;
+
+                                    modifiedShape = extractedShapes.prefixLines + modifiedShape;
+                                    modifiedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(modifiedShape, propertyShape.iri.toString(), newSupport, newConfidence);
+                                    modifiedShape = RegexUtils.removeLinesWithPrefix(modifiedShape);
+                                }
+                                fileContent = fileContent.replace(originalShape, modifiedShape);
                             }
                         }
-                        if(numberOfOrItemsLeft == 1 && propertyShape.orItems.size() != 1) {
-                            var item = propertyShape.orItems.stream().filter(o -> o.support > supportThreshold && o.confidence > confidenceThreshold).findFirst().get();
-                            int newSupport = item.support;
-                            double newConfidence = item.confidence;
 
-                            modifiedShape = extractedShapes.prefixLines + modifiedShape;
-                            modifiedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(modifiedShape, propertyShape.iri.toString(), newSupport, newConfidence);
-                            modifiedShape = RegexUtils.removeLinesWithPrefix(modifiedShape);
-                        }
-                        fileContent = fileContent.replace(originalShape, modifiedShape);
+                        fileContent = removeMinCount(nodeShape, propertyShape, fileContent);
                     }
                 }
             }
+        }
+        return fileContent;
+    }
 
+    private static String removeMinCount(NodeShape nodeShape, PropertyShape propertyShape, String fileContent) {
+        if(propertyShape.support != nodeShape.support) {
+            String shape = getShapeAsString(propertyShape.iri.toString(), fileContent);
+            String minCountString = "<http://www.w3.org/ns/shacl#minCount>";
+            if(shape.contains(minCountString)) {
+                String regexPattern = "\n  "+minCountString+" 1 ;";
+                String newShape = getReplacedFileWithRegex("MinCount " + propertyShape.iri.toString(), shape, regexPattern);
+                fileContent = fileContent.replace(shape, newShape);
+            }
         }
         return fileContent;
     }
