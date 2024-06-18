@@ -5,8 +5,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import qseevolvingkgwebapp.data.Graph;
-import qseevolvingkgwebapp.data.Version;
+import data.Graph;
+import data.Version;
 import qseevolvingkgwebapp.data.VersionRepository;
 
 import java.time.LocalDateTime;

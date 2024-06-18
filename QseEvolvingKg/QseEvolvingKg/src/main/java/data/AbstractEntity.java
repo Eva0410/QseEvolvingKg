@@ -1,4 +1,4 @@
-package qseevolvingkgwebapp.data;
+package data;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

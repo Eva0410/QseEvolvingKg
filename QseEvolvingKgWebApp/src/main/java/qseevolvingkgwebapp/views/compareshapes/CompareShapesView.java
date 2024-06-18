@@ -23,15 +23,14 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import qseevolvingkgwebapp.data.ExtractedShapes;
-import qseevolvingkgwebapp.data.NodeShape;
-import qseevolvingkgwebapp.data.PropertyShape;
+import data.ExtractedShapes;
+import data.NodeShape;
+import data.PropertyShape;
 import qseevolvingkgwebapp.services.*;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.comparisondetails.ComparisonDetailsView;
+import utils.Utils;
 
 @PageTitle("Compare Shapes")
 @Route(value = "compare-shapes", layout = MainLayout.class)
@@ -44,7 +43,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
     @Autowired()
     private ShapesService shapeService;
 
-    MultiSelectComboBox<Utils.ComboBoxItem> multiSelectShapes;
+    MultiSelectComboBox<WebAppUtils.ComboBoxItem> multiSelectShapes;
     TreeGrid<ComparisonTreeViewItem> treeViewComparison;
     TextField filterField = new TextField("Filter");
     RadioButtonGroup<String> radioGroupFilter = new RadioButtonGroup<>();
@@ -160,18 +159,18 @@ public class CompareShapesView extends Composite<VerticalLayout> {
 
     private void fillComboBox() {
         var shapes = shapeService.listAll();
-        var comboBoxItems = new ArrayList<Utils.ComboBoxItem>();
+        var comboBoxItems = new ArrayList<WebAppUtils.ComboBoxItem>();
 
         for (var shape : shapes) {
-            var comboBoxItem = new Utils.ComboBoxItem();
+            var comboBoxItem = new WebAppUtils.ComboBoxItem();
             comboBoxItem.id = shape.getId();
-            comboBoxItem.label = Utils.getComboBoxLabelForExtractedShapes(shape);
+            comboBoxItem.label = WebAppUtils.getComboBoxLabelForExtractedShapes(shape);
             comboBoxItems.add(comboBoxItem);
         }
         multiSelectShapes.setItems(comboBoxItems);
         multiSelectShapes.setItemLabelGenerator(item -> item.label);
 
-        var currentComboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
+        var currentComboBoxItems = (Set<WebAppUtils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
         if(currentComboBoxItems != null && !currentComboBoxItems.isEmpty()
                 && currentComboBoxItems.stream()
                 .map(item -> item.id)

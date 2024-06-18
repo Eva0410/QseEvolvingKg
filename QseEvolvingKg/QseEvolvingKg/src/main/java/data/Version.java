@@ -1,5 +1,6 @@
-package qseevolvingkgwebapp.data;
+package data;
 
+import data.ExtractedShapes;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

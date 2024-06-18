@@ -93,14 +93,14 @@
             <artifactId>jena-arq</artifactId>
             <version>4.8.0</version>
         </dependency>
-        <dependency>
-            <groupId>dk.aau.cs.relweb</groupId>
-            <artifactId>dk.aau.cs.relweb</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <!--Todo mention to change this-->
-            <systemPath>${project.basedir}/../../qse/build/libs/qse-1.0-QSE-all.jar</systemPath>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>dk.aau.cs.relweb</groupId>-->
+<!--            <artifactId>dk.aau.cs.relweb</artifactId>-->
+<!--            <version>1.0</version>-->
+<!--            <scope>system</scope>-->
+<!--            &lt;!&ndash;Todo mention to change this&ndash;&gt;-->
+<!--            <systemPath>${project.basedir}/../../qse/build/libs/qse-1.0-QSE-all.jar</systemPath>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -115,6 +115,17 @@
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
             <version>4.9.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>QseEvolvingKg</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>3.2.4</version>
         </dependency>
 
     </dependencies>

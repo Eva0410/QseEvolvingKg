@@ -1,9 +1,10 @@
-package qseevolvingkgwebapp.data;
+package data;
 
 import cs.qse.common.structure.PS;
+import data.ShaclOrListItem;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
-import qseevolvingkgwebapp.services.Utils;
+import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

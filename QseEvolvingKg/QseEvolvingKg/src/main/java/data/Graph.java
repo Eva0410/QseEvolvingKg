@@ -1,12 +1,14 @@
-package qseevolvingkgwebapp.data;
+package data;
 
+import data.AbstractEntity;
+import data.Version;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-public class Graph extends AbstractEntity{
+public class Graph extends AbstractEntity {
     private String name;
     private LocalDateTime createdAt;
 

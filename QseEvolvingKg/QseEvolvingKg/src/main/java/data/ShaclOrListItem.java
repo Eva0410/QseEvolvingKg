@@ -1,4 +1,4 @@
-package qseevolvingkgwebapp.data;
+package data;
 
 import jakarta.persistence.*;
 

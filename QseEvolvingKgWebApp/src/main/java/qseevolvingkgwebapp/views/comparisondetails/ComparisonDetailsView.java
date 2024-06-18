@@ -16,10 +16,11 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import qseevolvingkgwebapp.data.NodeShape;
+import data.NodeShape;
 import qseevolvingkgwebapp.services.ComparisonTreeViewItem;
 import qseevolvingkgwebapp.services.ShapesService;
-import qseevolvingkgwebapp.services.Utils;
+import qseevolvingkgwebapp.services.WebAppUtils;
+import utils.Utils;
 import qseevolvingkgwebapp.views.MainLayout;
 
 import java.util.ArrayList;
@@ -29,8 +30,8 @@ import java.util.Set;
 @Uses(Icon.class)
 public class ComparisonDetailsView extends Composite<VerticalLayout> implements HasDynamicTitle {
     private ComparisonDiv comparisonDiv;
-    private Select<Utils.ComboBoxItem> selectItemOld;
-    private Select<Utils.ComboBoxItem> selectItemNew;
+    private Select<WebAppUtils.ComboBoxItem> selectItemOld;
+    private Select<WebAppUtils.ComboBoxItem> selectItemNew;
     private String oldText;
     private String newText;
     private ComparisonTreeViewItem treeViewItem;
@@ -60,7 +61,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         layoutRow.add(selectItemNew);
         treeViewItem = (ComparisonTreeViewItem)VaadinSession.getCurrent().getAttribute("currentCompareObject");
 
-        var comboBoxItems = (Set<Utils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
+        var comboBoxItems = (Set<WebAppUtils.ComboBoxItem>)VaadinSession.getCurrent().getAttribute("currentComboBoxItems");
         if(comboBoxItems != null) {
             selectItemOld.setItems(comboBoxItems);
             selectItemOld.setItemLabelGenerator(item -> item.label);
@@ -103,7 +104,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             layout.add(new H2("All SHACL shapes"));
             if(this.treeViewItem != null) {
                 for (var extractedShapes : selectItemOld.getDataProvider().fetch(new Query<>()).toList()) {
-                    layout.add(new H4(Utils.getComboBoxLabelForExtractedShapes(shapesService.get(extractedShapes.id).get())));
+                    layout.add(new H4(WebAppUtils.getComboBoxLabelForExtractedShapes(shapesService.get(extractedShapes.id).get())));
                     Div div = new Div();
                     if(treeViewItem.isNodeShapeLine()) {
                         if(treeViewItem.getNodeShapeList().containsKey(extractedShapes.id)) {
@@ -182,7 +183,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         }
     }
 
-    private void addText(VerticalLayout layout, Utils.ComboBoxItem extractedShapes, Div div) {
+    private void addText(VerticalLayout layout, WebAppUtils.ComboBoxItem extractedShapes, Div div) {
         var allText = "";
         var supportText = "";
         if(treeViewItem.isNodeShapeLine()) {

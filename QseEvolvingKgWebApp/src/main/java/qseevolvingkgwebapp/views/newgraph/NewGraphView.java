@@ -2,7 +2,6 @@ package qseevolvingkgwebapp.views.newgraph;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
@@ -14,10 +13,10 @@ import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
-import qseevolvingkgwebapp.data.Graph;
-import qseevolvingkgwebapp.data.Version;
+import data.Graph;
 import qseevolvingkgwebapp.services.GraphService;
-import qseevolvingkgwebapp.services.Utils;
+import qseevolvingkgwebapp.services.WebAppUtils;
+import utils.Utils;
 import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
 
@@ -50,18 +49,18 @@ public class NewGraphView extends Composite<VerticalLayout> {
         MemoryBuffer buffer = new MemoryBuffer();
         uploadGraphFile = new Upload(buffer);
         preconfiguredGraphs = new Select<>();
-        Utils.setGraphOrVersionGuiFields(textFieldGraphName,buttonSave,uploadGraphFile, preconfiguredGraphs);
+        WebAppUtils.setGraphOrVersionGuiFields(textFieldGraphName,buttonSave,uploadGraphFile, preconfiguredGraphs);
 
         buttonSave.addClickListener(event -> {
             if (textFieldGraphName.getValue().isEmpty()) {
                 Notification.show("Name field cannot be empty");
             }
-            else if(buffer.getFileName().isEmpty() && Utils.isEmptyItemSelected(preconfiguredGraphs)) {
+            else if(buffer.getFileName().isEmpty() && WebAppUtils.isEmptyItemSelected(preconfiguredGraphs)) {
                 Notification.show("Please choose a pre-configured graph or upload a file");
             }
-            else if(!buffer.getFileName().isEmpty() && !Utils.isEmptyItemSelected(preconfiguredGraphs))
+            else if(!buffer.getFileName().isEmpty() && !WebAppUtils.isEmptyItemSelected(preconfiguredGraphs))
                 Notification.show("Please either deselect the pre-configured graph or remove the uploaded .nt file");
-            else if (!buffer.getFileName().isEmpty() || !Utils.isEmptyItemSelected(preconfiguredGraphs)) {
+            else if (!buffer.getFileName().isEmpty() || !WebAppUtils.isEmptyItemSelected(preconfiguredGraphs)) {
                 if(!buffer.getFileName().isEmpty()) {
                     try (InputStream inputStream = buffer.getInputStream()) {
                         saveFile(inputStream, textFieldGraphName.getValue(), "");
@@ -87,6 +86,6 @@ public class NewGraphView extends Composite<VerticalLayout> {
         graph.setCreatedAt(LocalDateTime.now());
         graph = graphService.insert(graph);
 
-        Utils.handleSaveFile(graph, versionService, inputStream, "Original", preconfiguredGraphPath);
+        WebAppUtils.handleSaveFile(graph, versionService, inputStream, "Original", preconfiguredGraphPath);
     }
 }

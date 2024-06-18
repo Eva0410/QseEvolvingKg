@@ -24,9 +24,9 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import qseevolvingkgwebapp.data.Version;
-import qseevolvingkgwebapp.services.Utils;
-import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
+import data.Version;
+import qseevolvingkgwebapp.services.WebAppUtils;
+import utils.Utils;
 import qseevolvingkgwebapp.services.GraphService;
 import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
@@ -53,7 +53,7 @@ public class VersionsView extends Composite<VerticalLayout>  {
 
     public VersionsView() {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        Select<ComboBoxItem> comboBoxGraphs = new Select<>();
+        Select<WebAppUtils.ComboBoxItem> comboBoxGraphs = new Select<>();
         Button buttonNewVersion = new Button();
         gridVersions = new Grid(Version.class);
         getContent().setWidth("100%");
@@ -69,12 +69,12 @@ public class VersionsView extends Composite<VerticalLayout>  {
         gridVersions.getStyle().set("flex-grow", "0");
         gridVersions.setColumns("versionNumber", "name", "createdAt","path");
         gridVersions.getColumnByKey("path").setTooltipGenerator(v -> ((Version)v).getPathWithSpacesForTooltip());
-        gridVersions.getColumnByKey("createdAt").setRenderer(new TextRenderer<>(e -> ((Version)e).getCreatedAt().format(Utils.formatter)));
+        gridVersions.getColumnByKey("createdAt").setRenderer(new TextRenderer<>(e -> ((Version)e).getCreatedAt().format(WebAppUtils.formatter)));
         gridVersions.addColumn(new ComponentRenderer<>(Button::new, (button, ver) -> {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener(e -> {
                 Version version = (Version) ver;
-                if(!version.getPath().contains(Utils.preconfiguredFolderName)) {
+                if(!version.getPath().contains(WebAppUtils.preconfiguredFolderName)) {
                     try {
                         Files.delete(Paths.get(version.getPath()));
                     } catch (IOException ex) {
@@ -140,9 +140,9 @@ public class VersionsView extends Composite<VerticalLayout>  {
                 .setFilter("event.code === 'Escape'");
     }
 
-    private void setGraphs(Select<ComboBoxItem> comboBox) {
-        List<ComboBoxItem> comboBoxItemList = graphService.listAll().stream()
-                .map(graph -> new ComboBoxItem(graph.getName(),graph.getId()))
+    private void setGraphs(Select<WebAppUtils.ComboBoxItem> comboBox) {
+        List<WebAppUtils.ComboBoxItem> comboBoxItemList = graphService.listAll().stream()
+                .map(graph -> new WebAppUtils.ComboBoxItem(graph.getName(),graph.getId()))
                 .collect(Collectors.toList());
         comboBox.setItems(comboBoxItemList);
         comboBox.setItemLabelGenerator(item -> item.label);

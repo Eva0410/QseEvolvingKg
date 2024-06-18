@@ -1,10 +1,9 @@
-package qseevolvingkgwebapp.data;
+package data;
 
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import qseevolvingkgwebapp.services.Utils;
+import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

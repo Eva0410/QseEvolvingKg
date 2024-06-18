@@ -1,4 +1,4 @@
-package qseevolvingkgwebapp.data;
+package data;
 
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
@@ -8,7 +8,7 @@ import org.apache.jena.riot.RDFLanguages;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import qseevolvingkgwebapp.services.Utils;
+import utils.Utils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -22,7 +22,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 @Entity
-public class ExtractedShapes extends AbstractEntity{
+public class ExtractedShapes extends AbstractEntity {
 
     @ManyToOne
     Version versionEntity;

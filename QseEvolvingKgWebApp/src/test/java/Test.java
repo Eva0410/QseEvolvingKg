@@ -2,31 +2,18 @@
 import cs.Main;
 import cs.qse.filebased.Parser;
 import cs.qse.querybased.nonsampling.QbParser;
-import cs.utils.ConfigManager;
 import cs.utils.Constants;
 import de.atextor.turtle.formatter.FormattingStyle;
 import de.atextor.turtle.formatter.TurtleFormatter;
-import elemental.json.JsonArray;
-import org.apache.jena.iri.IRI;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.*;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFLanguages;
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import qseevolvingkgwebapp.services.Utils;
+import utils.Utils;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.io.*;
-import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static cs.Main.setOutputFilePathForJar;
 

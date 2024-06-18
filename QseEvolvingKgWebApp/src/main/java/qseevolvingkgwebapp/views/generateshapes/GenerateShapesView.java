@@ -30,12 +30,12 @@ import cs.qse.filebased.Parser;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import qseevolvingkgwebapp.ShactorUtils.PruningUtil;
-import qseevolvingkgwebapp.data.ExtractedShapes;
-import qseevolvingkgwebapp.data.Graph;
-import qseevolvingkgwebapp.data.QseType;
-import qseevolvingkgwebapp.data.Version;
+import data.ExtractedShapes;
+import data.Graph;
+import data.QseType;
+import data.Version;
 import qseevolvingkgwebapp.services.*;
-import qseevolvingkgwebapp.services.Utils.ComboBoxItem;
+import utils.Utils;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.shapes.ShapesView;
 
@@ -60,8 +60,8 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
     @Autowired()
     private ShapesService shapeService;
 
-    Select<ComboBoxItem> comboBoxGraph;
-    Select<ComboBoxItem> comboBoxVersion;
+    Select<WebAppUtils.ComboBoxItem> comboBoxGraph;
+    Select<WebAppUtils.ComboBoxItem> comboBoxVersion;
     Long currentVersionId;
     Grid classesGrid;
     Parser parser;
@@ -154,7 +154,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
                 Long selectedValue = event.getValue().id;
                 VaadinSession.getCurrent().setAttribute("shapes_currentGraphId", selectedValue);
                 currentGraph = graphService.get(event.getValue().id).get();
-                Utils.setComboBoxVersionsData(selectedValue, versionService, comboBoxVersion);
+                WebAppUtils.setComboBoxVersionsData(selectedValue, versionService, comboBoxVersion);
             }
         });
         comboBoxVersion.addValueChangeListener(event -> {
@@ -188,7 +188,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
 
         addAttachListener(event -> {
             setPaths();
-            Utils.setComboBoxGraphData(graphService,comboBoxGraph);
+            WebAppUtils.setComboBoxGraphData(graphService,comboBoxGraph);
         });
     }
 

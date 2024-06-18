@@ -1,4 +1,4 @@
-package qseevolvingkgwebapp.data;
+package data;
 
 public enum QseType {
     EXACT,

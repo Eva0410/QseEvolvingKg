@@ -1,7 +1,7 @@
 package qseevolvingkgwebapp.services;
 
-import qseevolvingkgwebapp.data.NodeShape;
-import qseevolvingkgwebapp.data.PropertyShape;
+import data.NodeShape;
+import data.PropertyShape;
 
 import java.util.HashMap;
 

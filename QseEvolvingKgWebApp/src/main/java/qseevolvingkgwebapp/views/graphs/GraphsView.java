@@ -24,9 +24,10 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import qseevolvingkgwebapp.data.Graph;
+import data.Graph;
 import qseevolvingkgwebapp.services.GraphService;
-import qseevolvingkgwebapp.services.Utils;
+import qseevolvingkgwebapp.services.WebAppUtils;
+import utils.Utils;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.Utils.ValidationMessage;
 import qseevolvingkgwebapp.views.newgraph.NewGraphView;
@@ -35,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @PageTitle("Graphs")
 @Route(value = "graphs", layout = MainLayout.class)
@@ -66,7 +66,7 @@ public class GraphsView extends Composite<VerticalLayout> {
         gridGraphs.getStyle().set("flex-grow", "0");
         gridGraphs.getColumns().forEach(column -> ((Grid.Column)column).setResizable(true));
         gridGraphs.setColumns("name","createdAt");
-        gridGraphs.getColumnByKey("createdAt").setRenderer(new TextRenderer<>(g -> ((Graph)g).getCreatedAt().format(Utils.formatter)));
+        gridGraphs.getColumnByKey("createdAt").setRenderer(new TextRenderer<>(g -> ((Graph)g).getCreatedAt().format(WebAppUtils.formatter)));
         gridGraphs.addColumn(new ComponentRenderer<>(Button::new, (button, gr) -> {
             button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener(e -> {

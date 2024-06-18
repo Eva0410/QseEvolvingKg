@@ -18,17 +18,17 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import org.springframework.beans.factory.annotation.Autowired;
-import qseevolvingkgwebapp.data.ExtractedShapes;
-import qseevolvingkgwebapp.data.Graph;
-import qseevolvingkgwebapp.data.Version;
+import data.ExtractedShapes;
+import data.Graph;
+import data.Version;
 import qseevolvingkgwebapp.services.GraphService;
 import qseevolvingkgwebapp.services.ShapesService;
-import qseevolvingkgwebapp.services.Utils;
+import qseevolvingkgwebapp.services.WebAppUtils;
+import utils.Utils;
 import qseevolvingkgwebapp.services.VersionService;
 import qseevolvingkgwebapp.views.MainLayout;
 import qseevolvingkgwebapp.views.generateshapes.GenerateShapesView;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -43,8 +43,8 @@ public class ShapesView extends Composite<VerticalLayout>{
     private GraphService graphService;
     @Autowired()
     private ShapesService shapeService;
-    Select<Utils.ComboBoxItem> selectItemGraph;
-    Select<Utils.ComboBoxItem> selectItemVersion;
+    Select<WebAppUtils.ComboBoxItem> selectItemGraph;
+    Select<WebAppUtils.ComboBoxItem> selectItemVersion;
     Grid gridShapes;
     Graph currentGraph;
     Version currentVersion;
@@ -83,7 +83,7 @@ public class ShapesView extends Composite<VerticalLayout>{
                 Long selectedValue = event.getValue().id;
                 VaadinSession.getCurrent().setAttribute("shapes_currentGraphId", selectedValue);
                 currentGraph = graphService.get(selectedValue).get();
-                Utils.setComboBoxVersionsData(selectedValue, versionService, selectItemVersion);
+                WebAppUtils.setComboBoxVersionsData(selectedValue, versionService, selectItemVersion);
             }
         });
 
@@ -98,13 +98,13 @@ public class ShapesView extends Composite<VerticalLayout>{
 
         buttonGenerateShapes.addClickListener(buttonClickEvent -> getUI().ifPresent(ui -> ui.navigate(GenerateShapesView.class)));
 
-        addAttachListener(event -> Utils.setComboBoxGraphData(graphService, selectItemGraph));
+        addAttachListener(event -> WebAppUtils.setComboBoxGraphData(graphService, selectItemGraph));
     }
 
     private void setGridData() {
         gridShapes.removeAllColumns();
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getCreatedAt()).setHeader("Created At")
-        .setRenderer(new TextRenderer<>(e -> ((ExtractedShapes)e).getCreatedAt().format(Utils.formatter))).setResizable(true);
+        .setRenderer(new TextRenderer<>(e -> ((ExtractedShapes)e).getCreatedAt().format(WebAppUtils.formatter))).setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getQseType()).setHeader("QSE Type").setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getSupport()).setHeader("Support").setResizable(true);
         gridShapes.addColumn(o -> ((ExtractedShapes) o).getConfidence()).setHeader("Confidence").setResizable(true);

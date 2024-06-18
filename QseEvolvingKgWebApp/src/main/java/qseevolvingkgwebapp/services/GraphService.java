@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import qseevolvingkgwebapp.data.Graph;
+import data.Graph;
 import qseevolvingkgwebapp.data.GraphRepository;
 
 import java.util.List;
