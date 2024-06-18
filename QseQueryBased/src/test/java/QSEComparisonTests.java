@@ -1,10 +1,15 @@
+import cs.Main;
+import cs.qse.querybased.nonsampling.QbParser;
+import cs.utils.Constants;
 import org.junit.Test;
 import qseevolvingkg.partialsparqlqueries.comparator.ComparatorUtils;
 import qseevolvingkg.partialsparqlqueries.comparator.MetaComparator;
 import qseevolvingkg.partialsparqlqueries.comparator.ShapeComparatorQSE;
 import qseevolvingkg.partialsparqlqueries.comparator.ShapeComparatorSparql;
+import qseevolvingkg.partialsparqlqueries.utils.ConfigManager;
 
 import java.io.File;
+import java.time.Instant;
 
 //Tests are only used for local execution
 public class QSEComparisonTests {
@@ -53,12 +58,12 @@ public class QSEComparisonTests {
     public void bearBV1V2Test() {
         MetaComparator metaComparator = new MetaComparator();
         String dataSetName1 = "Bear-B-1";
-        String dataSetName2 = "Bear-B2";
+        String dataSetName2 = "Bear-B87";
         String pruningThresholds =  "{(-1,0)}";
-        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
-        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
-//        ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
-//        metaComparator.diffSparql = comparatorSparql.doFullComparison(pruningThresholds);
+//        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
+//        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
+        ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
+        metaComparator.diffSparql = comparatorSparql.doFullComparison(pruningThresholds);
         System.out.println(metaComparator.compare());
         ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
     }
@@ -75,5 +80,21 @@ public class QSEComparisonTests {
         metaComparator.diffSparql = comparatorSparql.doFullComparison(pruningThresholds);
         System.out.println(metaComparator.compare());
         ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
+    }
+
+    @Test
+    public void runQB() {
+        cs.Main.setResourcesPathForJar(ConfigManager.getRelativeResourcesPathFromQse());
+        cs.Main.annotateSupportConfidence = "true";
+        Main.setPruningThresholds("{(-1,0)}");
+        File currentDir = new File(System.getProperty("user.dir"));
+        File emptyConfig = new File(currentDir, "src/test/expected_test_results/emptyconfig.txt");
+        Main.configPath = emptyConfig.getAbsolutePath(); //avoid exceptions in QSE
+        Main.datasetName = "Bear-B2";
+        cs.Main.setOutputFilePathForJar(outputPath+Main.datasetName+File.separator);
+
+        Instant startQSE2 = Instant.now();
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, Main.datasetName);
+        qbParser.run();
     }
 }
