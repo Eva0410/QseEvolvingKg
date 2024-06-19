@@ -58,7 +58,6 @@ public class ExtractedShapes {
             var nsAlreadyExists = nsAlreadyExists(list, item);
             if(item.getSupport() > this.support && !nsAlreadyExists) {
                 list.add(new NodeShape(item, this));
-
             }
         }
         this.nodeShapes = list;
