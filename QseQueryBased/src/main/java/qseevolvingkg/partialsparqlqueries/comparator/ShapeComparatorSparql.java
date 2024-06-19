@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -103,6 +104,8 @@ public class ShapeComparatorSparql {
         extractedShapes2.fileContentPath = copiedFile;
 
         var content = RegexUtils.deleteFromFileWithPruning(extractedShapes2, comparisonDiff);
+        comparisonDiff.deletedNodeShapes = new ArrayList<>(comparisonDiff.deletedNodeShapes.stream().distinct().toList());
+        comparisonDiff.deletedPropertyShapes = new ArrayList<>(comparisonDiff.deletedPropertyShapes.stream().distinct().toList());
         RegexUtils.saveStringAsFile(content, copiedFile);
         Instant endSparql = Instant.now();
         comparisonDiff.durationSecondStep = Duration.between(startSparql, endSparql);

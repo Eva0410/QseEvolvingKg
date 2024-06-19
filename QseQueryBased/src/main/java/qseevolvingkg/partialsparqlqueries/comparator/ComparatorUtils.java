@@ -17,13 +17,13 @@ public class ComparatorUtils {
 
     public static void getEditedPropertyShapes(ComparisonDiff comparisonDiff, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2, List<NS> firstNodeShapes) {
         var propertyShapesToCheck = firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString()))
-                .filter(ps -> !comparisonDiff.deletedPropertyShapes.contains(ps)).toList();
+                .filter(ps -> !comparisonDiff.deletedPropertyShapes.contains(ps)).distinct().toList();
         var editedShapes = generateEditedShapesObjects(propertyShapesToCheck, extractedShapes1, extractedShapes2);
         comparisonDiff.editedPropertyShapes = editedShapes;
     }
 
     public static void getEditedNodeShapes(ComparisonDiff comparisonDiff, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2, List<NS> firstNodeShapes) {
-        var nodeShapesToCheck = firstNodeShapes.stream().filter(ns -> !comparisonDiff.deletedNodeShapes.contains(ns.getIri().toString())).map(ns -> ns.getIri().toString()).toList();
+        var nodeShapesToCheck = firstNodeShapes.stream().filter(ns -> !comparisonDiff.deletedNodeShapes.contains(ns.getIri().toString())).map(ns -> ns.getIri().toString()).distinct().toList();
         var editedShapes = generateEditedShapesObjects(nodeShapesToCheck, extractedShapes1, extractedShapes2);
         comparisonDiff.editedNodeShapes = editedShapes;
     }

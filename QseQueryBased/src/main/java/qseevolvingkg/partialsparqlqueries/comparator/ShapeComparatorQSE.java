@@ -91,15 +91,15 @@ public class ShapeComparatorQSE {
     }
 
     private void getDeletedPropertyShapes(ComparisonDiff comparisonDiff) {
-        var propertyShapes1 = new java.util.ArrayList<>(firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).toList());
-        var propertyShapes2 = secondNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).toList();
+        var propertyShapes1 = new java.util.ArrayList<>(firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).distinct().toList());
+        var propertyShapes2 = secondNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).distinct().toList();
         propertyShapes1.removeAll(propertyShapes2);
         comparisonDiff.deletedPropertyShapes = propertyShapes1;
     }
 
     private void getDeletedNodeShapes(ComparisonDiff comparisonDiff) {
-        var firstShapesCopied = new java.util.ArrayList<>(firstNodeShapes.stream().map(ns -> ns.getIri().toString()).toList());
-        var secondShapesCopied = secondNodeShapes.stream().map(ns -> ns.getIri().toString()).toList();
+        var firstShapesCopied = new java.util.ArrayList<>(firstNodeShapes.stream().map(ns -> ns.getIri().toString()).distinct().toList());
+        var secondShapesCopied = secondNodeShapes.stream().map(ns -> ns.getIri().toString()).distinct().toList();
         firstShapesCopied.removeAll(secondShapesCopied);
         comparisonDiff.deletedNodeShapes = firstShapesCopied;
     }

@@ -34,11 +34,14 @@ public class RegexUtils {
         double confidenceThreshold = extractedShapes.confidence;
         for (var nodeShape : extractedShapes.getNodeShapes()) {
             if(nodeShape.support <= supportThreshold) { //QSE also compares with <=, not with <
-                comparisonDiff.deletedNodeShapes.add(nodeShape.iri.toString());
-                fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent, nodeShape.errorDuringGeneration);
-                for (var propertyShape : nodeShape.propertyShapes) {
-                    comparisonDiff.deletedPropertyShapes.add(propertyShape.iri.toString());
-                    fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
+                var otherNodeShapes = extractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().toString().equals(nodeShape.getIri().toString()));
+                if(otherNodeShapes.findAny().isEmpty()) { //special case for multiple node shapes with different target classes
+                    comparisonDiff.deletedNodeShapes.add(nodeShape.iri.toString());
+                    fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent, nodeShape.errorDuringGeneration);
+                    for (var propertyShape : nodeShape.propertyShapes) {
+                        comparisonDiff.deletedPropertyShapes.add(propertyShape.iri.toString());
+                        fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
+                    }
                 }
             }
             else {
