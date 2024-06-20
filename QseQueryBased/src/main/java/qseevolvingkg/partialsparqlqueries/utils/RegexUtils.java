@@ -34,7 +34,8 @@ public class RegexUtils {
         double confidenceThreshold = extractedShapes.confidence;
         for (var nodeShape : extractedShapes.getNodeShapes()) {
             if(nodeShape.support <= supportThreshold) { //QSE also compares with <=, not with <
-                var otherNodeShapes = extractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().toString().equals(nodeShape.getIri().toString()));
+                //special case for multiple nodeshapes (different targetclasses) -> don't delete nodeshape if other nodeshape object still exist
+                var otherNodeShapes = extractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().toString().equals(nodeShape.getIri().toString()) && !ns.targetClass.equals(nodeShape.targetClass));
                 if(otherNodeShapes.findAny().isEmpty()) { //special case for multiple node shapes with different target classes
                     comparisonDiff.deletedNodeShapes.add(nodeShape.iri.toString());
                     fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent, nodeShape.errorDuringGeneration);
