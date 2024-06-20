@@ -164,7 +164,7 @@ public class Utils {
     public static String generateTTLFromRegex(IRI iri, String fileContent, String prefixLines) {
         //TODO maybe also replace other characters
         String iriWithEscapedChars = iri.toString().replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
-        String regexPattern = String.format("\n<%s>.*? \\.", iriWithEscapedChars);
+        String regexPattern = String.format("\r?\n<%s>.*? \\.", iriWithEscapedChars);
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
 
         Matcher matcher = pattern.matcher(fileContent);

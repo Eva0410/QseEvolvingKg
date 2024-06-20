@@ -91,7 +91,7 @@ public class RegexUtils {
             String shape = getShapeAsString(propertyShape.iri.toString(), fileContent);
             String minCountString = "<http://www.w3.org/ns/shacl#minCount>";
             if(shape.contains(minCountString)) {
-                String regexPattern = "\n  "+minCountString+" 1 ;";
+                String regexPattern = "\r?\n  "+minCountString+" 1 ;";
                 String newShape = getReplacedFileWithRegex("MinCount " + propertyShape.iri.toString(), shape, regexPattern);
                 fileContent = fileContent.replace(shape, newShape);
             }
@@ -138,7 +138,7 @@ public class RegexUtils {
         if(errorDuringGeneration)
             return file;
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
-        String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
+        String regexPattern = String.format("\r?\n<%s>.*? \\.\r?\n", iriWithEscapedChars);
         return getReplacedFileWithRegex(iri, file, regexPattern);
     }
 
@@ -146,7 +146,7 @@ public class RegexUtils {
         if(errorDuringGeneration)
             return file;
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
-        String regexPattern = String.format("  <http://www.w3.org/ns/shacl#property> <%s> \\;\n", iriWithEscapedChars);
+        String regexPattern = String.format("  <http://www.w3.org/ns/shacl#property> <%s> \\;\r?\n", iriWithEscapedChars);
         return getReplacedFileWithRegex(iri, file, regexPattern);
     }
 
@@ -198,7 +198,7 @@ public class RegexUtils {
 
     private static Matcher getIriWithEscapedCharacters(String iri, String file) {
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
-        String regexPattern = String.format("\n<%s>.*? \\.\n", iriWithEscapedChars);
+        String regexPattern = String.format("\r?\n<%s>.*? \\.\r?\n", iriWithEscapedChars);
         Pattern pattern = Pattern.compile(regexPattern, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(file);
         if (!matcher.find()) {

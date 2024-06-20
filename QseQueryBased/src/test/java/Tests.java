@@ -557,6 +557,77 @@ public class Tests {
         assertEquals("Shapes are not equal", expected, shape);
     }
 
+    @Test
+    public void testGetShape() {
+        String text = "\n" +
+                "<http://shaclshapes.org/aliasPersonShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://shaclshapes.org/confidence> 8,8889E-1 ;\n" +
+                "  <http://shaclshapes.org/support> \"8\"^^xsd:int ;\n" +
+                "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "  <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ( [\n" +
+                "    <http://shaclshapes.org/confidence> 5,4545E-1 ;\n" +
+                "    <http://shaclshapes.org/support> \"6\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  ] [\n" +
+                "    <http://shaclshapes.org/confidence> 1,8182E-1 ;\n" +
+                "    <http://shaclshapes.org/support> \"2\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ( [\n" +
+                "    <http://shaclshapes.org/confidence> 5,4545E-1 ;\n" +
+                "    <http://shaclshapes.org/support> \"6\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  ] [\n" +
+                "    <http://shaclshapes.org/confidence> 1,8182E-1 ;\n" +
+                "    <http://shaclshapes.org/support> \"2\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> <http://dbpedia.org/ontology/alias> .\n" +
+                "\n" +
+                "<http://shaclshapes.org/aliasQ13474373ShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://shaclshapes.org/confidence> 1E0 ;\n" +
+                "  <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
+                "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "  <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  <http://www.w3.org/ns/shacl#minCount> 1 ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> <http://dbpedia.org/ontology/alias> .\n";
+        String property = "http://shaclshapes.org/aliasPersonShapeProperty";
+        String shape = RegexUtils.getShapeAsString(property, text);
+        assertEquals(shape, "\n<http://shaclshapes.org/aliasPersonShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://shaclshapes.org/confidence> 8,8889E-1 ;\n" +
+                "  <http://shaclshapes.org/support> \"8\"^^xsd:int ;\n" +
+                "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "  <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ( [\n" +
+                "    <http://shaclshapes.org/confidence> 5,4545E-1 ;\n" +
+                "    <http://shaclshapes.org/support> \"6\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  ] [\n" +
+                "    <http://shaclshapes.org/confidence> 1,8182E-1 ;\n" +
+                "    <http://shaclshapes.org/support> \"2\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ( [\n" +
+                "    <http://shaclshapes.org/confidence> 5,4545E-1 ;\n" +
+                "    <http://shaclshapes.org/support> \"6\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> rdf:langString ;\n" +
+                "  ] [\n" +
+                "    <http://shaclshapes.org/confidence> 1,8182E-1 ;\n" +
+                "    <http://shaclshapes.org/support> \"2\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> <http://dbpedia.org/ontology/alias> .\n");
+    }
+
     public static boolean compareFiles(String filePath1, String filePath2) {
         try (BufferedReader reader1 = new BufferedReader(new FileReader(filePath1));
              BufferedReader reader2 = new BufferedReader(new FileReader(filePath2))) {
