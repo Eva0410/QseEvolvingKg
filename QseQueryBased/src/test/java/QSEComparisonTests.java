@@ -58,7 +58,7 @@ public class QSEComparisonTests {
     public void bearBV1V2Test() {
         MetaComparator metaComparator = new MetaComparator();
         String dataSetName1 = "Bear-B-1";
-        String dataSetName2 = "Bear-B87";
+        String dataSetName2 = "Bear-B2";
         String pruningThresholds =  "{(-1,0)}";
 //        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
 //        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
@@ -90,10 +90,9 @@ public class QSEComparisonTests {
         File currentDir = new File(System.getProperty("user.dir"));
         File emptyConfig = new File(currentDir, "src/test/expected_test_results/emptyconfig.txt");
         Main.configPath = emptyConfig.getAbsolutePath(); //avoid exceptions in QSE
-        Main.datasetName = "Bear-B2";
+        Main.datasetName = "Bear-B87";
         cs.Main.setOutputFilePathForJar(outputPath+Main.datasetName+File.separator);
 
-        Instant startQSE2 = Instant.now();
         QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, Main.datasetName);
         qbParser.run();
     }

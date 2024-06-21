@@ -452,7 +452,7 @@ public class Tests {
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_-1.0_5_SHACLNoGender.ttl"));
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_-1.0_5_SHACL_SupportNoGender.ttl"));
     }
 
     @Test

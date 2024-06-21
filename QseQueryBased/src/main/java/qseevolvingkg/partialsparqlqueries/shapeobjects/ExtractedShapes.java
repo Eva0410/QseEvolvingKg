@@ -38,7 +38,7 @@ public class ExtractedShapes {
         } catch (IOException e) {
             LOGGER.severe("Failed to read file: " + e.getMessage());
         }
-        this.fileAsString = fileContent.toString();
+        this.fileAsString = fileContent.toString().replace("\r", "");
         this.prefixLines = prefixLines.toString();
         return fileAsString;
     }
