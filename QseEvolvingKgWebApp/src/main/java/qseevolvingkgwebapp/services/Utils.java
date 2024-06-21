@@ -42,7 +42,6 @@ public class Utils {
     public static final String shapesPath = "shapes";
 
 
-
     public static String getGraphDirectory() {
         String projectDirectory = System.getProperty("user.dir");
         projectDirectory = projectDirectory + File.separator + "graphs" + File.separator;
@@ -51,13 +50,13 @@ public class Utils {
 
     public static List<ComboBoxItem> getAllGraphs(GraphService graphService) {
         return graphService.listAll().stream()
-                .map(graph -> new Utils.ComboBoxItem(graph.getName(),graph.getId()))
+                .map(graph -> new Utils.ComboBoxItem(graph.getName(), graph.getId()))
                 .collect(Collectors.toList());
     }
 
     public static List<ComboBoxItem> getAllVersions(VersionService versionService, Long graphId) {
         return versionService.listByGraphId(graphId).stream()
-                .map(version -> new Utils.ComboBoxItem(version.getVersionNumber() + " - " + version.getName(),version.getId()))
+                .map(version -> new Utils.ComboBoxItem(version.getVersionNumber() + " - " + version.getName(), version.getId()))
                 .collect(Collectors.toList());
     }
 
@@ -82,17 +81,14 @@ public class Utils {
         var selectedGraphId = (Long) VaadinSession.getCurrent().getAttribute("shapes_currentGraphId");
         var firstItem = graphs.stream().findFirst();
 
-        if(selectedGraphId != null) {
+        if (selectedGraphId != null) {
             var graphItem = selectItemGraph.getDataProvider().fetch(new Query<>()).filter(g -> g.id.equals(selectedGraphId)).findFirst();
-            if(graphItem.isPresent())
+            if (graphItem.isPresent())
                 selectItemGraph.setValue(graphItem.get());
-            else
-                if(firstItem.isPresent())
-                    selectItemGraph.setValue(firstItem.get());
-        }
-        else
-            if(firstItem.isPresent())
+            else if (firstItem.isPresent())
                 selectItemGraph.setValue(firstItem.get());
+        } else if (firstItem.isPresent())
+            selectItemGraph.setValue(firstItem.get());
     }
 
     public static void setComboBoxVersionsData(Long graphId, VersionService versionService, Select<ComboBoxItem> selectItemVersion) {
@@ -102,22 +98,20 @@ public class Utils {
         var currentVersionId = (Long) VaadinSession.getCurrent().getAttribute("shapes_currentVersionId");
         var firstItem = versions.stream().findFirst();
 
-        if(currentVersionId != null) {
+        if (currentVersionId != null) {
             var graphItem = selectItemVersion.getDataProvider().fetch(new Query<>()).filter(v -> v.id.equals(currentVersionId)).findFirst();
-            if(graphItem.isPresent())
+            if (graphItem.isPresent())
                 selectItemVersion.setValue(graphItem.get());
-            else
-            if(firstItem.isPresent())
+            else if (firstItem.isPresent())
                 selectItemVersion.setValue(firstItem.get());
-        }
-        else
-        if(firstItem.isPresent())
+        } else if (firstItem.isPresent())
             selectItemVersion.setValue(firstItem.get());
     }
 
     public static Boolean usePrettyFormatting = true; //debugging
+
     public static String generateTTLFromIRIInModel(IRI iri, Model model) {
-        if(usePrettyFormatting) {
+        if (usePrettyFormatting) {
             SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
             IRI iriSupport = valueFactory.createIRI("http://shaclshapes.org/support");
             IRI iriConfidence = valueFactory.createIRI("http://shaclshapes.org/confidence");
@@ -139,7 +133,7 @@ public class Utils {
 
 
             //need to write to file to load as jena model
-            var tmpPath = System.getProperty("user.dir")+File.separator+"tmp.ttl";
+            var tmpPath = System.getProperty("user.dir") + File.separator + "tmp.ttl";
             FileWriter fileWriter = null;
             try {
                 fileWriter = new FileWriter(tmpPath, false);
@@ -159,8 +153,7 @@ public class Utils {
             OutputStream outputStream = new ByteArrayOutputStream();
             formatter.accept(jenaModel, outputStream);
             return outputStream.toString().replaceAll("\n+$", "");
-        }
-        else {
+        } else {
             StringWriter out = new StringWriter();
             Model filteredModel = model.filter(iri, null, null); //filters current propertyshape
             Rio.write(filteredModel, out, RDFFormat.TURTLE);
@@ -176,14 +169,14 @@ public class Utils {
 
         Matcher matcher = pattern.matcher(fileContent);
 
-        if(!matcher.find()) {
-            System.out.println("No text generated for " +iri.getLocalName());
+        if (!matcher.find()) {
+            System.out.println("No text generated for " + iri.getLocalName());
             return "";
         }
         String match = matcher.group();
 
         var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
-        model.read(new java.io.StringReader(prefixLines+match), null, "TURTLE"); // Assuming Turtle format, change as needed
+        model.read(new java.io.StringReader(prefixLines + match), null, "TURTLE"); // Assuming Turtle format, change as needed
 
         org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
         org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
@@ -204,7 +197,7 @@ public class Utils {
 
     private static String reorderShaclInItems(String input) {
         String searchString = "shacl#in";
-        if(input.contains(searchString) && input.indexOf(searchString)!=input.lastIndexOf(searchString)) {
+        if (input.contains(searchString) && input.indexOf(searchString) != input.lastIndexOf(searchString)) {
             String[] lines = input.split("\n");
             List<String> inLines = new ArrayList<>();
             for (String line : lines) {
@@ -218,16 +211,14 @@ public class Utils {
                 if (line.contains(searchString)) {
                     orderedLines.add(inLines.get(remainingIndex));
                     remainingIndex++;
-                }
-                else
+                } else
                     orderedLines.add(line);
             }
             StringBuilder orderedText = new StringBuilder();
             orderedText.append(String.join("\n", orderedLines));
 
             return orderedText.toString();
-        }
-        else
+        } else
             return input;
     }
 
@@ -242,7 +233,7 @@ public class Utils {
                 "    <%s> (rdf:type|!rdf:type)* ?s ." +
                 "    ?s ?p ?o " +
                 "    FILTER ((?s = <%s> || isBlank(?s)) && ?p != <%s> && ?p != <%s>) " +
-                "    }", iriWithEscapedChars,iriWithEscapedChars, iriSupport, iriConfidence);
+                "    }", iriWithEscapedChars, iriWithEscapedChars, iriSupport, iriConfidence);
 
         var query = QueryFactory.create(queryString);
 
@@ -252,8 +243,7 @@ public class Utils {
             OutputStream outputStream = new ByteArrayOutputStream();
             formatter.accept(jenaModel, outputStream);
             return outputStream.toString().replaceAll("\n+$", "");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return "";
         }
@@ -262,12 +252,13 @@ public class Utils {
     public static String reOrderOrItems(String input) {
         try {
             String orItemString = "<http://www.w3.org/ns/shacl#or>"; //highly dependent on turtlePrettyFormatter
-            String patternString = orItemString + " \\(.*\\)"; //would not work for names with '('
-
+            String patternString = orItemString + " \\([^\\)]*\\) ;"; //would not work for names with '('
             Pattern patternOrParent = Pattern.compile(patternString, Pattern.DOTALL);
             Matcher matcherOrParent = patternOrParent.matcher(input);
-            if(matcherOrParent.find()) { //no or items
-                var firstResultParent = matcherOrParent.group(); //only works for first item
+            var inputCopy = input;
+            List<String> orObjects = new ArrayList<>();
+            while(matcherOrParent.find()) {
+                var firstResultParent = matcherOrParent.group();
                 var patternOrObjects = Pattern.compile("\\[[^\\]]*\\]", Pattern.DOTALL);
                 var matcherObjects = patternOrObjects.matcher(firstResultParent);
                 List<String> objects = new ArrayList<>();
@@ -276,16 +267,29 @@ public class Utils {
                     objects.add(object);
                 }
                 objects.sort(Comparator.comparing(o -> o));
-                var newString = input;
+                var newString = firstResultParent;
                 StringBuilder newOrItems = new StringBuilder();
-                for(var m : objects) {
+                for (var m : objects) {
                     newString = newString.replace(m, "");
                     newOrItems.append(m).append(" ");
                 }
-                return insertAfter(newString, orItemString+" ( ", newOrItems.toString());
+                var newOrItemString = insertAfter(newString, orItemString + " ( ", newOrItems.toString());
+                inputCopy = inputCopy.replace(firstResultParent, newOrItemString);
+                orObjects.add(newOrItemString);
             }
-            else
+
+            //reorder or-objects in general (in case of multiple
+            orObjects.sort(Comparator.comparing(o -> o));
+            StringBuilder newOrItems = new StringBuilder();
+            for (var m : orObjects) {
+                inputCopy = inputCopy.replace(m, "");
+                newOrItems.append(m).append(" \n");
+            }
+            int index = input.indexOf(orItemString);
+            if (index == -1)
                 return input;
+            inputCopy = insertAfter(inputCopy, input.substring(0, index), newOrItems.toString());
+            return inputCopy;
         } catch (Exception ex) {
             ex.printStackTrace();
             return input;
@@ -304,10 +308,9 @@ public class Utils {
     }
 
     public static String escapeNew(String input) {
-        if(usePrettyFormatting) {
-            return input.replaceAll("\r","").replaceAll("\n","\\\\n");
-        }
-        else {
+        if (usePrettyFormatting) {
+            return input.replaceAll("\r", "").replaceAll("\n", "\\\\n");
+        } else {
             input = input.replaceFirst("\r\n", "");
             return input.replaceAll("\r\n", "\\\\\\\\n");
         }
@@ -315,7 +318,7 @@ public class Utils {
 
     private static Set<Statement> addBlankNodesToModel(Set<Statement> filteredModel, Model model) {
         var blankNodeQueue = filteredModel.stream().filter(statement -> statement.getObject() instanceof BNode).collect(Collectors.toList());
-        while(blankNodeQueue.size() != 0) {
+        while (blankNodeQueue.size() != 0) {
             var nextStatement = blankNodeQueue.get(0);
             var modelToAdd = model.stream().filter(statement -> statement.getSubject().equals(nextStatement.getObject())).toList();
             filteredModel.addAll(modelToAdd);
@@ -327,18 +330,18 @@ public class Utils {
     }
 
     public static String getComboBoxLabelForExtractedShapes(ExtractedShapes shape) {
-        if(shape.getComboBoxString().isEmpty())
+        if (shape.getComboBoxString().isEmpty())
             shape.generateComboBoxString();
         return shape.getComboBoxString();
     }
 
     public static void handleSaveFile(Graph graph, VersionService versionService, InputStream inputStream, String versionName, String preConfiguredGraphPath) {
         Version version = versionService.generateNewVersion(graph);
-        if(preConfiguredGraphPath.isEmpty()) {
+        if (preConfiguredGraphPath.isEmpty()) {
             var dir = Utils.getGraphDirectory();
-            String directory = dir+graph.getName()+File.separator;
-            String generatedFileName = graph.getName() + "_" + version.getVersionNumber() +".nt";
-            String filePath = directory+generatedFileName;
+            String directory = dir + graph.getName() + File.separator;
+            String generatedFileName = graph.getName() + "_" + version.getVersionNumber() + ".nt";
+            String filePath = directory + generatedFileName;
             version.setPath(filePath);
             File file = new File(directory);
 
@@ -354,12 +357,10 @@ public class Utils {
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, bytesRead);
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        }
-        else {
+        } else {
             version.setPath(preConfiguredGraphPath);
         }
         version.setName(versionName);
@@ -382,7 +383,7 @@ public class Utils {
 
         var files = Utils.listFilesInStaticGraphDirectory();
         preconfiguredGraphs.setItems(files);
-        preconfiguredGraphs.setItemLabelGenerator(item -> item == null ? "" : item.substring(item.indexOf(Utils.preconfiguredFolderName) + Utils.preconfiguredFolderName.length()+1));
+        preconfiguredGraphs.setItemLabelGenerator(item -> item == null ? "" : item.substring(item.indexOf(Utils.preconfiguredFolderName) + Utils.preconfiguredFolderName.length() + 1));
         preconfiguredGraphs.setLabel("Select pre-configured graph");
         preconfiguredGraphs.setEmptySelectionAllowed(true);
     }
@@ -395,6 +396,8 @@ public class Utils {
     public static List<String> listFilesInStaticGraphDirectory() {
         Path projectDirectory = Paths.get("").toAbsolutePath().resolve("graphs" + File.separator + preconfiguredFolderName);
         try {
+            if (!Files.exists(projectDirectory))
+                Files.createDirectory(projectDirectory);
             return Files.walk(projectDirectory)
                     .filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".nt"))
                     .map(Path::toString)
@@ -404,4 +407,5 @@ public class Utils {
             return new ArrayList<>();
         }
     }
+
 }

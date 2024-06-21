@@ -2,6 +2,11 @@ vaadin-scroller[slot="drawer"] {
   padding: var(--lumo-space-s);
 }
 
+/*
+Hide vaadin development icon
+ */
+vaadin-dev-tools {display:none}
+
 vaadin-side-nav-item vaadin-icon {
   padding: 0;
 }

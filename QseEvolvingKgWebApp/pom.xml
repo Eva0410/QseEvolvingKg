@@ -98,7 +98,8 @@
             <artifactId>dk.aau.cs.relweb</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../qse/build/libs/qse-1.0-QSE-all.jar</systemPath>
+            <!--Todo mention to change this-->
+            <systemPath>${project.basedir}/../../qse/build/libs/qse-1.0-QSE-all.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
