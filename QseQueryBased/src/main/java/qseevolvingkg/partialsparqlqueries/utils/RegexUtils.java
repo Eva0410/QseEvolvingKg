@@ -108,9 +108,7 @@ public class RegexUtils {
                 result.append(line).append("\n");
             }
         }
-
-        //remove leading new lines
-        return result.toString().replaceFirst("^\\n+", "");
+        return result.toString();
     }
 
     public static void saveStringAsFile(String content, String filePath) {
@@ -266,7 +264,7 @@ public class RegexUtils {
             StringBuilder newOrItems = new StringBuilder();
             for (var m : orObjects) {
                 inputCopy = inputCopy.replace(m, "");
-                newOrItems.append(m).append(" \n");
+                newOrItems.append(m).append(" \n  ");
             }
             int index = input.indexOf(orItemString);
             if (index == -1)

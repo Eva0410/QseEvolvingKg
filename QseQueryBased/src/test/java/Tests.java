@@ -237,7 +237,7 @@ public class Tests {
         var adaptedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty", 1, 1);
         //todo remove prefix lines of shape
         var shapeWithoutPrefix = RegexUtils.removeLinesWithPrefix(adaptedShape);
-        var expected = "<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+        var expected = "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "  <http://shaclshapes.org/confidence> 1E0 ;\n" + //problem with , in double
                 "  <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
                 "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
@@ -265,7 +265,7 @@ public class Tests {
         RegexUtils regexUtils = new RegexUtils();
 
         var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
@@ -361,7 +361,7 @@ public class Tests {
         RegexUtils regexUtils = new RegexUtils();
 
         var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_noGender.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_noGender.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
@@ -387,7 +387,7 @@ public class Tests {
         RegexUtils regexUtils = new RegexUtils();
 
         var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_NoFilmStudio.ttl";
+        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_NoFilmStudio.ttl";
         regexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();

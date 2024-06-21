@@ -12,6 +12,8 @@ import qseevolvingkg.partialsparqlqueries.utils.GraphDbUtils;
 import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -98,8 +100,14 @@ public class ShapeComparatorSparql {
 
         GraphDbUtils.checkShapesInNewGraph(graphDbUrl, this.dataSetName2, extractedShapes2.getNodeShapes());
 
-        Path parentDir = Paths.get(extractedShapes1.fileContentPath).getParent();
-        var copiedFile = parentDir.resolve(dataSetName2+"_QSEQueryBased.ttl").toString();
+        Path parentDir = Paths.get(extractedShapes1.fileContentPath).getParent().getParent();
+        String newFolderName = "QSEQueryBased_Results";
+        try {
+            Files.createDirectories(parentDir.resolve(newFolderName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        var copiedFile = parentDir.resolve(newFolderName + File.separator + dataSetName1 + "_" + dataSetName2+".ttl").toString();
         RegexUtils.copyFile(extractedShapes1.fileContentPath, copiedFile);
         extractedShapes2.fileContentPath = copiedFile;
 
