@@ -589,14 +589,12 @@
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#minCount> 1 ;
   <http://www.w3.org/ns/shacl#path> rdfs:label .
-
 <http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://shaclshapes.org/confidence> 1E0 ;
   <http://shaclshapes.org/support> "6"^^xsd:int ;
   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;
   <http://www.w3.org/ns/shacl#datatype> xsd:string ;
   <http://www.w3.org/ns/shacl#path> rdfs:label .
-
 <http://shaclshapes.org/labelNamedIndividualShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://shaclshapes.org/confidence> 4,6875E-1 ;
   <http://shaclshapes.org/support> "15"^^xsd:int ;

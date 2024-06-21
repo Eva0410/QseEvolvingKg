@@ -725,7 +725,6 @@
     <http://www.w3.org/ns/shacl#class> rdfs:Datatype ;
   ] ) ;
   <http://www.w3.org/ns/shacl#path> rdfs:range .
-
 <http://shaclshapes.org/rangeFunctionalPropertyShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;
   <http://shaclshapes.org/confidence> 1E0 ;
   <http://shaclshapes.org/support> "2"^^xsd:int ;

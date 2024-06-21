@@ -101,11 +101,11 @@ public class RegexUtils {
 
     public static String removeLinesWithPrefix(String input) {
         StringBuilder result = new StringBuilder();
-        String[] lines = input.split("\\r?\\n");
+        String[] lines = input.split("\n");
 
         for (String line : lines) {
             if (!line.startsWith("@prefix")) {
-                result.append(line).append("\r\n");
+                result.append(line).append("\n");
             }
         }
 

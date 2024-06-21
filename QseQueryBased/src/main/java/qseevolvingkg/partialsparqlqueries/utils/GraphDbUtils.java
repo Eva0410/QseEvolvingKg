@@ -179,7 +179,7 @@ public class GraphDbUtils {
         TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
         OutputStream outputStream = new ByteArrayOutputStream();
         formatter.accept(model, outputStream);
-        return outputStream.toString().replaceAll("\n+$", "");
+        return outputStream.toString().replaceAll("\n+$", "").replace("\r", "").replace("\r\n", "\n");
     }
 
     private static void setSupportOrConfidence(Model model, Resource propertyShape, Property iri, Literal newLiteral) {

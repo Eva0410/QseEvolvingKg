@@ -237,7 +237,7 @@ public class Tests {
         var adaptedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty", 1, 1);
         //todo remove prefix lines of shape
         var shapeWithoutPrefix = RegexUtils.removeLinesWithPrefix(adaptedShape);
-        var expected = "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+        var expected = "<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "  <http://shaclshapes.org/confidence> 1E0 ;\n" + //problem with , in double
                 "  <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
                 "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
@@ -369,7 +369,7 @@ public class Tests {
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACLNoGender.ttl"));
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_noGender.ttl"));
     }
 
     @Test
@@ -395,7 +395,7 @@ public class Tests {
         regexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACLNoFilmStudio.ttl"));
+                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_NoFilmStudio.ttl"));
 
     }
 

@@ -58,7 +58,7 @@ public class QSEComparisonTests {
     public void bearBV1V2Test() {
         MetaComparator metaComparator = new MetaComparator();
         String dataSetName1 = "Bear-B-1";
-        String dataSetName2 = "Bear-B2";
+        String dataSetName2 = "Bear-B87";
         String pruningThresholds =  "{(-1,0)}";
 //        ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, dataSetName2, logPath);
 //        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);

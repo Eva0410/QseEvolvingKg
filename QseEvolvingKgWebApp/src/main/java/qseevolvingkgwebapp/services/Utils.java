@@ -283,7 +283,7 @@ public class Utils {
             StringBuilder newOrItems = new StringBuilder();
             for (var m : orObjects) {
                 inputCopy = inputCopy.replace(m, "");
-                newOrItems.append(m).append(" \r\n");
+                newOrItems.append(m).append(" \n");
             }
             int index = input.indexOf(orItemString);
             if (index == -1)
