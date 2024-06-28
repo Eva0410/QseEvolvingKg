@@ -42,7 +42,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        H1 appName = new H1("QSE for Evolving Knowledge Graphs");
+        H1 appName = new H1("ShapeComparator");
         appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
         Header header = new Header(appName);
 

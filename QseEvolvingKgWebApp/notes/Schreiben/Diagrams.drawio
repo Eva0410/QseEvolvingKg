@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-06-13T11:33:42.285Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="I9CFVZXQidqzbdMI6gz6" version="24.4.9" type="device" pages="2">
+<mxfile host="app.diagrams.net" modified="2024-06-27T08:59:18.859Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" etag="-9qtp7FZibDzDmrNEF7d" version="24.5.4" type="device" pages="3">
   <diagram name="Page-1" id="8N3XWA4QchF8TUvQweEX">
     <mxGraphModel dx="1434" dy="738" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -92,6 +92,17 @@
         </mxCell>
         <mxCell id="fEZMnwb492uWOY82GJNW-22" value="Count support for all node shapes&lt;div&gt;Count support for all property shapes / or items&lt;/div&gt;&lt;div&gt;Result as objects&lt;/div&gt;&lt;div&gt;Result as file, cleaned by using Regex + Jena&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_1;align=left;pointerEvents=1;" vertex="1" parent="1">
           <mxGeometry x="830" y="185" width="50" height="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="h9kkkdFmvusbFrpcWYQx" name="Activity Diagram">
+    <mxGraphModel dx="1290" dy="522" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="jkRxhuaDtczTZrTlU4aY-1" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="140" y="260" width="30" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
