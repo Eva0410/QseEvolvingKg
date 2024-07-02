@@ -33,7 +33,10 @@ public class RegexUtils {
         int supportThreshold = extractedShapes.support;
         double confidenceThreshold = extractedShapes.confidence;
         for (var nodeShape : extractedShapes.getNodeShapes()) {
-            if(nodeShape.support <= supportThreshold) { //QSE also compares with <=, not with <
+            var allPropertyShapesUnderThreshold = nodeShape.propertyShapes != null
+                    && nodeShape.propertyShapes.stream().allMatch(o -> o.support <= supportThreshold || o.confidence <= confidenceThreshold);
+
+            if(nodeShape.support <= supportThreshold || allPropertyShapesUnderThreshold) { //QSE also compares with <=, not with <
                 //special case for multiple nodeshapes (different targetclasses) -> don't delete nodeshape if other nodeshape object still exist
                 var otherNodeShapes = extractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().toString().equals(nodeShape.getIri().toString()) && !ns.targetClass.equals(nodeShape.targetClass));
                 if(otherNodeShapes.findAny().isEmpty()) { //special case for multiple node shapes with different target classes
@@ -48,7 +51,7 @@ public class RegexUtils {
             else {
                 for(var propertyShape : nodeShape.propertyShapes) {
                     var allOrItemsUnderThreshold = propertyShape.orItems != null && !propertyShape.orItems.isEmpty()
-                            && propertyShape.orItems.stream().allMatch(o -> o.support <= supportThreshold && o.confidence <= confidenceThreshold);
+                            && propertyShape.orItems.stream().allMatch(o -> o.support <= supportThreshold || o.confidence <= confidenceThreshold);
 
                     if ((propertyShape.support <= supportThreshold || propertyShape.confidence <= confidenceThreshold) && (propertyShape.orItems == null || propertyShape.orItems.isEmpty()) || allOrItemsUnderThreshold) {
                         comparisonDiff.deletedPropertyShapes.add(propertyShape.iri.toString());
