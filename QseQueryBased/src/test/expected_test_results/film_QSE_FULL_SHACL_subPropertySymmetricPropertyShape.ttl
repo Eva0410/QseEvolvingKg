@@ -11,10 +11,6 @@
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/genderActorShapeProperty> ;
   <http://www.w3.org/ns/shacl#targetClass> <http://semantics.id/ns/example/film#Actor> .
 
-<http://shaclshapes.org/AnnotationPropertyShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
-  <http://shaclshapes.org/support> "6"^^xsd:int ;
-  <http://www.w3.org/ns/shacl#targetClass> owl:AnnotationProperty .
-
 <http://shaclshapes.org/ClassShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
   <http://shaclshapes.org/support> "11"^^xsd:int ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/labelClassShapeProperty> ;
@@ -33,10 +29,6 @@
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/labelDatatypePropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/rangeDatatypePropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#targetClass> owl:DatatypeProperty .
-
-<http://shaclshapes.org/DatatypeShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
-  <http://shaclshapes.org/support> "1"^^xsd:int ;
-  <http://www.w3.org/ns/shacl#targetClass> rdfs:Datatype .
 
 <http://shaclshapes.org/DirectorShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
   <http://shaclshapes.org/support> "3"^^xsd:int ;
