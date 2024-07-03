@@ -33,10 +33,7 @@ public class RegexUtils {
         int supportThreshold = extractedShapes.support;
         double confidenceThreshold = extractedShapes.confidence;
         for (var nodeShape : extractedShapes.getNodeShapes()) {
-            var allPropertyShapesUnderThreshold = nodeShape.propertyShapes != null
-                    && nodeShape.propertyShapes.stream().allMatch(o -> o.support <= supportThreshold || o.confidence <= confidenceThreshold);
-
-            if(nodeShape.support <= supportThreshold || allPropertyShapesUnderThreshold) { //QSE also compares with <=, not with <
+            if(nodeShape.support <= supportThreshold) { //QSE also compares with <=, not with <
                 //special case for multiple nodeshapes (different targetclasses) -> don't delete nodeshape if other nodeshape object still exist
                 var otherNodeShapes = extractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().toString().equals(nodeShape.getIri().toString()) && !ns.targetClass.equals(nodeShape.targetClass));
                 if(otherNodeShapes.findAny().isEmpty()) { //special case for multiple node shapes with different target classes

@@ -9,6 +9,9 @@
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/genderActorShapeProperty> ;
   <http://www.w3.org/ns/shacl#targetClass> <http://semantics.id/ns/example/film#Actor> .
 
+<http://shaclshapes.org/AnnotationPropertyShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
+  <http://www.w3.org/ns/shacl#targetClass> owl:AnnotationProperty .
+
 <http://shaclshapes.org/ClassShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/labelClassShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/subClassOfClassShapeProperty> ;
@@ -18,6 +21,9 @@
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/domainDatatypePropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/labelDatatypePropertyShapeProperty> ;
   <http://www.w3.org/ns/shacl#targetClass> owl:DatatypeProperty .
+
+<http://shaclshapes.org/GenreShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
+  <http://www.w3.org/ns/shacl#targetClass> <http://semantics.id/ns/example/film#Genre> .
 
 <http://shaclshapes.org/NamedIndividualShape> rdf:type <http://www.w3.org/ns/shacl#NodeShape> ;
   <http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/dateOfBirthNamedIndividualShapeProperty> ;
