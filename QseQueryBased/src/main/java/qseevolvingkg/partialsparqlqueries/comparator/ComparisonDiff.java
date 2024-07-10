@@ -8,10 +8,10 @@ public class ComparisonDiff {
     public ArrayList<String> deletedPropertyShapes;
     public ArrayList<EditedShapesComparisonObject> editedNodeShapes;
     public ArrayList<EditedShapesComparisonObject> editedPropertyShapes;
-    Duration durationQse1;
-    Duration durationSecondStep;
-    Duration durationComparison;
-    Duration durationTotal;
+    public Duration durationQse1;
+    public Duration durationSecondStep;
+    public Duration durationComparison;
+    public Duration durationTotal;
 
     public ComparisonDiff() {
         deletedNodeShapes = new ArrayList<>();

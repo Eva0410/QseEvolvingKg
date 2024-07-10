@@ -13,6 +13,7 @@ import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,11 +26,26 @@ import java.util.List;
 public class ShapeComparatorSparql {
     String graphDbUrl;
     String dataSetName1;
-    String dataSetName2;
+    public String dataSetName2;
     String logFilePath;
     List<NS> firstNodeShapes;
     String shapePath1;
     public String outputPath;
+
+    public void doFullComparisonForMultipleVersions(String threshold, String[] dataSetsToCheck) {
+        ComparisonDiff comparisonDiff = prepareQSE(threshold);
+
+        //First Run
+        runQse1(comparisonDiff);
+        var durationQse1 = comparisonDiff.durationQse1;
+        for (var dataSet : dataSetsToCheck) {
+            this.dataSetName2 = dataSet;
+            doComparisonSparql(firstNodeShapes, shapePath1, comparisonDiff);
+
+            comparisonDiff = new ComparisonDiff();
+            comparisonDiff.durationQse1 = durationQse1;
+        }
+    }
 
     public ComparisonDiff doFullComparison(String threshold) {
         ComparisonDiff comparisonDiff = prepareQSE(threshold);
@@ -57,7 +73,7 @@ public class ShapeComparatorSparql {
         this.graphDbUrl = graphDbUrl;
         this.dataSetName1 = dataSetName1;
         this.dataSetName2 = dataSetName2;
-        this.logFilePath = logFilePath+dataSetName1+"_"+dataSetName2+ File.separator;
+        this.logFilePath = logFilePath;
         this.outputPath = System.getProperty("user.dir")+ File.separator + "Output" + File.separator;
     }
 
@@ -127,6 +143,6 @@ public class ShapeComparatorSparql {
         comparisonDiff.durationComparison = Duration.between(startComparison, endComparison);
 
         comparisonDiff.durationTotal = comparisonDiff.durationQse1.plus(comparisonDiff.durationSecondStep).plus(comparisonDiff.durationComparison);
-        ComparatorUtils.exportComparisonToFile(logFilePath+"Sparql", comparisonDiff.toString());
+        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"Sparql", comparisonDiff.toString());
     }
 }
