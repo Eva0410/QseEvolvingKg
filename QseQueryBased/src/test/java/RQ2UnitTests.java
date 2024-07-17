@@ -98,6 +98,52 @@ public class RQ2UnitTests {
     }
 
     @Test
+    public void testDeleteSameOutcome() throws IOException {
+
+        var content = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/bob> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/name> \"Alice\" .\n" +
+                "<http://example.org/bob> <http://xmlns.com/foaf/0.1/name> \"Bob\" .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/alice> .\n";
+
+        var contentNew = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/bob> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/name> \"Alice\" .\n";
+
+        var contentAdded = "";
+
+        var contentDeleted = "<http://example.org/bob> <http://xmlns.com/foaf/0.1/name> \"Bob\" .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/alice> .\n";
+
+        testQseOuptut(content, contentNew, contentAdded, contentDeleted);
+    }
+
+    @Test
+    public void testDeleteOnePropertyLeft() throws IOException {
+
+        var content = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/bob> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/name> \"Alice\" .\n" +
+                "<http://example.org/bob> <http://xmlns.com/foaf/0.1/name> \"Bob\" .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/alice> .\n";
+
+        var contentNew = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/name> \"Alice\" .\n";
+
+        var contentAdded = "";
+
+        var contentDeleted = "<http://example.org/bob> <http://xmlns.com/foaf/0.1/name> \"Bob\" .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/alice> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/bob> .\n";
+
+        testQseOuptut(content, contentNew, contentAdded, contentDeleted);
+    }
+
+    @Test
     public void testBasicAdd() throws IOException {
 
         var content = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
