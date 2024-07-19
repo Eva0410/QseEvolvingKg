@@ -132,7 +132,7 @@ public class RegexUtils {
         }
     }
 
-    private static String deleteIriFromString(String iri, String file, boolean errorDuringGeneration) {
+    public static String deleteIriFromString(String iri, String file, boolean errorDuringGeneration) {
         if(errorDuringGeneration)
             return file;
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
