@@ -1,9 +1,7 @@
 import cs.Main;
 import cs.qse.common.EntityData;
-import cs.qse.common.TurtlePrettyFormatter;
 import cs.qse.filebased.Parser;
 import cs.qse.filebased.SupportConfidence;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import qseevolvingkg.partialsparqlqueries.DiffExtractor;
@@ -436,6 +434,71 @@ public class RQ2UnitTests {
                 "  <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
                 "  <http://www.w3.org/ns/shacl#minCount> 1 ;\n" +
                 "  <http://www.w3.org/ns/shacl#path> <http://example.org/color> ."));
+    }
+
+    @Test
+    public void deleteNSFromShaclFile() throws IOException {
+        var content = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n"+
+                "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n"+
+                "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n";
+
+        var contentNew = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n";
+        var contentAdded = "";
+        var contentDeleted = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n"+
+                "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n";
+
+        var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
+        DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
+        var deletedShapeMap = diffShapeGenerator.getDeletedShapes();
+        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+
+        assertTrue(deletedShapeMap.containsKey(0));
+        assertEquals(1, deletedShapeMap.size());
+        assertEquals(2, deletedShapeMap.get(0).size());
+        assertTrue(deletedShapeMap.get(0).contains(2));
+        assertTrue(deletedShapeMap.get(0).contains(4));
+        assertEquals(0, diffMap.size());
+
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var fileAsString = RegexUtils.getFileAsString(newFilePath);
+        var fileWithDeletedShapes = diffShapeGenerator.deleteShapesFromFile(diffExtractor.originalExtractedShapes, fileAsString);
+        RegexUtils.saveStringAsFile(fileWithDeletedShapes,  Main.outputFilePath+"finished.ttl");
+        assertFalse(fileWithDeletedShapes.contains("<http://shaclshapes.org/CatShape>"));
+        assertFalse(fileWithDeletedShapes.contains("<http://shaclshapes.org/colorCatShapeProperty>"));
+        assertFalse(fileWithDeletedShapes.contains("<http://shaclshapes.org/instanceTypeCatShapeProperty>"));
+    }
+
+    @Test
+    public void deletePSFromShaclFile() throws IOException {
+        var content = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n"+
+                "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n"+
+                "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n";
+
+        var contentNew = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n"+
+                "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n";
+        var contentAdded = "";
+        var contentDeleted = "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n";
+
+        var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
+        DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
+        var deletedShapeMap = diffShapeGenerator.getDeletedShapes();
+        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+
+        assertTrue(deletedShapeMap.containsKey(0));
+        assertEquals(1, deletedShapeMap.size());
+        assertEquals(1, deletedShapeMap.get(0).size());
+        assertTrue(deletedShapeMap.get(0).contains(4));
+        assertEquals(0, diffMap.size());
+
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var fileAsString = RegexUtils.getFileAsString(newFilePath);
+        var fileWithDeletedShapes = diffShapeGenerator.deleteShapesFromFile(diffExtractor.originalExtractedShapes, fileAsString);
+        RegexUtils.saveStringAsFile(fileWithDeletedShapes,  Main.outputFilePath+"finished.ttl");
+        assertTrue(fileWithDeletedShapes.contains("<http://shaclshapes.org/CatShape>"));
+        assertFalse(fileWithDeletedShapes.contains("<http://shaclshapes.org/colorCatShapeProperty>"));
+        assertTrue(fileWithDeletedShapes.contains("<http://shaclshapes.org/instanceTypeCatShapeProperty>"));
     }
 
     @Test

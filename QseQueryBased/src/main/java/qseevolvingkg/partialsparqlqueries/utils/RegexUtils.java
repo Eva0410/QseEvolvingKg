@@ -140,7 +140,7 @@ public class RegexUtils {
         return getReplacedFileWithRegex(iri, file, regexPattern);
     }
 
-    private static String deletePropertyShapeReferenceWithIriFromString(String iri, String file, boolean errorDuringGeneration) {
+    public static String deletePropertyShapeReferenceWithIriFromString(String iri, String file, boolean errorDuringGeneration) {
         if(errorDuringGeneration)
             return file;
         String iriWithEscapedChars = iri.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");

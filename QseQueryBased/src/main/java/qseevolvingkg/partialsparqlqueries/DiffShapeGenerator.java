@@ -3,24 +3,28 @@ package qseevolvingkg.partialsparqlqueries;
 import cs.Main;
 import cs.qse.filebased.Parser;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.shapeobjects.NodeShape;
+import qseevolvingkg.partialsparqlqueries.utils.GraphDbUtils;
 import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class DiffShapeGenerator {
-    Map<Integer, Map<Integer, Set<Integer>>> oldShapes;
-    Map<Integer, Map<Integer, Set<Integer>>> newShapes;
+    Map<Integer, Map<Integer, Set<Integer>>> oldShapesMap;
+    Map<Integer, Map<Integer, Set<Integer>>> newShapesMap;
     Parser parser;
     public Map<Integer, Map<Integer, Set<Integer>>> diffShapes;
     public ExtractedShapes extractedShapes;
     HashMap<Integer, Set<Integer>> editedShapes;
+    public HashMap<Integer, Set<Integer>> deletedShapes = new HashMap<>();
 
     public DiffShapeGenerator(DiffExtractor diffExtractor) {
-        this.oldShapes = diffExtractor.originalClassToPropWithObjTypes;
-        this.newShapes = DiffExtractor.deepClone(diffExtractor.parser.classToPropWithObjTypes);
+        this.oldShapesMap = diffExtractor.originalClassToPropWithObjTypes;
+        this.newShapesMap = DiffExtractor.deepClone(diffExtractor.parser.classToPropWithObjTypes);
         this.parser = diffExtractor.parser;
         this.editedShapes = diffExtractor.editedShapesMap;
     }
@@ -38,16 +42,39 @@ public class DiffShapeGenerator {
         return extractedShapes;
     }
 
+    public HashMap<Integer, Set<Integer>> getDeletedShapes() {
+        deletedShapes = new HashMap<>();
+        for(var nodeShapeEntry : oldShapesMap.entrySet()) {
+            var nodeShapeKey = nodeShapeEntry.getKey();
+            if(!newShapesMap.containsKey(nodeShapeKey)) {
+                deletedShapes.put(nodeShapeKey, nodeShapeEntry.getValue().keySet());
+            }
+            else {
+                for(var propertyShapeId : nodeShapeEntry.getValue().keySet()) {
+                    if(!newShapesMap.get(nodeShapeKey).containsKey(propertyShapeId)) {
+                        if(!deletedShapes.containsKey(nodeShapeKey)) {
+                            deletedShapes.put(nodeShapeKey, new HashSet<>());
+                        }
+                        var propEntryDeleted = deletedShapes.get(nodeShapeKey);
+                        propEntryDeleted.add(propertyShapeId);
+                    }
+                }
+            }
+        }
+        return deletedShapes;
+    }
+
+
     public Map<Integer, Map<Integer, Set<Integer>>> generateDiffMap() {
         diffShapes = new HashMap<>();
-        for(var nodeShapeEntry : newShapes.entrySet()) {
+        for(var nodeShapeEntry : newShapesMap.entrySet()) {
             var nodeShapeKey = nodeShapeEntry.getKey();
-            if(!oldShapes.containsKey(nodeShapeKey)) {
+            if(!oldShapesMap.containsKey(nodeShapeKey)) {
                 diffShapes.put(nodeShapeKey, nodeShapeEntry.getValue());
             }
             else {
                 for(var propertyShapeEntry : nodeShapeEntry.getValue().entrySet()) {
-                    if(!oldShapes.get(nodeShapeKey).containsKey(propertyShapeEntry.getKey())) {
+                    if(!oldShapesMap.get(nodeShapeKey).containsKey(propertyShapeEntry.getKey())) {
                         if(!diffShapes.containsKey(nodeShapeKey)) {
                             diffShapes.put(nodeShapeKey, new HashMap<>());
                         }
@@ -64,15 +91,40 @@ public class DiffShapeGenerator {
             if(!diffShapes.containsKey(nodeShapeKey)) {
                 diffShapes.put(nodeShapeKey, new HashMap<>());
             }
+            var propEntryDiff = diffShapes.get(nodeShapeKey);
+            var propEntryDeleted = deletedShapes.getOrDefault(nodeShapeKey, new HashSet<>());
+
             for(var propertyShapeId : nodeShapeEntry.getValue()) {
-                if(!diffShapes.get(nodeShapeKey).containsKey(propertyShapeId)) {
-                    var propEntryNew = newShapes.get(nodeShapeKey).get(propertyShapeId);
-                    var propEntryDiff = diffShapes.get(nodeShapeKey);
+                if(!propEntryDiff.containsKey(propertyShapeId) && !propEntryDeleted.contains(propertyShapeId)) {
+                    var propEntryNew = newShapesMap.get(nodeShapeKey).get(propertyShapeId);
                     propEntryDiff.put(propertyShapeId, propEntryNew);
                 }
             }
+            if(propEntryDiff.isEmpty())
+                diffShapes.remove(nodeShapeKey);
         }
         return diffShapes;
+    }
+
+    public String deleteShapesFromFile(ExtractedShapes originalExtractedShapes, String fileContent) {
+        for (var nodeShapeClass : deletedShapes.entrySet()) {
+            var nodeShape = originalExtractedShapes.nodeShapes.stream().filter(ns -> ns.targetClass.toString().equals(parser.getStringEncoder().decode(nodeShapeClass.getKey()))).findFirst();
+            if (nodeShape.isPresent()) {
+                for (var propertyShapeClass : nodeShapeClass.getValue()) {
+                    var propertyShape = nodeShape.get().propertyShapes.stream().filter(ps -> ps.path.toString().equals(parser.getStringEncoder().decode(propertyShapeClass))).findFirst();
+                    if (propertyShape.isPresent()) {
+                        fileContent = RegexUtils.deleteIriFromString(propertyShape.get().iri.toString(), fileContent, false);
+                        fileContent = RegexUtils.deletePropertyShapeReferenceWithIriFromString(propertyShape.get().iri.toString(), fileContent, false);
+                        nodeShape.get().propertyShapes.remove(propertyShape.get());
+                    }
+                }
+                if (nodeShape.get().propertyShapes.isEmpty()) {
+                    fileContent = RegexUtils.deleteIriFromString(nodeShape.get().iri.toString(), fileContent, false);
+                    originalExtractedShapes.nodeShapes.remove(nodeShape.get());
+                }
+            }
+        }
+        return fileContent;
     }
 
     public String mergeAddedShapesToOrginialFileAsString(ExtractedShapes originalExtractedShapes) {

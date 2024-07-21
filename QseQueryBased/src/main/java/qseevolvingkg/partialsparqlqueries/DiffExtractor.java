@@ -271,9 +271,11 @@ public class DiffExtractor {
                     }
 
                     //delete entries now, before they were needed for SupportConfidence-Values
-                    for(var entry : entityData.propertyConstraintsMap.entrySet()) {
-                        if(entry.getValue().objTypes.isEmpty()) {
-                            entityData.propertyConstraintsMap.remove(entry.getKey());
+                    var iterator = entityData.propertyConstraintsMap.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        var entry = iterator.next();
+                        if (entry.getValue().objTypes.isEmpty()) {
+                            iterator.remove();
                         }
                     }
                 }
