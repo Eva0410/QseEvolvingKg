@@ -21,7 +21,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RQ2UnitTests {
     String instanceTypeProperty = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
@@ -357,6 +357,85 @@ public class RQ2UnitTests {
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
         assertTrue(fileAsString.contains("colorCatShape"));
         assertTrue(fileAsString.contains("<http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/colorCatShapeProperty> ;"));
+    }
+
+    @Test
+    public void constraintAddedInPropertyShape() throws IOException {
+        var content = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n"+
+                "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n";
+
+        var contentNew = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n" +
+                "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n"+
+                "<http://example.org/orangeCat> <http://example.org/color> \"10\"^^<http://www.w3.org/2001/XMLSchema#integer> .\n";
+        var contentAdded = "<http://example.org/orangeCat> <http://example.org/color> \"10\"^^<http://www.w3.org/2001/XMLSchema#integer> .\n";
+        var contentDeleted = "";
+
+        var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
+        DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
+        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+
+        assertTrue(diffExtractor.editedShapesMap.containsKey(0));
+        assertEquals(1, diffExtractor.editedShapesMap.size());
+        assertEquals(1, diffExtractor.editedShapesMap.get(0).size());
+        assertTrue(diffExtractor.editedShapesMap.get(0).contains(3));
+        assertTrue(diffMap.containsKey(0));
+        assertEquals(1, diffMap.size());
+        assertEquals(1, diffMap.get(0).size());
+        assertNotNull(diffMap.get(0).get(3));
+
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var fileAsString = RegexUtils.getFileAsString(newFilePath);
+        assertTrue(fileAsString.contains("<http://shaclshapes.org/colorCatShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://www.w3.org/ns/shacl#minCount> 1 ;\n" +
+                "  <http://www.w3.org/ns/shacl#or> ( [\n" +
+                "    <http://shaclshapes.org/confidence> 1E0 ;\n" +
+                "    <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
+                "  ] [\n" +
+                "    <http://shaclshapes.org/confidence> 1E0 ;\n" +
+                "    <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
+                "    <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "    <http://www.w3.org/ns/shacl#datatype> xsd:integer ;\n" +
+                "  ] ) ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> <http://example.org/color> .\n"));
+    }
+
+    @Test
+    public void constraintDeletedInPropertyShape() throws IOException {
+        var content = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n"+
+                "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n"+
+                "<http://example.org/orangeCat> <http://example.org/color> \"10\"^^<http://www.w3.org/2001/XMLSchema#integer> .\n";
+
+        var contentNew = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n" +
+                "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n";
+        var contentAdded = "";
+        var contentDeleted = "<http://example.org/orangeCat> <http://example.org/color> \"10\"^^<http://www.w3.org/2001/XMLSchema#integer> .\n";
+
+        var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
+        DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
+        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+
+        assertTrue(diffExtractor.editedShapesMap.containsKey(0));
+        assertEquals(1, diffExtractor.editedShapesMap.size());
+        assertEquals(1, diffExtractor.editedShapesMap.get(0).size());
+        assertTrue(diffExtractor.editedShapesMap.get(0).contains(3));
+        assertTrue(diffMap.containsKey(0));
+        assertEquals(1, diffMap.size());
+        assertEquals(1, diffMap.get(0).size());
+        assertNotNull(diffMap.get(0).get(3));
+
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var fileAsString = RegexUtils.getFileAsString(newFilePath);
+        assertTrue(fileAsString.contains("<http://shaclshapes.org/colorCatShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
+                "  <http://shaclshapes.org/confidence> 1E0 ;\n" +
+                "  <http://shaclshapes.org/support> \"1\"^^xsd:int ;\n" +
+                "  <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
+                "  <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
+                "  <http://www.w3.org/ns/shacl#minCount> 1 ;\n" +
+                "  <http://www.w3.org/ns/shacl#path> <http://example.org/color> ."));
     }
 
     @Test

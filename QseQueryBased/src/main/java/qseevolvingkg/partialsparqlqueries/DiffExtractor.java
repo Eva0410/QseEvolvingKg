@@ -24,8 +24,7 @@ public class DiffExtractor {
     public Map<Integer, Map<Integer, Set<Integer>>> originalClassToPropWithObjTypes;
     public ExtractedShapes originalExtractedShapes;
     public Parser parser;
-    public HashMap<Integer, Integer> addedConstraints = new HashMap<>();
-    public HashMap<Node, EntityData> addedEntityData = new HashMap<>();
+    public HashMap<Integer, Set<Integer>> editedShapesMap = new HashMap<>();
 
     public Integer supportThreshold;
     public Double confidenceThreshold;
@@ -206,16 +205,20 @@ public class DiffExtractor {
     private void updateClassToPropWithObjTypesMap(Set<Integer> objTypesIDs, Node entityNode, int propID, boolean added) {
         EntityData entityData = parser.entityDataHashMap.get(entityNode);
         if (entityData != null) {
-            addedEntityData.put(entityNode,entityData);
             for (Integer entityTypeID : entityData.getClassTypes()) {
                 Map<Integer, Set<Integer>> propToObjTypes = parser.classToPropWithObjTypes.computeIfAbsent(entityTypeID, k -> new HashMap<>());
                 Set<Integer> classObjTypes = propToObjTypes.computeIfAbsent(propID, k -> new HashSet<>());
+
+                //remember edited shapes
+                editedShapesMap.computeIfAbsent(entityTypeID, k -> new HashSet<>());
+                var properySet = editedShapesMap.get(entityTypeID);
+                properySet.add(propID);
+                editedShapesMap.put(entityTypeID, properySet);
 
                 if(added)  {
                     classObjTypes.addAll(objTypesIDs);
                     propToObjTypes.put(propID, classObjTypes);
                     parser.classToPropWithObjTypes.put(entityTypeID, propToObjTypes);
-                    addedConstraints.put(entityTypeID, propID);
 
                     //update support
                     for (var classObjType : objTypesIDs) {
