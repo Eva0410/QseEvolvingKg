@@ -8,7 +8,7 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.jetbrains.annotations.NotNull;
 import qseevolvingkg.partialsparqlqueries.comparator.ComparisonDiff;
-import qseevolvingkg.partialsparqlqueries.Main;
+import qseevolvingkg.partialsparqlqueries.SparqlShapeValidator;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.NodeShape;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.PropertyShape;
@@ -26,7 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexUtils {
-    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
 
     public static String deleteFromFileWithPruning(ExtractedShapes extractedShapes, ComparisonDiff comparisonDiff) {
         String fileContent = extractedShapes.getFileAsString();

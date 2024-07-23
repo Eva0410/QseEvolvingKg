@@ -1,38 +1,65 @@
 package qseevolvingkg.partialsparqlqueries.comparator;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MetaComparator {
     public ComparisonDiff diffQse;
-    public ComparisonDiff diffSparql;
+    public ComparisonDiff diffAlgorithm;
 
-    public String compare() {
+    public String compareEditedAndDeleted() {
         StringBuilder sb = new StringBuilder();
         sb.append("\n\n==== Comparison of Compare-Methods ====\n");
         sb.append("=== Deleted Node Shapes ===\n");
-        List<String> uniqueToFirstList = getDifference(diffQse.deletedNodeShapes, diffSparql.deletedNodeShapes);
-        List<String> uniqueToSecondList = getDifference(diffSparql.deletedNodeShapes, diffQse.deletedNodeShapes);
+        List<String> uniqueToFirstList = getDifference(diffQse.deletedNodeShapes, diffAlgorithm.deletedNodeShapes);
+        List<String> uniqueToSecondList = getDifference(diffAlgorithm.deletedNodeShapes, diffQse.deletedNodeShapes);
+        return stringResultForDeletedAndEdited(sb, uniqueToFirstList, uniqueToSecondList);
+    }
+
+    public String compareAll() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n\n==== Comparison of Compare-Methods ====\n");
+
+        sb.append("=== Added Node Shapes ===\n");
+        List<String> uniqueToFirstList = getDifference(diffQse.addedNodeShapes, diffAlgorithm.addedNodeShapes);
+        List<String> uniqueToSecondList = getDifference(diffAlgorithm.addedNodeShapes, diffQse.addedNodeShapes);
+        appendUniqueNamesToStringBuilder(uniqueToFirstList, sb, uniqueToSecondList);
+
+        sb.append("=== Added Property Shapes ===\n");
+        uniqueToFirstList = getDifference(diffQse.addedPropertyShapes, diffAlgorithm.addedPropertyShapes);
+        uniqueToSecondList = getDifference(diffAlgorithm.addedPropertyShapes, diffQse.addedPropertyShapes);
+        appendUniqueNamesToStringBuilder(uniqueToFirstList, sb, uniqueToSecondList);
+
+        sb.append("=== Deleted Node Shapes ===\n");
+        uniqueToFirstList = getDifference(diffQse.deletedNodeShapes, diffAlgorithm.deletedNodeShapes);
+        uniqueToSecondList = getDifference(diffAlgorithm.deletedNodeShapes, diffQse.deletedNodeShapes);
+        return stringResultForDeletedAndEdited(sb, uniqueToFirstList, uniqueToSecondList);
+    }
+
+    @NotNull
+    private String stringResultForDeletedAndEdited(StringBuilder sb, List<String> uniqueToFirstList, List<String> uniqueToSecondList) {
         appendUniqueNamesToStringBuilder(uniqueToFirstList, sb, uniqueToSecondList);
 
         sb.append("=== Deleted Property Shapes ===\n");
-        uniqueToFirstList = getDifference(diffQse.deletedPropertyShapes, diffSparql.deletedPropertyShapes);
-        uniqueToSecondList = getDifference(diffSparql.deletedPropertyShapes, diffQse.deletedPropertyShapes);
+        uniqueToFirstList = getDifference(diffQse.deletedPropertyShapes, diffAlgorithm.deletedPropertyShapes);
+        uniqueToSecondList = getDifference(diffAlgorithm.deletedPropertyShapes, diffQse.deletedPropertyShapes);
         appendUniqueNamesToStringBuilder(uniqueToFirstList, sb, uniqueToSecondList);
 
         sb.append("=== Edited Node Shape Names ===\n");
-        if(diffQse.editedNodeShapes != null && diffSparql.editedNodeShapes != null) {
-            var uniqueToFirstListObjects = getDifferenceBetweenObjectLists(diffQse.editedNodeShapes, diffSparql.editedNodeShapes);
-            var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffSparql.editedNodeShapes, diffQse.editedNodeShapes);
+        if(diffQse.editedNodeShapes != null && diffAlgorithm.editedNodeShapes != null) {
+            var uniqueToFirstListObjects = getDifferenceBetweenObjectLists(diffQse.editedNodeShapes, diffAlgorithm.editedNodeShapes);
+            var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffAlgorithm.editedNodeShapes, diffQse.editedNodeShapes);
             appendUniqueNamesToStringBuilderObjects(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
         }
         sb.append("=== Edited Property Shape Names ===\n");
-        if(diffQse.editedPropertyShapes != null && diffSparql.editedPropertyShapes != null) {
-            var uniqueToFirstListObjects = getDifferenceBetweenObjectLists(diffQse.editedPropertyShapes, diffSparql.editedPropertyShapes);
-            var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffSparql.editedPropertyShapes, diffQse.editedPropertyShapes);
+        if(diffQse.editedPropertyShapes != null && diffAlgorithm.editedPropertyShapes != null) {
+            var uniqueToFirstListObjects = getDifferenceBetweenObjectLists(diffQse.editedPropertyShapes, diffAlgorithm.editedPropertyShapes);
+            var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffAlgorithm.editedPropertyShapes, diffQse.editedPropertyShapes);
             appendUniqueNamesToStringBuilderObjects(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
         }
-        sb.append("Execution Time QSE Total: ").append(diffQse.durationTotal.getSeconds()).append(" seconds, Execution Time Sparql Total: ").append(diffSparql.durationTotal.getSeconds()).append(" seconds");
+        sb.append("Execution Time QSE Total: ").append(diffQse.durationTotal.getSeconds()).append(" seconds, Execution Time Algorithm Total: ").append(diffAlgorithm.durationTotal.getSeconds()).append(" seconds");
         return sb.toString();
     }
 

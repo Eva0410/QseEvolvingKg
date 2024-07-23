@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-public class ShapeComparatorQSE {
+public class ShapeComparatorQSEQueryBased {
     String graphDbUrl;
     public String dataSetName1;
     public String dataSetName2;
@@ -25,7 +25,7 @@ public class ShapeComparatorQSE {
     public String outputPath;
     public ComparisonDiff comparisonDiff;
 
-    public ShapeComparatorQSE(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
+    public ShapeComparatorQSEQueryBased(String graphDbUrl, String dataSetName1, String dataSetName2, String logFilePath) {
         this.graphDbUrl = graphDbUrl;
         this.dataSetName1 = dataSetName1;
         this.dataSetName2 = dataSetName2;
@@ -33,7 +33,7 @@ public class ShapeComparatorQSE {
         this.outputPath = System.getProperty("user.dir")+ File.separator + "Output" + File.separator;
     }
 
-    public ComparisonDiff doComparison(String threshold) {
+    public ComparisonDiff doComparisonSparql(String threshold) {
         prepareQse(threshold);
 
         //First Run
@@ -66,8 +66,8 @@ public class ShapeComparatorQSE {
         shapePath2 = qbParser.shapesExtractor.getOutputFileAddress();
 
         Instant startComparison = Instant.now();
-        getDeletedNodeShapes(comparisonDiff);
-        getDeletedPropertyShapes(comparisonDiff);
+        ComparatorUtils.getDeletedNodeShapes(comparisonDiff, firstNodeShapes, secondNodeShapes);
+        ComparatorUtils.getDeletedPropertyShapes(comparisonDiff, firstNodeShapes, secondNodeShapes);
         ExtractedShapes extractedShapes1 = new ExtractedShapes();
         ExtractedShapes extractedShapes2 = new ExtractedShapes();
         extractedShapes1.fileContentPath = shapePath1;
@@ -81,7 +81,7 @@ public class ShapeComparatorQSE {
         comparisonDiff.durationComparison = durationComparison;
 
         comparisonDiff.durationTotal = comparisonDiff.durationQse1.plus(durationQSE2).plus(durationComparison);
-        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"QSE", comparisonDiff.toString());
+        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"QSE", comparisonDiff.toStringEditedAndDeleted());
         this.comparisonDiff = comparisonDiff;
         return comparisonDiff;
     }
@@ -114,17 +114,4 @@ public class ShapeComparatorQSE {
         Main.configPath = emptyConfig.getAbsolutePath(); //avoid exceptions in QSE
     }
 
-    private void getDeletedPropertyShapes(ComparisonDiff comparisonDiff) {
-        var propertyShapes1 = new java.util.ArrayList<>(firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).distinct().toList());
-        var propertyShapes2 = secondNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).distinct().toList();
-        propertyShapes1.removeAll(propertyShapes2);
-        comparisonDiff.deletedPropertyShapes = propertyShapes1;
-    }
-
-    private void getDeletedNodeShapes(ComparisonDiff comparisonDiff) {
-        var firstShapesCopied = new java.util.ArrayList<>(firstNodeShapes.stream().map(ns -> ns.getIri().toString()).distinct().toList());
-        var secondShapesCopied = secondNodeShapes.stream().map(ns -> ns.getIri().toString()).distinct().toList();
-        firstShapesCopied.removeAll(secondShapesCopied);
-        comparisonDiff.deletedNodeShapes = firstShapesCopied;
-    }
 }

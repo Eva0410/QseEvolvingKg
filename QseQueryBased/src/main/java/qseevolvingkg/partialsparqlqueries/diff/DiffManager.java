@@ -12,11 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
-
 public class DiffManager {
-    String instanceTypeProperty = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+    public static String instanceTypeProperty = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
     public Parser parser;
     public DiffExtractor diffExtractor;
     public DiffShapeGenerator diffShapeGenerator;
@@ -45,15 +42,15 @@ public class DiffManager {
         }
         cs.Main.setOutputFilePathForJar(basePath.toAbsolutePath()+File.separator);
 
-        clearOutputDirectory();
+        clearOutputDirectory(basePath.getParent());
         Main.datasetName = dataSetName;
         parser = new Parser(filePath, 3, 10, instanceTypeProperty);
         runParser(parser);
     }
 
-    private static void clearOutputDirectory() {
+    public static void clearOutputDirectory(Path outputPath) {
         try {
-            Files.walk(Paths.get(Main.outputFilePath).getParent())
+            Files.walk(outputPath)
                     .forEach(path -> {
                         try {
                             Files.delete(path);
@@ -65,14 +62,14 @@ public class DiffManager {
         }
     }
 
-    private void runParser(Parser parser) {
+    public static void runParser(Parser parser) {
         parser.entityExtraction();
         parser.entityConstraintsExtraction();
         parser.computeSupportConfidence();
         parser.extractSHACLShapes(false, Main.qseFromSpecificClasses);
     }
     public ExtractedShapes executeQseDiff(String filePathAdded, String filePathDeleted) {
-        DiffExtractor diffExtractor = new DiffExtractor(filePathAdded, filePathDeleted,parser,support, confidence);
+        diffExtractor = new DiffExtractor(filePathAdded, filePathDeleted,parser,support, confidence);
         diffExtractor.extractFromFile();
 
         diffShapeGenerator = new DiffShapeGenerator(diffExtractor);

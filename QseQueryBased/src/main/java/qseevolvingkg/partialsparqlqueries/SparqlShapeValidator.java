@@ -5,13 +5,12 @@ import qseevolvingkg.partialsparqlqueries.utils.ConfigManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-public class Main {
-    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+public class SparqlShapeValidator {
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
 
     public static void main(String[] args) {
         setupLogger();
@@ -26,7 +25,7 @@ public class Main {
         String logPath = parentDirectory + "Output" + File.separator + "compareLogs" + File.separator;
         var doMetaComparison = Boolean.parseBoolean(ConfigManager.getProperty("doMetaComparison"));
         if(doMetaComparison) {
-            ShapeComparatorQSE comparatorQSETwice = new ShapeComparatorQSE(graphDbUrl, dataSetName1, "", logPath);
+            ShapeComparatorQSEQueryBased comparatorQSETwice = new ShapeComparatorQSEQueryBased(graphDbUrl, dataSetName1, "", logPath);
             ComparisonDiff comparisonDiff = comparatorQSETwice.runQseFirstTime(pruningThresholds);
             ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, "", logPath);
             for (var dataSetName2 : dataSetsToCheck) {
@@ -34,8 +33,8 @@ public class Main {
                 comparatorSparql.dataSetName2 = dataSetName2;
 
                 metaComparator.diffQse = comparatorQSETwice.doComparisonForFollowingVersion(pruningThresholds, comparisonDiff);
-                metaComparator.diffSparql = comparatorSparql.doComparison(pruningThresholds, comparatorQSETwice);
-                ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compare());
+                metaComparator.diffAlgorithm = comparatorSparql.doComparison(pruningThresholds, comparatorQSETwice);
+                ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareEditedAndDeleted());
             }
         }
         else {
@@ -45,7 +44,7 @@ public class Main {
 
     }
 
-    private static void setupLogger() {
+    static void setupLogger() {
         try {
             FileHandler fileHandler;
             fileHandler = new FileHandler("application.log");

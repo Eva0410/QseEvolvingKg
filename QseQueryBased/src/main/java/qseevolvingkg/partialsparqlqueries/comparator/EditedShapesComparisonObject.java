@@ -15,6 +15,16 @@ public class EditedShapesComparisonObject{
                 "\n";
     }
 
+    public EditedShapesComparisonObject() {
+
+    }
+
+    public EditedShapesComparisonObject(String shapeName, String shapeAsTextNew, String shapeAsTextOld) {
+        this.shapeName = shapeName;
+        this.shapeAsTextNew = shapeAsTextNew;
+        this.shapeAsTextOld = shapeAsTextOld;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -2,7 +2,7 @@ package qseevolvingkg.partialsparqlqueries.comparator;
 
 import cs.qse.common.structure.NS;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
-import qseevolvingkg.partialsparqlqueries.Main;
+import qseevolvingkg.partialsparqlqueries.SparqlShapeValidator;
 import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class ComparatorUtils {
-    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
 
     public static void getEditedPropertyShapes(ComparisonDiff comparisonDiff, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2, List<NS> firstNodeShapes) {
         var propertyShapesToCheck = firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString()))
@@ -61,5 +61,33 @@ public class ComparatorUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void getDeletedNodeShapes(ComparisonDiff comparisonDiff, List<NS> firstNodeShapes, List<NS> secondNodeShapes) {
+        var firstShapesCopied = new java.util.ArrayList<>(firstNodeShapes.stream().map(ns -> ns.getIri().toString()).distinct().toList());
+        var secondShapesCopied = secondNodeShapes.stream().map(ns -> ns.getIri().toString()).distinct().toList();
+        firstShapesCopied.removeAll(secondShapesCopied);
+        comparisonDiff.deletedNodeShapes = firstShapesCopied;
+    }
+
+    public static void getDeletedPropertyShapes(ComparisonDiff comparisonDiff, List<NS> firstNodeShapes, List<NS> secondNodeShapes) {
+        var propertyShapes1 = new java.util.ArrayList<>(firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).distinct().toList());
+        var propertyShapes2 = secondNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).distinct().toList();
+        propertyShapes1.removeAll(propertyShapes2);
+        comparisonDiff.deletedPropertyShapes = propertyShapes1;
+    }
+
+    public static void getAddedNodeShapes(ComparisonDiff comparisonDiff, List<NS> firstNodeShapes, List<NS> secondNodeShapes) {
+        var secondShapesCopied = new java.util.ArrayList<>(secondNodeShapes.stream().map(ns -> ns.getIri().toString()).distinct().toList());
+        var firstShapesCopied = firstNodeShapes.stream().map(ns -> ns.getIri().toString()).distinct().toList();
+        secondShapesCopied.removeAll(firstShapesCopied);
+        comparisonDiff.addedNodeShapes = secondShapesCopied;
+    }
+
+    public static void getAddedPropertyShapes(ComparisonDiff comparisonDiff, List<NS> firstNodeShapes, List<NS> secondNodeShapes) {
+        var propertyShapes2 = new java.util.ArrayList<>(secondNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).distinct().toList());
+        var propertyShapes1 = firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString())).distinct().toList();
+        propertyShapes2.removeAll(propertyShapes1);
+        comparisonDiff.addedPropertyShapes = propertyShapes2;
     }
 }

@@ -1,7 +1,7 @@
 package qseevolvingkg.partialsparqlqueries.shapeobjects;
 
 import cs.qse.common.structure.NS;
-import qseevolvingkg.partialsparqlqueries.Main;
+import qseevolvingkg.partialsparqlqueries.SparqlShapeValidator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 //Copied from WebApp
 public class ExtractedShapes {
-    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
 
     public int support = 0;
     public double confidence = 0;

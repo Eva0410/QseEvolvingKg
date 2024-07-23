@@ -1,6 +1,6 @@
 package qseevolvingkg.partialsparqlqueries.utils;
 
-import qseevolvingkg.partialsparqlqueries.Main;
+import qseevolvingkg.partialsparqlqueries.SparqlShapeValidator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 //Copied from QSE
 public class ConfigManager {
-    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
 
     public static String getProperty(String property) {
         try {

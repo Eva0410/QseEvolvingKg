@@ -20,7 +20,7 @@ import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
-import qseevolvingkg.partialsparqlqueries.Main;
+import qseevolvingkg.partialsparqlqueries.SparqlShapeValidator;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.NodeShape;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.PropertyShape;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ShaclOrListItem;
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class GraphDbUtils {
-    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
 
     public static void checkShapesInNewGraph(String url, String repositoryName, List<NodeShape> nodeShapes) {
         RepositoryManager repositoryManager = new RemoteRepositoryManager(url);

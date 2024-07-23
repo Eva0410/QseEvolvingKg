@@ -645,7 +645,7 @@ public class RQ2UnitTests {
         assertTrue(nodeShapes.get(0).propertyShapes.get(0).iri.toString().contains("http://shaclshapes.org/instanceTypePersonShapeProperty"));
     }
 
-    private static String generateFile(String content) {
+    static String generateFile(String content) {
         Path tempFile = null;
         try {
             var randomString =  RandomStringUtils.random(5, true, true);

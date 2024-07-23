@@ -13,7 +13,6 @@ import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,7 +58,7 @@ public class ShapeComparatorSparql {
         return comparisonDiff;
     }
 
-    public ComparisonDiff doComparison(String threshold, ShapeComparatorQSE shapeComparatorQSE) {
+    public ComparisonDiff doComparison(String threshold, ShapeComparatorQSEQueryBased shapeComparatorQSE) {
         ComparisonDiff comparisonDiff = prepareQSE(threshold);
         comparisonDiff.durationQse1 = shapeComparatorQSE.comparisonDiff.durationQse1;
 
@@ -143,6 +142,6 @@ public class ShapeComparatorSparql {
         comparisonDiff.durationComparison = Duration.between(startComparison, endComparison);
 
         comparisonDiff.durationTotal = comparisonDiff.durationQse1.plus(comparisonDiff.durationSecondStep).plus(comparisonDiff.durationComparison);
-        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"Sparql", comparisonDiff.toString());
+        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"Sparql", comparisonDiff.toStringEditedAndDeleted());
     }
 }
