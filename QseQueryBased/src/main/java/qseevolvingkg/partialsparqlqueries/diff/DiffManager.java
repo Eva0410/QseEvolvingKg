@@ -78,15 +78,16 @@ public class DiffManager {
         diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
         diffShapeGenerator.computeDeletedShapes();
         diffShapeGenerator.generateDiffMap();
-        diffShapeGenerator.generateDiffShapesWithQse(diffShapeGenerator.diffShapes);
+        diffShapeGenerator.generateDiffShapesWithQse();
 
-        var mergedFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var mergedFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString();
         var fileAsString = RegexUtils.getFileAsString(mergedFilePath);
-        var fileWithDeletedShapes = diffShapeGenerator.deleteShapesFromFile(diffExtractor.originalExtractedShapes, fileAsString);
+        var fileWithDeletedShapes = diffShapeGenerator.deleteShapesFromFile(fileAsString);
         var filePath = Paths.get(Main.outputFilePath).getParent() + File.separator + Main.datasetName+"InclDiff.ttl";
         RegexUtils.saveStringAsFile(fileWithDeletedShapes, filePath);
         var extractedShapes = new ExtractedShapes();
         extractedShapes.fileContentPath = filePath;
+        extractedShapes.nodeShapes = diffShapeGenerator.resultExtractedShapes.getNodeShapes();
         return extractedShapes;
     }
 }

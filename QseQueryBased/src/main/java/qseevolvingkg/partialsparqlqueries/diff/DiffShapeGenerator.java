@@ -18,20 +18,22 @@ public class DiffShapeGenerator {
     Map<Integer, Map<Integer, Set<Integer>>> newShapesMap;
     Parser parser;
     public Map<Integer, Map<Integer, Set<Integer>>> diffShapes;
-    public ExtractedShapes extractedShapes;
+    public ExtractedShapes diffExtractedShapes;
     HashMap<Integer, Set<Integer>> editedShapes;
     public HashMap<Integer, Set<Integer>> deletedShapes = new HashMap<>();
+    public ExtractedShapes resultExtractedShapes;
 
     public DiffShapeGenerator(DiffExtractor diffExtractor) {
         this.oldShapesMap = diffExtractor.originalClassToPropWithObjTypes;
         this.newShapesMap = DiffExtractor.deepClone(diffExtractor.parser.classToPropWithObjTypes);
         this.parser = diffExtractor.parser;
         this.editedShapes = diffExtractor.editedShapesMap;
+        this.resultExtractedShapes = diffExtractor.originalExtractedShapes;
     }
 
-    public ExtractedShapes generateDiffShapesWithQse(Map<Integer, Map<Integer, Set<Integer>>> diffMap) {
+    public ExtractedShapes generateDiffShapesWithQse() {
         //todo check pruning
-        parser.classToPropWithObjTypes = diffMap;
+        parser.classToPropWithObjTypes = this.diffShapes;
         var oldDataSetName = Main.datasetName;
         var oldOutputPath = Main.outputFilePath;
         Main.datasetName = Main.datasetName+"_Diff";
@@ -39,13 +41,13 @@ public class DiffShapeGenerator {
         var diffPath = path.toAbsolutePath() + File.separator + "Diff" + File.separator;
         Main.outputFilePath = diffPath;
         parser.extractSHACLShapes(false, false);
-        extractedShapes = new ExtractedShapes();
-        extractedShapes.setNodeShapes(parser.shapesExtractor.getNodeShapes());
-        extractedShapes.fileContentPath = parser.shapesExtractor.getOutputFileAddress();
-        extractedShapes.getFileAsString();
+        diffExtractedShapes = new ExtractedShapes();
+        diffExtractedShapes.setNodeShapes(parser.shapesExtractor.getNodeShapes());
+        diffExtractedShapes.fileContentPath = parser.shapesExtractor.getOutputFileAddress();
+        diffExtractedShapes.getFileAsString();
         Main.datasetName = oldDataSetName;
         Main.outputFilePath = oldOutputPath;
-        return extractedShapes;
+        return diffExtractedShapes;
     }
 
     public void computeDeletedShapes() {
@@ -110,9 +112,9 @@ public class DiffShapeGenerator {
         }
     }
 
-    public String deleteShapesFromFile(ExtractedShapes originalExtractedShapes, String fileContent) {
+    public String deleteShapesFromFile(String fileContent) {
         for (var nodeShapeClass : deletedShapes.entrySet()) {
-            var nodeShape = originalExtractedShapes.nodeShapes.stream().filter(ns -> ns.targetClass.toString().equals(parser.getStringEncoder().decode(nodeShapeClass.getKey()))).findFirst();
+            var nodeShape = resultExtractedShapes.nodeShapes.stream().filter(ns -> ns.targetClass.toString().equals(parser.getStringEncoder().decode(nodeShapeClass.getKey()))).findFirst();
             if (nodeShape.isPresent()) {
                 for (var propertyShapeClass : nodeShapeClass.getValue()) {
                     var propertyShape = nodeShape.get().propertyShapes.stream().filter(ps -> ps.path.toString().equals(parser.getStringEncoder().decode(propertyShapeClass))).findFirst();
@@ -124,22 +126,22 @@ public class DiffShapeGenerator {
                 }
                 if (nodeShape.get().propertyShapes.isEmpty()) {
                     fileContent = RegexUtils.deleteIriFromString(nodeShape.get().iri.toString(), fileContent, false);
-                    originalExtractedShapes.nodeShapes.remove(nodeShape.get());
+                    resultExtractedShapes.nodeShapes.remove(nodeShape.get());
                 }
             }
         }
         return fileContent;
     }
 
-    public String mergeAddedShapesToOrginialFileAsString(ExtractedShapes originalExtractedShapes) {
-        var originalFile = originalExtractedShapes.getFileAsString();
-        originalFile += extractedShapes.prefixLines;
+    public String mergeAddedShapesToOrginialFileAsString() {
+        var originalFile = resultExtractedShapes.getFileAsString();
+        originalFile += diffExtractedShapes.prefixLines;
 
-        for(var addedNodeShape : extractedShapes.getNodeShapes()) {
-            var existingNodeShape = originalExtractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().equals(addedNodeShape.getIri())).findFirst();
+        for(var addedNodeShape : diffExtractedShapes.getNodeShapes()) {
+            var existingNodeShape = resultExtractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().equals(addedNodeShape.getIri())).findFirst();
             if(existingNodeShape.isPresent()) {
                 var nodeShape = existingNodeShape.get();
-                var nodeShapeAsText = RegexUtils.getShapeAsString(nodeShape.iri.toString(), originalExtractedShapes.getFileAsString());
+                var nodeShapeAsText = RegexUtils.getShapeAsString(nodeShape.iri.toString(), resultExtractedShapes.getFileAsString());
                 var nodeShapeAsTextUpdated = nodeShapeAsText;
 
                 for(var newPropertyShape : addedNodeShape.propertyShapes) {
@@ -148,11 +150,11 @@ public class DiffShapeGenerator {
                         nodeShape.propertyShapes.remove(existingPropertyShape.get());
                         nodeShape.propertyShapes.add(newPropertyShape);
                         originalFile = RegexUtils.deleteIriFromString(existingPropertyShape.get().iri.toString(), originalFile, false);
-                        originalFile += RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), extractedShapes.getFileAsString());
+                        originalFile += RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString());
                     }
                     else {
                         nodeShape.propertyShapes.add(newPropertyShape);
-                        originalFile+=RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), extractedShapes.getFileAsString());
+                        originalFile+=RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString());
                         nodeShapeAsTextUpdated = RegexUtils.insertAfter(nodeShapeAsText, ";", "<http://www.w3.org/ns/shacl#property> <"+newPropertyShape.iri.toString()+"> ;");
                     }
                 }
@@ -161,10 +163,10 @@ public class DiffShapeGenerator {
                 originalFile += nodeShapeAsTextUpdated;
             }
             else {
-                originalExtractedShapes.nodeShapes.add(addedNodeShape);
-                originalFile+=RegexUtils.getShapeAsString(addedNodeShape.iri.toString(), extractedShapes.getFileAsString());
+                resultExtractedShapes.nodeShapes.add(addedNodeShape);
+                originalFile+=RegexUtils.getShapeAsString(addedNodeShape.iri.toString(), diffExtractedShapes.getFileAsString());
                 for (var ps : addedNodeShape.propertyShapes) {
-                    originalFile+=RegexUtils.getShapeAsString(ps.iri.toString(), extractedShapes.getFileAsString());
+                    originalFile+=RegexUtils.getShapeAsString(ps.iri.toString(), diffExtractedShapes.getFileAsString());
                 }
             }
         }

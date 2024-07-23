@@ -9,6 +9,7 @@ import qseevolvingkg.partialsparqlqueries.diff.DiffExtractor;
 import qseevolvingkg.partialsparqlqueries.diff.DiffManager;
 import qseevolvingkg.partialsparqlqueries.diff.DiffShapeGenerator;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
+import qseevolvingkg.partialsparqlqueries.shapeobjects.PropertyShape;
 import qseevolvingkg.partialsparqlqueries.utils.ConfigManager;
 import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
@@ -318,13 +319,12 @@ public class RQ2UnitTests {
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
         diffShapeGenerator.generateDiffMap();
-        var diffMap = diffShapeGenerator.diffShapes;
-        ExtractedShapes extractedShapes = diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+        ExtractedShapes extractedShapes = diffShapeGenerator.generateDiffShapesWithQse();
         String file = extractedShapes.getFileAsString();
-        var catshape = RegexUtils.getShapeAsString("http://shaclshapes.org/CatShape", file);
-        assertFalse(catshape.isEmpty());
-        var ageShape = RegexUtils.getShapeAsString("http://shaclshapes.org/ageCatShapeProperty", file);
-        assertFalse(ageShape.isEmpty());
+        var catShapeString = RegexUtils.getShapeAsString("http://shaclshapes.org/CatShape", file);
+        assertFalse(catShapeString.isEmpty());
+        var ageShapeString = RegexUtils.getShapeAsString("http://shaclshapes.org/ageCatShapeProperty", file);
+        assertFalse(ageShapeString.isEmpty());
     }
 
     @Test
@@ -341,11 +341,23 @@ public class RQ2UnitTests {
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
         diffShapeGenerator.generateDiffMap();
-        var diffMap = diffShapeGenerator.diffShapes;
-        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
-        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        diffShapeGenerator.generateDiffShapesWithQse();
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString();
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
         assertTrue(fileAsString.contains("colorCatShape"));
+
+        var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
+        assertEquals(nodeShapes.size(),2);
+        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        var personShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
+        assertNotNull(catShape);
+        assertNotNull(personShape);
+        assertEquals(personShape.propertyShapes.size(),1);
+        var colorShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("colorCatShapeProperty")).toList().get(0);
+        assertNotNull(colorShape);
+        var instanceTypeShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("instanceTypeCatShapeProperty")).toList().get(0);
+        assertNotNull(instanceTypeShape);
+        assertEquals(catShape.propertyShapes.size(),2);
     }
 
     @Test
@@ -354,18 +366,26 @@ public class RQ2UnitTests {
 
         var contentNew = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n" +
                 "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n";
+
         var contentAdded = "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n";
         var contentDeleted = "";
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
         diffShapeGenerator.generateDiffMap();
-        var diffMap = diffShapeGenerator.diffShapes;
-        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
-        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        diffShapeGenerator.generateDiffShapesWithQse();
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString();
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
         assertTrue(fileAsString.contains("colorCatShape"));
         assertTrue(fileAsString.contains("<http://www.w3.org/ns/shacl#property> <http://shaclshapes.org/colorCatShapeProperty> ;"));
+
+        var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
+        assertEquals(nodeShapes.size(),1);
+        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        assertNotNull(catShape);
+        var colorShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("colorCatShapeProperty")).toList().get(0);
+        assertNotNull(colorShape);
+        assertEquals(catShape.propertyShapes.size(),2);
     }
 
     @Test
@@ -383,7 +403,7 @@ public class RQ2UnitTests {
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
         diffShapeGenerator.generateDiffMap();
         var diffMap = diffShapeGenerator.diffShapes;
-        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+        diffShapeGenerator.generateDiffShapesWithQse();
 
         assertTrue(diffExtractor.editedShapesMap.containsKey(0));
         assertEquals(1, diffExtractor.editedShapesMap.size());
@@ -394,7 +414,7 @@ public class RQ2UnitTests {
         assertEquals(1, diffMap.get(0).size());
         assertNotNull(diffMap.get(0).get(3));
 
-        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString();
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
         assertTrue(fileAsString.contains("<http://shaclshapes.org/colorCatShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "  <http://www.w3.org/ns/shacl#minCount> 1 ;\n" +
@@ -410,6 +430,15 @@ public class RQ2UnitTests {
                 "    <http://www.w3.org/ns/shacl#datatype> xsd:integer ;\n" +
                 "  ] ) ;\n" +
                 "  <http://www.w3.org/ns/shacl#path> <http://example.org/color> .\n"));
+
+
+        var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
+        assertEquals(nodeShapes.size(),1);
+        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        assertNotNull(catShape);
+        var colorShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("colorCatShapeProperty")).toList().get(0);
+        assertNotNull(colorShape);
+        assertEquals(catShape.propertyShapes.size(),2);
     }
 
     @Test
@@ -427,7 +456,7 @@ public class RQ2UnitTests {
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
         diffShapeGenerator.generateDiffMap();
         var diffMap = diffShapeGenerator.diffShapes;
-        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+        diffShapeGenerator.generateDiffShapesWithQse();
 
         assertTrue(diffExtractor.editedShapesMap.containsKey(0));
         assertEquals(1, diffExtractor.editedShapesMap.size());
@@ -438,7 +467,7 @@ public class RQ2UnitTests {
         assertEquals(1, diffMap.get(0).size());
         assertNotNull(diffMap.get(0).get(3));
 
-        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString();
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
         assertTrue(fileAsString.contains("<http://shaclshapes.org/colorCatShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "  <http://shaclshapes.org/confidence> 1E0 ;\n" +
@@ -447,6 +476,14 @@ public class RQ2UnitTests {
                 "  <http://www.w3.org/ns/shacl#datatype> xsd:string ;\n" +
                 "  <http://www.w3.org/ns/shacl#minCount> 1 ;\n" +
                 "  <http://www.w3.org/ns/shacl#path> <http://example.org/color> ."));
+
+        var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
+        assertEquals(nodeShapes.size(),1);
+        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        assertNotNull(catShape);
+        var colorShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("colorCatShapeProperty")).toList().get(0);
+        assertNotNull(colorShape);
+        assertEquals(catShape.propertyShapes.size(),2);
     }
 
     @Test
@@ -466,7 +503,7 @@ public class RQ2UnitTests {
         var deletedShapeMap = diffShapeGenerator.deletedShapes;
         diffShapeGenerator.generateDiffMap();
         var diffMap = diffShapeGenerator.diffShapes;
-        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+        diffShapeGenerator.generateDiffShapesWithQse();
 
         assertTrue(deletedShapeMap.containsKey(0));
         assertEquals(1, deletedShapeMap.size());
@@ -475,13 +512,22 @@ public class RQ2UnitTests {
         assertTrue(deletedShapeMap.get(0).contains(4));
         assertEquals(0, diffMap.size());
 
-        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString();
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
-        var fileWithDeletedShapes = diffShapeGenerator.deleteShapesFromFile(diffExtractor.originalExtractedShapes, fileAsString);
+        var fileWithDeletedShapes = diffShapeGenerator.deleteShapesFromFile(fileAsString);
         RegexUtils.saveStringAsFile(fileWithDeletedShapes,  Main.outputFilePath+"finished.ttl");
         assertFalse(fileWithDeletedShapes.contains("<http://shaclshapes.org/CatShape>"));
         assertFalse(fileWithDeletedShapes.contains("<http://shaclshapes.org/colorCatShapeProperty>"));
         assertFalse(fileWithDeletedShapes.contains("<http://shaclshapes.org/instanceTypeCatShapeProperty>"));
+
+        var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
+        assertEquals(nodeShapes.size(),1);
+        var personShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
+        assertNotNull(personShape);
+        assertEquals(personShape.propertyShapes.size(),1);
+        var instanceTypeShape = personShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("instanceTypePersonShapeProperty")).toList().get(0);
+        assertNotNull(instanceTypeShape);
+        assertEquals(personShape.propertyShapes.size(),1);
     }
 
     @Test
@@ -501,7 +547,7 @@ public class RQ2UnitTests {
         var deletedShapeMap = diffShapeGenerator.deletedShapes;
         diffShapeGenerator.generateDiffMap();
         var diffMap = diffShapeGenerator.diffShapes;
-        diffShapeGenerator.generateDiffShapesWithQse(diffMap);
+        diffShapeGenerator.generateDiffShapesWithQse();
 
         assertTrue(deletedShapeMap.containsKey(0));
         assertEquals(1, deletedShapeMap.size());
@@ -509,13 +555,26 @@ public class RQ2UnitTests {
         assertTrue(deletedShapeMap.get(0).contains(4));
         assertEquals(0, diffMap.size());
 
-        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
+        var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString();
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
-        var fileWithDeletedShapes = diffShapeGenerator.deleteShapesFromFile(diffExtractor.originalExtractedShapes, fileAsString);
+        var fileWithDeletedShapes = diffShapeGenerator.deleteShapesFromFile(fileAsString);
         RegexUtils.saveStringAsFile(fileWithDeletedShapes,  Main.outputFilePath+"finished.ttl");
         assertTrue(fileWithDeletedShapes.contains("<http://shaclshapes.org/CatShape>"));
         assertFalse(fileWithDeletedShapes.contains("<http://shaclshapes.org/colorCatShapeProperty>"));
         assertTrue(fileWithDeletedShapes.contains("<http://shaclshapes.org/instanceTypeCatShapeProperty>"));
+
+        var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
+        assertEquals(nodeShapes.size(),2);
+        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        var personShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
+        assertNotNull(catShape);
+        assertNotNull(personShape);
+        assertEquals(personShape.propertyShapes.size(),1);
+        var instanceCatShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("instanceTypeCatShapeProperty")).toList().get(0);
+        var instancePerson = personShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("instanceTypePersonShapeProperty")).toList().get(0);
+        assertNotNull(instanceCatShape);
+        assertNotNull(instancePerson);
+        assertEquals(catShape.propertyShapes.size(),1);
     }
 
     @Test
@@ -579,7 +638,11 @@ public class RQ2UnitTests {
         var extractedShapes = diffManager.run("People", filePath, addedPath, deletedPath);
         assertTrue(extractedShapes.getFileAsString().contains("<http://shaclshapes.org/PersonShape>"));
         assertTrue(extractedShapes.getFileAsString().contains("<http://shaclshapes.org/instanceTypePersonShapeProperty>"));
-
+        var nodeShapes = extractedShapes.getNodeShapes();
+        assertEquals(1, nodeShapes.size());
+        assertTrue(nodeShapes.get(0).iri.toString().contains("http://shaclshapes.org/PersonShape"));
+        assertEquals(nodeShapes.get(0).propertyShapes.size(),1);
+        assertTrue(nodeShapes.get(0).propertyShapes.get(0).iri.toString().contains("http://shaclshapes.org/instanceTypePersonShapeProperty"));
     }
 
     private static String generateFile(String content) {
