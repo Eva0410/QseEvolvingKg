@@ -1,4 +1,4 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.diff;
 
 import cs.Main;
 import cs.qse.common.EntityData;

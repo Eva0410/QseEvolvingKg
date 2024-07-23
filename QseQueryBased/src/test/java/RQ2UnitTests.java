@@ -2,22 +2,27 @@ import cs.Main;
 import cs.qse.common.EntityData;
 import cs.qse.filebased.Parser;
 import cs.qse.filebased.SupportConfidence;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import qseevolvingkg.partialsparqlqueries.DiffExtractor;
-import qseevolvingkg.partialsparqlqueries.DiffShapeGenerator;
+import qseevolvingkg.partialsparqlqueries.diff.DiffExtractor;
+import qseevolvingkg.partialsparqlqueries.diff.DiffManager;
+import qseevolvingkg.partialsparqlqueries.diff.DiffShapeGenerator;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
 import qseevolvingkg.partialsparqlqueries.utils.ConfigManager;
 import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -33,10 +38,11 @@ public class RQ2UnitTests {
         File emptyConfig = new File(currentDir, "src/test/expected_test_results/emptyconfig.txt");
         Main.configPath = emptyConfig.getAbsolutePath(); //avoid exceptions in QSE
         Main.saveCountInPropertyData=true;
-        Path basePath = Paths.get( "Output", "UnitTestOutput");
+        Path basePath = Paths.get( "Output", "UnitTestOutput", "Original");
+        Files.createDirectories(basePath);
         cs.Main.setOutputFilePathForJar(basePath.toAbsolutePath()+File.separator);
 
-        Files.walk(Paths.get(Main.outputFilePath))
+        Files.walk(Paths.get(Main.outputFilePath).getParent())
                 .forEach(path -> {
                     try {
                         Files.delete(path);
@@ -256,15 +262,16 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var diffMap = diffShapeGenerator.generateDiffMap();
-        assertTrue(diffMap.size()==1);
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
+        assertEquals(1, diffMap.size());
         assertTrue(diffMap.containsKey(6));
-        assertTrue(diffMap.get(6).size()==2);
+        assertEquals(2, diffMap.get(6).size());
         assertTrue(diffMap.get(6).containsKey(1));
-        assertTrue(diffMap.get(6).get(1).size()==1);
+        assertEquals(1, diffMap.get(6).get(1).size());
         assertTrue(diffMap.get(6).get(1).contains(2));
         assertTrue(diffMap.get(6).containsKey(7));
-        assertTrue(diffMap.get(6).get(7).size()==1);
+        assertEquals(1, diffMap.get(6).get(7).size());
         assertTrue(diffMap.get(6).get(7).contains(4));
     }
 
@@ -284,12 +291,13 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var diffMap = diffShapeGenerator.generateDiffMap();
-        assertTrue(diffMap.size()==1);
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
+        assertEquals(1, diffMap.size());
         assertTrue(diffMap.containsKey(1));
-        assertTrue(diffMap.get(1).size()==1);
+        assertEquals(1, diffMap.get(1).size());
         assertTrue(diffMap.get(1).containsKey(6));
-        assertTrue(diffMap.get(1).get(6).size()==1);
+        assertEquals(1, diffMap.get(1).get(6).size());
         assertTrue(diffMap.get(1).get(6).contains(7));
     }
 
@@ -309,13 +317,14 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
         ExtractedShapes extractedShapes = diffShapeGenerator.generateDiffShapesWithQse(diffMap);
         String file = extractedShapes.getFileAsString();
         var catshape = RegexUtils.getShapeAsString("http://shaclshapes.org/CatShape", file);
-        assertTrue(!catshape.isEmpty());
+        assertFalse(catshape.isEmpty());
         var ageShape = RegexUtils.getShapeAsString("http://shaclshapes.org/ageCatShapeProperty", file);
-        assertTrue(!ageShape.isEmpty());
+        assertFalse(ageShape.isEmpty());
     }
 
     @Test
@@ -331,7 +340,8 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
         diffShapeGenerator.generateDiffShapesWithQse(diffMap);
         var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
@@ -349,7 +359,8 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
         diffShapeGenerator.generateDiffShapesWithQse(diffMap);
         var newFilePath = diffShapeGenerator.mergeAddedShapesToOrginialFileAsString(diffExtractor.originalExtractedShapes);
         var fileAsString = RegexUtils.getFileAsString(newFilePath);
@@ -370,7 +381,8 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
         diffShapeGenerator.generateDiffShapesWithQse(diffMap);
 
         assertTrue(diffExtractor.editedShapesMap.containsKey(0));
@@ -413,7 +425,8 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
         diffShapeGenerator.generateDiffShapesWithQse(diffMap);
 
         assertTrue(diffExtractor.editedShapesMap.containsKey(0));
@@ -449,8 +462,10 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var deletedShapeMap = diffShapeGenerator.getDeletedShapes();
-        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.computeDeletedShapes();
+        var deletedShapeMap = diffShapeGenerator.deletedShapes;
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
         diffShapeGenerator.generateDiffShapesWithQse(diffMap);
 
         assertTrue(deletedShapeMap.containsKey(0));
@@ -482,8 +497,10 @@ public class RQ2UnitTests {
 
         var diffExtractor = testQseOuptut(content, contentNew, contentAdded, contentDeleted);
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
-        var deletedShapeMap = diffShapeGenerator.getDeletedShapes();
-        var diffMap = diffShapeGenerator.generateDiffMap();
+        diffShapeGenerator.computeDeletedShapes();
+        var deletedShapeMap = diffShapeGenerator.deletedShapes;
+        diffShapeGenerator.generateDiffMap();
+        var diffMap = diffShapeGenerator.diffShapes;
         diffShapeGenerator.generateDiffShapesWithQse(diffMap);
 
         assertTrue(deletedShapeMap.containsKey(0));
@@ -545,6 +562,36 @@ public class RQ2UnitTests {
                 "<http://example.org/greyCat> <http://example.org/color> \"grey\" .";
 
         testQseOuptut(content, contentNew, contentAdded, contentDeleted);
+    }
+
+    @Test
+    public void testDiffManager()
+    {
+        var content = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n";
+
+        var contentAdded = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n";
+        var contentDeleted = "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n";
+        String filePath = generateFile(content);
+        String addedPath = generateFile(contentAdded);
+        String deletedPath = generateFile(contentDeleted);
+
+        DiffManager diffManager = new DiffManager();
+        var extractedShapes = diffManager.run("People", filePath, addedPath, deletedPath);
+        assertTrue(extractedShapes.getFileAsString().contains("<http://shaclshapes.org/PersonShape>"));
+        assertTrue(extractedShapes.getFileAsString().contains("<http://shaclshapes.org/instanceTypePersonShapeProperty>"));
+
+    }
+
+    private static String generateFile(String content) {
+        Path tempFile = null;
+        try {
+            var randomString =  RandomStringUtils.random(5, true, true);
+            tempFile = Files.createTempFile("QSEDiff"+randomString,".nt");
+            Files.write(tempFile, content.getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+            return tempFile.toAbsolutePath().toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void runParser(Parser parser) {

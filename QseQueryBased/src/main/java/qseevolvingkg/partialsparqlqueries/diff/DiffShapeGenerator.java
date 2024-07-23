@@ -1,13 +1,13 @@
-package qseevolvingkg.partialsparqlqueries;
+package qseevolvingkg.partialsparqlqueries.diff;
 
 import cs.Main;
 import cs.qse.filebased.Parser;
 import qseevolvingkg.partialsparqlqueries.shapeobjects.ExtractedShapes;
-import qseevolvingkg.partialsparqlqueries.shapeobjects.NodeShape;
-import qseevolvingkg.partialsparqlqueries.utils.GraphDbUtils;
 import qseevolvingkg.partialsparqlqueries.utils.RegexUtils;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,17 +32,23 @@ public class DiffShapeGenerator {
     public ExtractedShapes generateDiffShapesWithQse(Map<Integer, Map<Integer, Set<Integer>>> diffMap) {
         //todo check pruning
         parser.classToPropWithObjTypes = diffMap;
+        var oldDataSetName = Main.datasetName;
+        var oldOutputPath = Main.outputFilePath;
         Main.datasetName = Main.datasetName+"_Diff";
-        Main.outputFilePath = Main.outputFilePath+ "Diff" + File.separator;
+        Path path = Paths.get(Main.outputFilePath).getParent();
+        var diffPath = path.toAbsolutePath() + File.separator + "Diff" + File.separator;
+        Main.outputFilePath = diffPath;
         parser.extractSHACLShapes(false, false);
         extractedShapes = new ExtractedShapes();
         extractedShapes.setNodeShapes(parser.shapesExtractor.getNodeShapes());
         extractedShapes.fileContentPath = parser.shapesExtractor.getOutputFileAddress();
         extractedShapes.getFileAsString();
+        Main.datasetName = oldDataSetName;
+        Main.outputFilePath = oldOutputPath;
         return extractedShapes;
     }
 
-    public HashMap<Integer, Set<Integer>> getDeletedShapes() {
+    public void computeDeletedShapes() {
         deletedShapes = new HashMap<>();
         for(var nodeShapeEntry : oldShapesMap.entrySet()) {
             var nodeShapeKey = nodeShapeEntry.getKey();
@@ -61,11 +67,10 @@ public class DiffShapeGenerator {
                 }
             }
         }
-        return deletedShapes;
     }
 
 
-    public Map<Integer, Map<Integer, Set<Integer>>> generateDiffMap() {
+    public void generateDiffMap() {
         diffShapes = new HashMap<>();
         for(var nodeShapeEntry : newShapesMap.entrySet()) {
             var nodeShapeKey = nodeShapeEntry.getKey();
@@ -103,7 +108,6 @@ public class DiffShapeGenerator {
             if(propEntryDiff.isEmpty())
                 diffShapes.remove(nodeShapeKey);
         }
-        return diffShapes;
     }
 
     public String deleteShapesFromFile(ExtractedShapes originalExtractedShapes, String fileContent) {
