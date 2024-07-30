@@ -1,0 +1,61 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
+  <diagram id="RRZBlMb02mqQcLyzKxVq" name="Seite-1">
+    <mxGraphModel dx="1789" dy="577" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="node0" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;NS&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt;~ targetClass: IRI&lt;br/&gt;~ countPscWithPruneFlag: Integer&lt;br/&gt;~ countPscWithSupportPruneFlag: Integer&lt;br/&gt;~ countPropertyShapes: Integer&lt;br/&gt;~ countPsWithPruneFlag: Integer&lt;br/&gt;~ propertyShapes: List&amp;lt;PS&amp;gt;&lt;br/&gt;~ countPsWithConfidencePruneFlag: Integer&lt;br/&gt;~ iri: IRI&lt;br/&gt;~ pruneFlag: Boolean&lt;br/&gt;~ countPscWithConfidencePruneFlag: Integer&lt;br/&gt;~ support: Integer&lt;br/&gt;~ countPsWithSupportPruneFlag: Integer&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="-550" y="287" width="300" height="327" as="geometry" />
+        </mxCell>
+        <mxCell id="node2" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;PS&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt;~ pruneFlag: Boolean&lt;br/&gt;~ confidencePruneFlag: Boolean&lt;br/&gt;~ dataTypeOrClass: String&lt;br/&gt;~ hasOrList: Boolean&lt;br/&gt;~ support: Integer&lt;br/&gt;~ iri: IRI&lt;br/&gt;~ path: String&lt;br/&gt;~ nodeKind: String&lt;br/&gt;~ shaclOrListItems: List&amp;lt;ShaclOrListItem&amp;gt;&lt;br/&gt;~ confidence: Double&lt;br/&gt;~ supportPruneFlag: Boolean&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="-220" y="287" width="270" height="303" as="geometry" />
+        </mxCell>
+        <mxCell id="node1" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ShaclOrListItem&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt;~ nodeKind: String&lt;br/&gt;~ confidencePruneFlag: Boolean&lt;br/&gt;~ pruneFlag: Boolean&lt;br/&gt;~ dataTypeOrClass: String&lt;br/&gt;~ support: Integer&lt;br/&gt;~ supportPruneFlag: Boolean&lt;br/&gt;~ confidence: Double&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="70" y="287" width="210" height="207" as="geometry" />
+        </mxCell>
+        <mxCell id="7FnU-LPrHERl6SKrsJ8--2" value="1" style="endArrow=open;html=1;endSize=12;startArrow=diamondThin;startSize=14;startFill=1;edgeStyle=orthogonalEdgeStyle;align=left;verticalAlign=bottom;rounded=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="node0" target="node2" edge="1">
+          <mxGeometry x="-0.8395" y="-30" relative="1" as="geometry">
+            <mxPoint x="-230" y="640" as="sourcePoint" />
+            <mxPoint x="-70" y="640" as="targetPoint" />
+            <mxPoint x="-30" y="-30" as="offset" />
+            <Array as="points">
+              <mxPoint x="-400" y="640" />
+              <mxPoint x="-153" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7FnU-LPrHERl6SKrsJ8--3" value="propertyShapes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="7FnU-LPrHERl6SKrsJ8--2" vertex="1" connectable="0">
+          <mxGeometry x="-0.2604" y="2" relative="1" as="geometry">
+            <mxPoint x="27" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7FnU-LPrHERl6SKrsJ8--4" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="7FnU-LPrHERl6SKrsJ8--2" vertex="1" connectable="0">
+          <mxGeometry x="0.6563" y="-2" relative="1" as="geometry">
+            <mxPoint x="18" y="-42" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7FnU-LPrHERl6SKrsJ8--5" value="1" style="endArrow=open;html=1;endSize=12;startArrow=diamondThin;startSize=14;startFill=1;edgeStyle=orthogonalEdgeStyle;align=left;verticalAlign=bottom;rounded=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="node2" target="node1" edge="1">
+          <mxGeometry x="-0.8971" y="-23" relative="1" as="geometry">
+            <mxPoint x="220" y="470" as="sourcePoint" />
+            <mxPoint x="370" y="560" as="targetPoint" />
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="-17" y="640" />
+              <mxPoint x="175" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7FnU-LPrHERl6SKrsJ8--6" value="shaclOrListItems" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="7FnU-LPrHERl6SKrsJ8--5" vertex="1" connectable="0">
+          <mxGeometry x="-0.2604" y="2" relative="1" as="geometry">
+            <mxPoint x="4" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7FnU-LPrHERl6SKrsJ8--7" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="7FnU-LPrHERl6SKrsJ8--5" vertex="1" connectable="0">
+          <mxGeometry x="0.6563" y="-2" relative="1" as="geometry">
+            <mxPoint x="13" y="-60" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

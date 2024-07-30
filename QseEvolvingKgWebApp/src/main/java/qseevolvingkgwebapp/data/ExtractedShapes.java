@@ -22,7 +22,13 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 @Entity
-public class ExtractedShapes extends AbstractEntity{
+public class ExtractedShapes {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idgenerator")
+    @SequenceGenerator(name = "idgenerator", initialValue = 1000)
+    private Long extractedshapesId;
+
 
     @ManyToOne
     Version versionEntity;
@@ -282,5 +288,9 @@ public class ExtractedShapes extends AbstractEntity{
             this.fileContentDefaultShapesPath = saveFileContentPath(fileContentDefaultShapesPath, "_default.ttl");
         else
             this.fileContentDefaultShapesPath = fileContentDefaultShapesPath;
+    }
+
+    public Long getId() {
+        return extractedshapesId;
     }
 }

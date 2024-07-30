@@ -1,164 +1,86 @@
-<mxfile host="Electron" modified="2024-07-05T12:07:12.922Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.6.4 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="1teRroQmT6iKEa9S0qCG" version="24.6.4" type="device">
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
   <diagram id="n_EjeLJXGiH_CpQGuu-Z" name="Page-1">
-    <mxGraphModel dx="1077" dy="-399" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
+    <mxGraphModel dx="1800" dy="28" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="node10" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXTRACTED_SHAPES&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; VERSION: integer&lt;br/&gt; COMBO_BOX_STRING: character varying(255)&lt;br/&gt; CONFIDENCE: double precision&lt;br/&gt; CREATED_AT: timestamp&lt;br/&gt; FILE_CONTENT_DEFAULT_SHAPES_PATH: character varying(255)&lt;br/&gt; FILE_CONTENT_PATH: character varying(255)&lt;br/&gt; QSE_TYPE: character varying(255)&lt;br/&gt; SUPPORT: integer&lt;br/&gt; VERSION_ENTITY_ID: bigint&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="-83" y="1114" width="443" height="280" as="geometry" />
+        <mxCell id="node10" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXTRACTED_SHAPES&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt;COMBO_BOX_STRING: character varying(255)&lt;br&gt; CONFIDENCE: double precision&lt;br&gt; CREATED_AT: timestamp&lt;br&gt; FILE_CONTENT_DEFAULT_SHAPES_PATH: character varying(255)&lt;br&gt; FILE_CONTENT_PATH: character varying(255)&lt;br&gt; QSE_TYPE: character varying(255)&lt;br&gt; SUPPORT: integer&lt;br&gt; VERSION_ENTITY_ID: bigint FK&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt;EXTRACTEDSHAPES_ID: bigint PK&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
+          <mxGeometry x="-100" y="1126" width="443" height="254" as="geometry" />
         </mxCell>
-        <mxCell id="node3" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXTRACTED_SHAPES_CLASSES&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; EXTRACTED_SHAPES_ID: bigint&lt;br/&gt; CLASSES: character varying(255)&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="570" y="1139" width="250" height="94" as="geometry" />
+        <mxCell id="node3" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXTRACTED_SHAPES_CLASSES&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; EXTRACTED_SHAPES_ID: bigint FK&lt;br&gt; CLASSES: character varying(255)&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
+          <mxGeometry x="450" y="1032" width="250" height="94" as="geometry" />
         </mxCell>
-        <mxCell id="node9" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXTRACTED_SHAPES_NODE_SHAPES&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; EXTRACTED_SHAPES_ID: bigint&lt;br/&gt; NODE_SHAPES_ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="525" y="1300" width="275" height="94" as="geometry" />
+        <mxCell id="node4" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXTRACTED_SHAPES_NODE_SHAPES_DEFAULT&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; EXTRACTED_SHAPES_EXTRACTEDSHAPES_ID&amp;nbsp;: bigint FK&lt;br&gt; NODE_SHAPES_DEFAULT_NODE_SHAPE_ID: bigint FK&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
+          <mxGeometry x="-70" y="1580" width="400" height="94" as="geometry" />
         </mxCell>
-        <mxCell id="node4" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXTRACTED_SHAPES_NODE_SHAPES_DEFAULT&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; EXTRACTED_SHAPES_ID: bigint&lt;br/&gt; NODE_SHAPES_DEFAULT_ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="480" y="1550" width="340" height="94" as="geometry" />
+        <mxCell id="node7" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;GRAPH&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; VERSION: integer&lt;br&gt; CREATED_AT: timestamp&lt;br&gt; NAME: character varying(255)&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; ID: bigint PK&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
+          <mxGeometry x="210" y="910.5" width="219" height="147" as="geometry" />
         </mxCell>
-        <mxCell id="node7" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;GRAPH&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; VERSION: integer&lt;br/&gt; CREATED_AT: timestamp&lt;br/&gt; NAME: character varying(255)&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="420" y="890.5" width="219" height="147" as="geometry" />
+        <mxCell id="node0" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;NODE_SHAPE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; GENERATED_TEXT: character large object&lt;br&gt; IRI: binary varying(255)&lt;br&gt; IRI_LOCAL_NAME: character varying(255)&lt;br&gt; SHOULD_GENERATE_TEXT: boolean&lt;br&gt; SUPPORT: integer&lt;br&gt; TARGET_CLASS: binary varying(255)&lt;br&gt; EXTRACTED_SHAPES_ID: bigint&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;NODE_SHAPE_&lt;span style=&quot;background-color: initial;&quot;&gt;ID: bigint PK&lt;/span&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
+          <mxGeometry x="420" y="1442" width="280" height="232" as="geometry" />
         </mxCell>
-        <mxCell id="node0" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;NODE_SHAPE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; GENERATED_TEXT: character large object&lt;br/&gt; IRI: binary varying(255)&lt;br/&gt; IRI_LOCAL_NAME: character varying(255)&lt;br/&gt; SHOULD_GENERATE_TEXT: boolean&lt;br/&gt; SUPPORT: integer&lt;br/&gt; TARGET_CLASS: binary varying(255)&lt;br/&gt; EXTRACTED_SHAPES_ID: bigint&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="10" y="1442" width="280" height="232" as="geometry" />
+        <mxCell id="node1" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;PROPERTY_SHAPE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; CONFIDENCE: double precision&lt;br&gt; DATA_TYPE_OR_CLASS: character varying(255)&lt;br&gt; GENERATED_TEXT: character large object&lt;br&gt; IRI: binary varying(255)&lt;br&gt; NODE_KIND: character varying(255)&lt;br&gt; PATH: character varying(255)&lt;br&gt; SUPPORT: integer&lt;br&gt; NODE_SHAPE_ID: bigint FK&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt;PROPERTY_SHAPE_ID: bigint PK&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
+          <mxGeometry x="378" y="1150" width="322" height="256" as="geometry" />
         </mxCell>
-        <mxCell id="node6" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;NODE_SHAPE_PROPERTY_SHAPE_LIST&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; NODE_SHAPE_ID: bigint&lt;br/&gt; PROPERTY_SHAPE_LIST_ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="181" y="2010" width="299" height="94" as="geometry" />
+        <mxCell id="node5" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;VERSION&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; VERSION: integer&lt;br&gt; CREATED_AT: timestamp&lt;br&gt; NAME: character varying(255)&lt;br&gt; PATH: character varying(255)&lt;br&gt; VERSION_NUMBER: integer&lt;br&gt; GRAPH_ID: bigint FK&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; ID: bigint PK&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
+          <mxGeometry x="-90" y="880" width="200" height="208" as="geometry" />
         </mxCell>
-        <mxCell id="node1" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;PROPERTY_SHAPE&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; CONFIDENCE: double precision&lt;br/&gt; DATA_TYPE_OR_CLASS: character varying(255)&lt;br/&gt; GENERATED_TEXT: character large object&lt;br/&gt; IRI: binary varying(255)&lt;br/&gt; NODE_KIND: character varying(255)&lt;br/&gt; PATH: character varying(255)&lt;br/&gt; SUPPORT: integer&lt;br/&gt; NODE_SHAPE_ID: bigint&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="-22.5" y="1710" width="322" height="256" as="geometry" />
-        </mxCell>
-        <mxCell id="node8" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;PROPERTY_SHAPE_SHACL_OR_LIST_ITEMS&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; PROPERTY_SHAPE_ID: bigint&lt;br/&gt; SHACL_OR_LIST_ITEMS_ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="480" y="1670" width="340" height="94" as="geometry" />
-        </mxCell>
-        <mxCell id="node2" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;SHACL_OR_LIST_ITEM&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; CONFIDENCE: double precision&lt;br/&gt; DATA_TYPE_OR_CLASS: character varying(255)&lt;br/&gt; NODE_KIND: character varying(255)&lt;br/&gt; SUPPORT: integer&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="495" y="1806" width="325" height="160" as="geometry" />
-        </mxCell>
-        <mxCell id="node5" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;VERSION&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; VERSION: integer&lt;br/&gt; CREATED_AT: timestamp&lt;br/&gt; NAME: character varying(255)&lt;br/&gt; PATH: character varying(255)&lt;br/&gt; VERSION_NUMBER: integer&lt;br/&gt; GRAPH_ID: bigint&lt;/p&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; ID: bigint&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" parent="1" vertex="1">
-          <mxGeometry x="38.5" y="860" width="200" height="208" as="geometry" />
-        </mxCell>
-        <mxCell id="edge2" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;arcSize=15;" parent="1" source="node10" target="node5" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="label14" value="VERSION_ENTITY_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge2" vertex="1" connectable="0">
-          <mxGeometry y="1077" as="geometry" />
-        </mxCell>
-        <mxCell id="edge3" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;entryX=1.000;entryY=0.244;entryDx=0;entryDy=0;arcSize=15;exitX=0.002;exitY=0.475;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="node3" target="node10" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="590" y="1182" as="sourcePoint" />
+        <mxCell id="n7M-BrFPSaSVqy9hfxwt-4" value="" style="fontSize=12;html=1;endArrow=ERzeroToMany;startArrow=ERmandOne;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="1" source="node5" target="node10" edge="1">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="-100" y="1080" as="sourcePoint" />
+            <mxPoint y="980" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="label20" value="EXTRACTED_SHAPES_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge3" vertex="1" connectable="0">
-          <mxGeometry x="390" y="1150" as="geometry" />
-        </mxCell>
-        <mxCell id="edge0" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;entryX=1.000;entryY=0.845;entryDx=0;entryDy=0;arcSize=15;" parent="1" target="node10" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="520" y="1351" as="sourcePoint" />
+        <mxCell id="n7M-BrFPSaSVqy9hfxwt-6" value="" style="fontSize=12;html=1;endArrow=ERoneToMany;startArrow=ERmandOne;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="node7" target="node5" edge="1">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="260" y="1050" as="sourcePoint" />
+            <mxPoint x="360" y="950" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="label2" value="EXTRACTED_SHAPES_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge0" vertex="1" connectable="0">
-          <mxGeometry x="370" y="1310" as="geometry" />
-        </mxCell>
-        <mxCell id="edge11" value="" style="html=1;rounded=1;edgeStyle=orthogonalEdgeStyle;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;arcSize=15;entryX=1.011;entryY=0.153;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="node0" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
+        <mxCell id="n7M-BrFPSaSVqy9hfxwt-7" value="" style="fontSize=12;html=1;endArrow=ERzeroToMany;startArrow=ERmandOne;rounded=0;entryX=0.001;entryY=0.53;entryDx=0;entryDy=0;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryPerimeter=0;" parent="1" source="node10" target="node3" edge="1">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="360" y="1181" as="sourcePoint" />
+            <mxPoint x="520" y="1140" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="640" y="1477" />
-            </Array>
-            <mxPoint x="640" y="1401" as="sourcePoint" />
-            <mxPoint x="310" y="1540" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="label68" value="NODE_SHAPES_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge11" vertex="1" connectable="0">
-          <mxGeometry x="430" y="1490" as="geometry" />
-        </mxCell>
-        <mxCell id="edge12" value="" style="html=1;rounded=1;edgeStyle=orthogonalEdgeStyle;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;entryX=1;entryY=0.5;entryDx=0;entryDy=0;arcSize=15;exitX=0.971;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="node4" target="node10" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="810" y="1254" />
-            </Array>
-            <mxPoint x="820" y="1580" as="sourcePoint" />
-            <mxPoint x="376" y="1253.93" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="label74" value="EXTRACTED_SHAPES_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge12" vertex="1" connectable="0">
-          <mxGeometry x="658" y="1505" as="geometry" />
-        </mxCell>
-        <mxCell id="edge8" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;exitX=0;exitY=0.106;exitDx=0;exitDy=0;arcSize=15;exitPerimeter=0;" parent="1" source="node4" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="290" y="1560" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="label50" value="NODE_SHAPES_DEFAULT_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge8" vertex="1" connectable="0">
-          <mxGeometry x="299.5" y="1570" as="geometry" />
-        </mxCell>
-        <mxCell id="edge4" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;arcSize=15;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.526;entryY=1.001;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="node0" target="node10" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="150" y="1503" as="sourcePoint" />
-            <mxPoint x="150" y="1395" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="label26" value="EXTRACTED_SHAPES_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge4" vertex="1" connectable="0">
-          <mxGeometry x="-10" y="1405" as="geometry" />
-        </mxCell>
-        <mxCell id="edge9" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;exitX=0;exitY=0.5;exitDx=0;exitDy=0;arcSize=15;edgeStyle=orthogonalEdgeStyle;" parent="1" source="node6" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-190" y="1662.22" as="sourcePoint" />
-            <mxPoint x="10" y="1625" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="-80" y="2057" />
-              <mxPoint x="-80" y="1625" />
+              <mxPoint x="232" y="1082" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="label56" value="NODE_SHAPE_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge9" vertex="1" connectable="0">
-          <mxGeometry x="30" y="2070" as="geometry" />
+        <mxCell id="mcAkrSsica0Bs7ON5UIX-2" value="" style="fontSize=12;html=1;endArrow=ERzeroToMany;startArrow=ERmandOne;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.566;entryY=1.002;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="node0" target="node1">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="329.90999999999997" y="1650" as="sourcePoint" />
+            <mxPoint x="560" y="1410" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="edge6" value="" style="html=1;rounded=1;edgeStyle=orthogonalEdgeStyle;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;entryX=0.000;entryY=0.500;entryDx=0;entryDy=0;arcSize=15;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" parent="1" source="node6" target="node1" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
+        <mxCell id="mcAkrSsica0Bs7ON5UIX-3" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;EXTRACTED_SHAPES_NODE_SHAPES&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot;&gt;&lt;p style=&quot;margin:0 0 0 4px;line-height:1.6;&quot;&gt; EXTRACTED_SHAPES_EXTRACTEDSHAPES_ID&amp;nbsp;: bigint FK&lt;br&gt; NODE_SHAPES_NODE_SHAPE_ID: bigint FK&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=14;fontFamily=Helvetica;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="-70" y="1460" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="mcAkrSsica0Bs7ON5UIX-5" value="" style="fontSize=12;html=1;endArrow=ERzeroToMany;startArrow=ERmandOne;rounded=0;exitX=0.247;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="node10">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="-171" y="1406" as="sourcePoint" />
+            <mxPoint x="10" y="1460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mcAkrSsica0Bs7ON5UIX-6" value="" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;rounded=0;entryX=0.001;entryY=0.28;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" edge="1" parent="1" source="mcAkrSsica0Bs7ON5UIX-3" target="node0">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="120" y="1430" as="sourcePoint" />
+            <mxPoint x="220" y="1330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mcAkrSsica0Bs7ON5UIX-7" value="" style="fontSize=12;html=1;endArrow=ERzeroToMany;startArrow=ERmandOne;rounded=0;exitX=0.024;exitY=0.998;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;" edge="1" parent="1" source="node10" target="node4">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="21" y="1404" as="sourcePoint" />
+            <mxPoint x="40" y="1470" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="-60" y="2033" />
-              <mxPoint x="-60" y="1838" />
+              <mxPoint x="-90" y="1627" />
             </Array>
-            <mxPoint x="-310" y="1707" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="label38" value="PROPERTY_SHAPE_LIST_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge6" vertex="1" connectable="0">
-          <mxGeometry x="-10" y="2010" as="geometry" />
-        </mxCell>
-        <mxCell id="edge5" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;entryX=0.461;entryY=1.007;entryDx=0;entryDy=0;arcSize=15;entryPerimeter=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="node1" target="node0" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="148" y="1798" as="sourcePoint" />
+        <mxCell id="mcAkrSsica0Bs7ON5UIX-9" value="" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERmandOne;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="node0">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="120" y="1430" as="sourcePoint" />
+            <mxPoint x="330" y="1616" as="targetPoint" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="label32" value="NODE_SHAPE_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge5" vertex="1" connectable="0">
-          <mxGeometry x="20" y="1680" as="geometry" />
-        </mxCell>
-        <mxCell id="edge7" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;arcSize=15;entryX=1;entryY=0.041;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="node1" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="478" y="1720" as="sourcePoint" />
-            <mxPoint x="310" y="1720" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="label44" value="PROPERTY_SHAPE_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge7" vertex="1" connectable="0">
-          <mxGeometry x="320" y="1737" as="geometry" />
-        </mxCell>
-        <mxCell id="edge1" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;exitX=0.414;exitY=1;exitDx=0;exitDy=0;arcSize=15;exitPerimeter=0;entryX=0.386;entryY=-0.001;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="node8" target="node2" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="620" y="1812.72" as="sourcePoint" />
-            <mxPoint x="620" y="1820" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="label8" value="SHACL_OR_LIST_ITEMS_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge1" vertex="1" connectable="0">
-          <mxGeometry x="630" y="1770" as="geometry" />
-        </mxCell>
-        <mxCell id="edge10" value="" style="html=1;rounded=1;dashed=0;startArrow=none;endArrow=block;endSize=12;strokeColor=#595959;arcSize=15;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" target="node7" edge="1" source="node5">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-340" y="1322" as="sourcePoint" />
-            <mxPoint x="-330" y="1400" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="label62" value="GRAPH_ID:ID" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=top;strokeColor=default;arcSize=15;" parent="edge10" vertex="1" connectable="0">
-          <mxGeometry x="280" y="970" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

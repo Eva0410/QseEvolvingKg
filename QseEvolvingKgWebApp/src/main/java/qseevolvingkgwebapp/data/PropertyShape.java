@@ -12,8 +12,7 @@ import java.util.List;
 public class PropertyShape {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    private Long propertyShapeId;
 
     IRI iri;
     String path;
@@ -22,13 +21,11 @@ public class PropertyShape {
     Integer support;
     Double confidence;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    List<ShaclOrListItem> shaclOrListItems; //never used
-
     @Lob
     String generatedText;
 
     @ManyToOne
+    @JoinColumn(name="nodeShapeId")
     NodeShape nodeShape;
 
     private PropertyShape(PS ps) {
@@ -43,10 +40,8 @@ public class PropertyShape {
         //Also resets support and confidence to the maximum confidence if ShaclOrItems are used (copied from Shactor)
         if(ps.getShaclOrListItems() != null && !ps.getShaclOrListItems().isEmpty()){
             cs.qse.common.structure.ShaclOrListItem maxConfidenceItem = null;
-            var shaclOrListItems = new ArrayList<ShaclOrListItem>();
             for (var item:
                     ps.getShaclOrListItems()) {
-                shaclOrListItems.add(new ShaclOrListItem(item.getNodeKind(),item.getDataTypeOrClass(), item.getSupport(), item.getConfidence()));
                 if (maxConfidenceItem == null) {
                     maxConfidenceItem = item;
                 }
@@ -56,7 +51,6 @@ public class PropertyShape {
             }
             support = maxConfidenceItem.getSupport();
             confidence = maxConfidenceItem.getConfidence();
-            this.shaclOrListItems = shaclOrListItems;
         }
     }
 
@@ -130,20 +124,12 @@ public class PropertyShape {
         this.confidence = confidence;
     }
 
-    public List<ShaclOrListItem> getShaclOrListItems() {
-        return shaclOrListItems;
+    public Long getPropertyShapeId() {
+        return propertyShapeId;
     }
 
-    public void setShaclOrListItems(List<ShaclOrListItem> shaclOrListItems) {
-        this.shaclOrListItems = shaclOrListItems;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public void setPropertyShapeId(Long id) {
+        this.propertyShapeId = id;
     }
 
     public String getGeneratedText() {

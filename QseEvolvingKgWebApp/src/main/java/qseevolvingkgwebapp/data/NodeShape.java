@@ -3,7 +3,6 @@ package qseevolvingkgwebapp.data;
 import cs.qse.common.structure.NS;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
 import qseevolvingkgwebapp.services.Utils;
 
 import java.util.ArrayList;
@@ -14,8 +13,7 @@ import java.util.List;
 public class NodeShape {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    private Long nodeShapeId;
 
     IRI iri;
     IRI targetClass;
@@ -24,7 +22,7 @@ public class NodeShape {
     @Lob
     String generatedText;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "nodeShape")
     List<PropertyShape> propertyShapeList;
 
     @ManyToOne
@@ -100,12 +98,12 @@ public class NodeShape {
         this.propertyShapeList = propertyShapeList;
     }
 
-    public Long getId() {
-        return id;
+    public Long getNodeShapeId() {
+        return nodeShapeId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setNodeShapeId(Long id) {
+        this.nodeShapeId = id;
     }
 
     public String getGeneratedText() {

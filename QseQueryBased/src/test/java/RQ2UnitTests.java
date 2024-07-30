@@ -63,6 +63,31 @@ public class RQ2UnitTests {
     }
 
     @Test
+    public void runQseWithPeopleWithSupport() throws IOException {
+        Main.datasetName = "People3";
+        var contentNew = "<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/jenny> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/name> \"Alice\" .\n" +
+                "<http://example.org/bob> <http://xmlns.com/foaf/0.1/name> \"Bob\" .\n" +
+                "<http://example.org/jenny> <http://xmlns.com/foaf/0.1/name> \"Jenny\" .\n" +
+                "<http://example.org/alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/orangeCat> .\n" +
+                "<http://example.org/bob> <http://xmlns.com/foaf/0.1/knows> <http://example.org/blackCat> .\n" +
+                "<http://example.org/jenny> <http://xmlns.com/foaf/0.1/knows> <http://example.org/greyCat> .\n" +
+                "<http://example.org/orangeCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n" +
+                "<http://example.org/blackCat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Cat> .\n" +
+                "<http://example.org/orangeCat> <http://example.org/color> \"orange\" .\n";
+        var tempFileNew = Files.createTempFile("QSERQ2TmpFileNew", ".nt");
+        Files.write(tempFileNew, contentNew.getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+        Main.setPruningThresholds("{(0,0)}");
+        Parser parser = new Parser(tempFileNew.toAbsolutePath().toString(), 3, 10, instanceTypeProperty);
+        parser.entityExtraction();
+        parser.entityConstraintsExtraction();
+        parser.computeSupportConfidence();
+        parser.extractSHACLShapes(true, Main.qseFromSpecificClasses);
+    }
+
+    @Test
     public void runQseWithPeople2() throws IOException {
         Main.datasetName = "People2";
         var tempFileNew = Files.createTempFile("QSERQ2TmpFileNew", ".nt");
