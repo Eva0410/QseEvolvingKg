@@ -51,12 +51,14 @@ public class ComparisonDiv extends Div {
 
                     String color = "";
                     String fontWeight = "";
+                    String strikeThrough = "";
 
                     if (!added.isEmpty() || !removed.isEmpty()) {
                         fontWeight = "font-weight:bold;";
                         color = added.isEmpty() ? "color:red;" : "color:green;";
+                        strikeThrough = added.isEmpty() ? "text-decoration: line-through;" : "";
                     }
-                    diffText.append("<span style=\"").append(color).append(fontWeight).append("\">").append(escapeHtmlCharacters(value)).append("</span>");
+                    diffText.append("<span style=\"").append(color).append(fontWeight).append(strikeThrough).append("\">").append(escapeHtmlCharacters(value)).append("</span>");
                 }
             }
         }

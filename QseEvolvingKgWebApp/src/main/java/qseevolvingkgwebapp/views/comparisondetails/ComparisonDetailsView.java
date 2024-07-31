@@ -83,7 +83,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
         infoParagraph.getElement().getStyle().setDisplay(Style.Display.NONE);
         layout.add(infoParagraph);
         comparisonDiv = new ComparisonDiv(oldText, newText);
-
+        updateColorCombobox(oldText,newText);
         layout.add(comparisonDiv);
 
         selectItemOld.addValueChangeListener(e -> {
@@ -91,12 +91,14 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             oldSelectItemIdExtractedShapes = e.getValue().id;
             comparisonDiv.updateTextDifferences(oldText,newText);
             updateInfoParagraph();
+            updateColorCombobox(oldText,newText);
         });
         selectItemNew.addValueChangeListener(e -> {
             newText = Utils.escapeNew(getText(e.getValue().id));
             newSelectItemIdExtractedShapes = e.getValue().id;
             comparisonDiv.updateTextDifferences(oldText,newText);
             updateInfoParagraph();
+            updateColorCombobox(oldText,newText);
         });
 
         getContent().addAttachListener(e -> {
@@ -119,6 +121,20 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
                 updateInfoParagraph();
             }
         });
+    }
+
+    private void updateColorCombobox(String oldText, String newText) {
+        if(oldText != null && !oldText.isEmpty() && newText != null && !newText.isEmpty() && !oldText.equals(newText)) {
+            selectItemOld.getStyle().set("--vaadin-input-field-border-width", "1px");
+            selectItemOld.getStyle().set("--vaadin-input-field-border-color", "#FF0000");
+            selectItemNew.getStyle().set("--vaadin-input-field-border-width", "1px");
+            selectItemNew.getStyle().set("--vaadin-input-field-border-color", "#008000");
+        }
+        else {
+            selectItemNew.getStyle().set("--vaadin-input-field-border-width", "0px");
+            selectItemOld.getStyle().set("--vaadin-input-field-border-width", "0px");
+        }
+
     }
 
     private void updateInfoParagraph() {
@@ -173,7 +189,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
             }
             //shape was added
             else if(oldText == null || oldText.equals("")) {
-                    infoParagraph.setText("This shape was newly added!");
+                infoParagraph.setText("This shape was newly added!");
             }
         }
         else {
