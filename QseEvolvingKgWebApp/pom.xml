@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <!-- Project from https://start.vaadin.com/project/49085a4b-5888-4262-bcab-b2e563235b42 -->
     <groupId>tuwien</groupId>
-    <artifactId>qseevolvingkgwebapp</artifactId>
-    <name>qseevolvingkgwebapp</name>
+    <artifactId>qseevolvingkg</artifactId>
+    <name>shape_comparator</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 

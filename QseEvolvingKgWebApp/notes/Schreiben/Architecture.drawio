@@ -7,13 +7,13 @@
         <mxCell id="39150e848f15840c-10" value="QSE" style="shape=component;align=left;spacingLeft=36;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;html=1;" parent="1" vertex="1">
           <mxGeometry x="460" y="175" width="80" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="iZPEShM9lby_EYqgSwIC-6" value="ShapeComparator" style="shape=folder;fontStyle=1;tabWidth=110;tabHeight=30;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=1;collapsible=0;recursiveResize=0;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="iZPEShM9lby_EYqgSwIC-6" value="shapecomparator" style="shape=folder;fontStyle=1;tabWidth=110;tabHeight=30;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=1;collapsible=0;recursiveResize=0;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="90" y="130" width="340" height="210" as="geometry" />
         </mxCell>
         <mxCell id="iZPEShM9lby_EYqgSwIC-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="iZPEShM9lby_EYqgSwIC-6" source="39150e848f15840c-5" target="iZPEShM9lby_EYqgSwIC-8">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="39150e848f15840c-5" value="ShapeComparator" style="shape=component;align=left;spacingLeft=36;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;html=1;" parent="iZPEShM9lby_EYqgSwIC-6" vertex="1">
+        <mxCell id="39150e848f15840c-5" value="shapecomparator" style="shape=component;align=left;spacingLeft=36;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;html=1;" parent="iZPEShM9lby_EYqgSwIC-6" vertex="1">
           <mxGeometry x="90" y="45" width="160" height="60" as="geometry" />
         </mxCell>
         <mxCell id="iZPEShM9lby_EYqgSwIC-8" value="Database" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="iZPEShM9lby_EYqgSwIC-6">
