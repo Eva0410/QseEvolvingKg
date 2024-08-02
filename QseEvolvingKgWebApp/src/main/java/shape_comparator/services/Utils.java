@@ -21,9 +21,11 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import org.jetbrains.annotations.NotNull;
 import shape_comparator.data.ExtractedShapes;
 import shape_comparator.data.Graph;
 import shape_comparator.data.Version;
+import sparqlshapechecker.SparqlShapeValidator;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -31,11 +33,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
+    private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
+
 
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final String preconfiguredFolderName = "pre_configured";
@@ -173,10 +179,15 @@ public class Utils {
             System.out.println("No text generated for " + iri.getLocalName());
             return "";
         }
+        return getShapeAsStringFormatted(prefixLines, matcher);
+    }
+
+    @NotNull
+    public static String getShapeAsStringFormatted(String prefixLines, Matcher matcher) {
         String match = matcher.group();
 
         var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
-        model.read(new java.io.StringReader(prefixLines + match), null, "TURTLE"); // Assuming Turtle format, change as needed
+        model.read(new StringReader(prefixLines + match), null, "TURTLE"); // Assuming Turtle format, change as needed
 
         org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
         org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
@@ -195,7 +206,7 @@ public class Utils {
         }
     }
 
-    private static String reorderShaclInItems(String input) {
+    public static String reorderShaclInItems(String input) {
         String searchString = "shacl#in";
         if (input.contains(searchString) && input.indexOf(searchString) != input.lastIndexOf(searchString)) {
             String[] lines = input.split("\n");
@@ -214,10 +225,8 @@ public class Utils {
                 } else
                     orderedLines.add(line);
             }
-            StringBuilder orderedText = new StringBuilder();
-            orderedText.append(String.join("\n", orderedLines));
 
-            return orderedText.toString();
+            return String.join("\n", orderedLines);
         } else
             return input;
     }
@@ -283,7 +292,7 @@ public class Utils {
             StringBuilder newOrItems = new StringBuilder();
             for (var m : orObjects) {
                 inputCopy = inputCopy.replace(m, "");
-                newOrItems.append(m).append(" \n");
+                newOrItems.append(m).append(" \n  ");
             }
             int index = input.indexOf(orItemString);
             if (index == -1)
@@ -291,7 +300,7 @@ public class Utils {
             inputCopy = insertAfter(inputCopy, input.substring(0, index), newOrItems.toString());
             return inputCopy;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occurred", ex);
             return input;
         }
     }

@@ -9,6 +9,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import shape_comparator.services.Utils;
+import sparqlshapechecker.SparqlShapeValidator;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -19,10 +20,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Entity
 public class ExtractedShapes {
+
+    @Transient
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idgenerator")
@@ -38,19 +43,19 @@ public class ExtractedShapes {
     @Enumerated(EnumType.STRING)
     QseType qseType;
 
-    int support;
-    double confidence;
+    public int support;
+    public double confidence;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "ExtractedShapesClasses")
     List<String> classes;
 
-    String fileContentPath;
+    public String fileContentPath;
 
     String fileContentDefaultShapesPath;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    List<NodeShape> nodeShapes;
+    public List<NodeShape> nodeShapes;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<NodeShape> nodeShapesDefault;
@@ -121,9 +126,9 @@ public class ExtractedShapes {
                         prefixLines.append(line).append("\n");
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.severe("Failed to read file: " + e.getMessage());
             }
-            this.fileAsString = fileContent.toString();
+            this.fileAsString = fileContent.toString().replace("\r", "").replace("\r\n", "\n");;
             this.prefixLines = prefixLines.toString();
         }
         return fileAsString;
@@ -133,13 +138,13 @@ public class ExtractedShapes {
         return nodeShapes;
     }
 
-    public void setNodeShapes(List<NS> ns) {
+    public void setNodeShapes(List<NS> ns, boolean shouldGenerateText) {
         var list = new ArrayList<NodeShape>();
         for(var item : ns) {
             //Bug in QSE...
             var nsAlreadyExists = nsAlreadyExists(list, item);
             if(item.getSupport() > this.support && !nsAlreadyExists)
-                list.add(new NodeShape(item, this, true));
+                list.add(new NodeShape(item, this, shouldGenerateText));
         }
         this.nodeShapes = list;
     }

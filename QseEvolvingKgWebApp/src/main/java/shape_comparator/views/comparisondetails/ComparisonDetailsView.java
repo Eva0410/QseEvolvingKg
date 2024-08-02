@@ -166,7 +166,7 @@ public class ComparisonDetailsView extends Composite<VerticalLayout> implements 
                         } else {
                             try {
                                 var nodeShape = extractedShapes.getNodeShapesDefault().stream().filter(ns -> ns.getIri().getLocalName().equals(treeViewItem.getParentShape().getShapeName())).findFirst().get();
-                                var propertyShape = nodeShape.getPropertyShapeList()
+                                var propertyShape = nodeShape.getPropertyShapes()
                                         .stream().filter(ps -> ps.getIri().getLocalName().equals(treeViewItem.getShapeName())).findFirst().get();
                                 support = propertyShape.getSupport();
                                 confidence = (int) Math.round(propertyShape.getConfidence() * 100);

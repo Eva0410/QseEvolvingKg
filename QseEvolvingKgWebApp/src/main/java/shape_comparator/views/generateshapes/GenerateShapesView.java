@@ -279,7 +279,7 @@ public class GenerateShapesView extends Composite<VerticalLayout> {
             }
             throw new Exception("Nothing exported");
         }
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, true);
         extractedShapes.generateComboBoxString();
         shapeService.insert(extractedShapes);
         long durationMillis = System.currentTimeMillis() - startTimeMillis;

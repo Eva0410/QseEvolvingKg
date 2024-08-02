@@ -5,7 +5,7 @@ import cs.qse.common.structure.NS;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
 import org.jetbrains.annotations.NotNull;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
+import shape_comparator.data.ExtractedShapes;
 import sparqlshapechecker.utils.ConfigManager;
 
 import java.io.File;

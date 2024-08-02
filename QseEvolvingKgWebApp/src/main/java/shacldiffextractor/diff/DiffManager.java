@@ -1,8 +1,8 @@
-package sparqlshapechecker.diff;
+package shacldiffextractor.diff;
 
 import cs.Main;
 import cs.qse.filebased.Parser;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
+import shape_comparator.data.ExtractedShapes;
 import sparqlshapechecker.utils.ConfigManager;
 import sparqlshapechecker.utils.RegexUtils;
 

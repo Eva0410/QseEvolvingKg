@@ -7,10 +7,10 @@ import cs.qse.filebased.SupportConfidence;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import sparqlshapechecker.diff.DiffExtractor;
-import sparqlshapechecker.diff.DiffManager;
-import sparqlshapechecker.diff.DiffShapeGenerator;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
+import shape_comparator.data.ExtractedShapes;
+import shacldiffextractor.diff.DiffExtractor;
+import shacldiffextractor.diff.DiffManager;
+import shacldiffextractor.diff.DiffShapeGenerator;
 import sparqlshapechecker.utils.ConfigManager;
 import sparqlshapechecker.utils.RegexUtils;
 
@@ -54,7 +54,7 @@ public class ShaclDiffExtractorUnitTests {
     @Test
     public void runQseWithPeople() {
         Main.datasetName = "People2";
-        var datasetPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QseEvolvingKgWebApp\\notes\\defaultGraphs\\miniexample\\People2AdaptWithMultipleKnows.nt";
+        var datasetPath = System.getProperty("user.dir")+"\\notes\\defaultGraphs\\miniexample\\People2AdaptWithMultipleKnows.nt";
 
         Parser parser = new Parser(datasetPath, 3, 10, instanceTypeProperty);
         runParser(parser);
@@ -371,8 +371,8 @@ public class ShaclDiffExtractorUnitTests {
 
         var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
         assertEquals(nodeShapes.size(),2);
-        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
-        var personShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
+        var catShape = nodeShapes.stream().filter(ns -> ns.getIri().toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        var personShape = nodeShapes.stream().filter(ns -> ns.getIri().toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
         assertNotNull(catShape);
         assertNotNull(personShape);
         assertEquals(personShape.propertyShapes.size(),1);
@@ -404,7 +404,7 @@ public class ShaclDiffExtractorUnitTests {
 
         var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
         assertEquals(nodeShapes.size(),1);
-        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        var catShape = nodeShapes.stream().filter(ns -> ns.getIri().toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
         assertNotNull(catShape);
         var colorShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("colorCatShapeProperty")).toList().get(0);
         assertNotNull(colorShape);
@@ -457,7 +457,7 @@ public class ShaclDiffExtractorUnitTests {
 
         var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
         assertEquals(nodeShapes.size(),1);
-        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        var catShape = nodeShapes.stream().filter(ns -> ns.getIri().toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
         assertNotNull(catShape);
         var colorShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("colorCatShapeProperty")).toList().get(0);
         assertNotNull(colorShape);
@@ -502,7 +502,7 @@ public class ShaclDiffExtractorUnitTests {
 
         var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
         assertEquals(nodeShapes.size(),1);
-        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        var catShape = nodeShapes.stream().filter(ns -> ns.getIri().toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
         assertNotNull(catShape);
         var colorShape = catShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("colorCatShapeProperty")).toList().get(0);
         assertNotNull(colorShape);
@@ -545,7 +545,7 @@ public class ShaclDiffExtractorUnitTests {
 
         var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
         assertEquals(nodeShapes.size(),1);
-        var personShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
+        var personShape = nodeShapes.stream().filter(ns -> ns.getIri().toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
         assertNotNull(personShape);
         assertEquals(personShape.propertyShapes.size(),1);
         var instanceTypeShape = personShape.propertyShapes.stream().filter(ps -> ps.iri.toString().contains("instanceTypePersonShapeProperty")).toList().get(0);
@@ -588,8 +588,8 @@ public class ShaclDiffExtractorUnitTests {
 
         var nodeShapes = diffShapeGenerator.resultExtractedShapes.nodeShapes;
         assertEquals(nodeShapes.size(),2);
-        var catShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
-        var personShape = nodeShapes.stream().filter(ns -> ns.iri.toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
+        var catShape = nodeShapes.stream().filter(ns -> ns.getIri().toString().contains("http://shaclshapes.org/CatShape")).toList().get(0);
+        var personShape = nodeShapes.stream().filter(ns -> ns.getIri().toString().contains("http://shaclshapes.org/PersonShape")).toList().get(0);
         assertNotNull(catShape);
         assertNotNull(personShape);
         assertEquals(personShape.propertyShapes.size(),1);
@@ -663,7 +663,7 @@ public class ShaclDiffExtractorUnitTests {
         assertTrue(extractedShapes.getFileAsString().contains("<http://shaclshapes.org/instanceTypePersonShapeProperty>"));
         var nodeShapes = extractedShapes.getNodeShapes();
         assertEquals(1, nodeShapes.size());
-        assertTrue(nodeShapes.get(0).iri.toString().contains("http://shaclshapes.org/PersonShape"));
+        assertTrue(nodeShapes.get(0).getIri().toString().contains("http://shaclshapes.org/PersonShape"));
         assertEquals(nodeShapes.get(0).propertyShapes.size(),1);
         assertTrue(nodeShapes.get(0).propertyShapes.get(0).iri.toString().contains("http://shaclshapes.org/instanceTypePersonShapeProperty"));
     }

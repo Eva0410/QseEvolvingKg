@@ -3,17 +3,23 @@ package sparqlshapechecker;
 import cs.Main;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.junit.Before;
 import org.junit.Test;
+import shape_comparator.data.ExtractedShapes;
 import sparqlshapechecker.comparator.ComparisonDiff;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
-import sparqlshapechecker.shapeobjects.ShaclOrListItem;
+import shape_comparator.data.ShaclOrListItem;
 import sparqlshapechecker.utils.GraphDbUtils;
 import sparqlshapechecker.utils.RegexUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,11 +30,37 @@ public class SparqlShapeCheckerUnitTests {
     public static final String resourcesPath = "/Users/evapu/Documents/GitHub/qse/src/main/resources";
     public static String firstVersionName = "film";
 
-    public static String outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+    public static String outputPath = System.getProperty("user.dir")+"\\Output\\"+firstVersionName+"\\";
     //QSE QueryBases does not calculate confidence, therefore it is always 0 and filtering works with > 0 -> filter to -1
     public static final String pruningThresholds = "{(-1,0)}"; //only set one threshold - {(<confidence 10% is 0.1>,<support>)}
     public static final String graphDbUrl = "http://localhost:7201/";
 
+    @Before
+    public void prepareQSE() throws IOException {
+        try {
+            FileUtils.deleteDirectory((Paths.get("Output").toFile()));
+        }
+        catch(Exception ex) {}
+        try {
+            Files.createDirectory(Path.of(System.getProperty("user.dir") + File.separator + "Output"));
+        }
+        catch(Exception ex) {}
+        try {
+            Files.createDirectory(Paths.get("Output","QSEQueryBased_Results"));
+        }
+        catch(Exception ex) {}
+    }
+
+    public void runFilm() {
+        Main.setResourcesPathForJar(resourcesPath);
+        Main.setOutputFilePathForJar(outputPath);
+        Main.setPruningThresholds(pruningThresholds);
+        Main.annotateSupportConfidence = "true";
+        Main.datasetName = firstVersionName;
+
+        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
+        qbParser.run();
+    }
 
     @Test
     public void runQSEQBased() {
@@ -54,47 +86,42 @@ public class SparqlShapeCheckerUnitTests {
 //        QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
 //        qbParser.run();
 //        var localPath = qbParser.dbDefaultConnectionString;
-        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
+        var localPath = System.getProperty("user.dir")+"\\Output\\film\\db_default";
+        var result = GraphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
         result.forEach(r -> System.out.println(r));
         System.out.println("new version");
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", result);
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", result);
         result.forEach(r -> System.out.println(r));
-
     }
 
     @Test
     public void testNewRepo() {
-        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(goalRepo);
+        var localPath = System.getProperty("user.dir")+"\\Output\\film\\db_default";
+        var goalRepo = System.getProperty("user.dir")+"\\Output\\film\\secondVersion";
+        var result = GraphDbUtils.getNodeShapesWithTargetClassFromRepo(goalRepo);
         result.forEach(r -> System.out.println(r));
     }
 
     @Test
     public void testDeleteInNewRepo() {
-        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
+        var localPath = System.getProperty("user.dir")+"\\Output\\film\\db_default";
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
+        var result = GraphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
         extractedShapes.nodeShapes = result;
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", result);
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", result);
         result.forEach(r -> System.out.println(r));
-        RegexUtils regexUtils = new RegexUtils();
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_copy.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL_copy.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
-//        var targetDb = graphDbUtils.cloneSailRepository(localPath, "secondVersion");
-//        graphDbUtils.deleteFromRepoWhereSupportIsZero(targetDb, result);
-//        var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
-//        var result2 = graphDbUtils.getNodeShapesWithTargetClassFromFile(goalRepo);
+//        var targetDb = GraphDbUtils.cloneSailRepository(localPath, "secondVersion");
+//        GraphDbUtils.deleteFromRepoWhereSupportIsZero(targetDb, result);
+//        var goalRepo = System.getProperty("user.dir")+"\\Output\\film\\secondVersion";
+//        var result2 = GraphDbUtils.getNodeShapesWithTargetClassFromFile(goalRepo);
 //        System.out.println("new version");
 //        result2.forEach(r -> System.out.println(r));
     }
@@ -106,81 +133,74 @@ public class SparqlShapeCheckerUnitTests {
         Main.setPruningThresholds(pruningThresholds);
         Main.annotateSupportConfidence = "true";
         Main.datasetName = firstVersionName + "_cloned";
-        var goalRepo = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\secondVersion";
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.constructDefaultShapes(goalRepo);
+        var goalRepo = System.getProperty("user.dir")+"\\Output\\film\\secondVersion";
+        GraphDbUtils.constructDefaultShapes(goalRepo);
     }
 
     @Test
     public void testDeleteWithPropertyShapeLiteralInNewRepo() {
-        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
+        var localPath = System.getProperty("user.dir")+"\\Output\\film\\db_default";
+        var result = GraphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.nodeShapes = result;
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", result);
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", result);
         result.forEach(r -> System.out.println(r));
-        RegexUtils regexUtils = new RegexUtils();
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_copyPropertyShape.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL_copyPropertyShape.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
     }
 
     @Test
     public void deleteWithPropertyShapeIriInNewRepo() throws IOException {
-//        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
-//        GraphDbUtils graphDbUtils = new GraphDbUtils();
-//        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
-//        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", result);
-//        RegexUtils regexUtils = new RegexUtils();
-//        ExtractedShapes extractedShapes = new ExtractedShapes();
+//        var localPath = System.getProperty("user.dir")+"\\Output\\film\\db_default";
+////        var result = GraphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
+//        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", result);
+////        ExtractedShapes extractedShapes = new ExtractedShapes();
 //        extractedShapes.nodeShapes = result;
-//        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL.ttl";
-//        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
-//        regexUtils.copyFile(sourceFile, copiedFile);
+//        var sourceFile = System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL.ttl";
+//        var copiedFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
+//        RegexUtils.copyFile(sourceFile, copiedFile);
 //        extractedShapes.fileContentPath = copiedFile;
 //        ComparisonDiff comparisonDiff = new ComparisonDiff();
-//        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-//        regexUtils.saveStringAsFile(content, copiedFile);
+//        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+//        RegexUtils.saveStringAsFile(content, copiedFile);
 //
 //        assertTrue("Files are not equal", compareFiles(copiedFile,
-//                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl"));
+//                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl"));
     }
 
     //todo implement, with shacl or items with literal and iri. make test reproducable
     @Test
     public void deleteWithPropertyShapeNestedItemIriInNewRepo() throws IOException {
-        var localPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\db_default";
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        var result = graphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", result);
+        var localPath = System.getProperty("user.dir")+"\\Output\\film\\db_default";
+        var result = GraphDbUtils.getNodeShapesWithTargetClassFromRepo(localPath);
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", result);
         result.forEach(r -> System.out.println(r));
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.nodeShapes = result;
-        RegexUtils regexUtils = new RegexUtils();
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
     }
 
     @Test
     public void deleteFromOrItems() {
+        runFilm();
         //actually SHACL should not contain or list anymore, when only one item is left
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        RegexUtils regexUtils = new RegexUtils();
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.fileContentPath = sourceFile;
-        String shape = regexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", extractedShapes.getFileAsString());
+        String shape = RegexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", extractedShapes.getFileAsString());
         ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
-        String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
+        String deletedShape = RegexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
         var expected = "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "  <http://www.w3.org/ns/shacl#or> ( [\n" +
                 "    <http://shaclshapes.org/confidence> 1,6667E-1 ;\n" +
@@ -227,14 +247,14 @@ public class SparqlShapeCheckerUnitTests {
 
     @Test
     public void testDeleteWhenOnlyOneOrItemIsLeft() {
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        RegexUtils regexUtils = new RegexUtils();
+        runFilm();
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.fileContentPath = sourceFile;
         extractedShapes.getFileAsString(); //read prefix lines todo maybe optimization
-        String shape = regexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", regexUtils.getFileAsString(sourceFile));
+        String shape = RegexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", RegexUtils.getFileAsString(sourceFile));
         ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
-        String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
+        String deletedShape = RegexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
         shape = extractedShapes.prefixLines + deletedShape;
         var adaptedShape = GraphDbUtils.deleteOrListAndConnectToParentNode(shape, "http://shaclshapes.org/labelGenreShapeProperty", 1, 1);
         //todo remove prefix lines of shape
@@ -260,29 +280,26 @@ public class SparqlShapeCheckerUnitTests {
 
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-v4labelgenreoneoritem", extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-v4labelgenreoneoritem", extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
         //Weird result for rangeDatatypePropertyShapeProperty: points to IRI undefined and is therefore filtered in next version
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl"));
+                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl"));
     }
 
     @Test
     public void deleteFromMultipleOrItems() {
         //SHACL should not contain or list anymore, when only one item is left
-        RegexUtils regexUtils = new RegexUtils();
         String shape = "<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "<http://www.w3.org/ns/shacl#or> ( [\n" +
                 "   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
@@ -296,7 +313,7 @@ public class SparqlShapeCheckerUnitTests {
                 "] ) ;\n" +
                 "<http://www.w3.org/ns/shacl#path> rdfs:label .";
         ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
-        String deletedShape = regexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
+        String deletedShape = RegexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
         var expected = "<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
                 "<http://www.w3.org/ns/shacl#or> ( [\n" +
                 "   <http://www.w3.org/ns/shacl#NodeKind> <http://www.w3.org/ns/shacl#Literal> ;\n" +
@@ -319,33 +336,32 @@ public class SparqlShapeCheckerUnitTests {
         Main.setPruningThresholds(pruningThresholds);
         Main.annotateSupportConfidence = "true";
         Main.datasetName = firstVersionName;
-        Main.configPath = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\emptyconfig.txt"; //avoid exceptions in QSE
+        Main.configPath = System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\emptyconfig.txt"; //avoid exceptions in QSE
     }
 
     @Test
     public void testDeletePropertyShapeWithIRI() {
         prepareTest();
+        runFilm();
         QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, firstVersionName);
         qbParser.run();
 
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-NoSubPropertyOfSymmetricProperty", extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes,comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes,comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl"));
+                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_subPropertySymmetricPropertyShape.ttl"));
     }
 
     @Test
@@ -356,22 +372,20 @@ public class SparqlShapeCheckerUnitTests {
 
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_noGender.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_noGender.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_noGender.ttl"));
+                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_noGender.ttl"));
     }
 
     @Test
@@ -382,22 +396,20 @@ public class SparqlShapeCheckerUnitTests {
 
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_NoFilmStudio.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_NoFilmStudio.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_NoFilmStudio.ttl"));
+                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\film_QSE_FULL_SHACL_NoFilmStudio.ttl"));
 
     }
 
@@ -411,22 +423,20 @@ public class SparqlShapeCheckerUnitTests {
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.support = 5;
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, firstVersionName, extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, firstVersionName, extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_-1.0_5_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_-1.0_5_SHACL_Support.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_-1.0_5_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_-1.0_5_SHACL_Support.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_-1.0_5_SHACL.ttl"));
+                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\film_QSE_-1.0_5_SHACL.ttl"));
     }
 
     @Test
@@ -439,28 +449,26 @@ public class SparqlShapeCheckerUnitTests {
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.support = 5;
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_-1.0_5_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\film\\film_QSE_-1.0_5_SHACL_SupportNoGender.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_-1.0_5_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_-1.0_5_SHACL_SupportNoGender.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\film_QSE_-1.0_5_SHACL_SupportNoGender.ttl"));
+                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\film_QSE_-1.0_5_SHACL_SupportNoGender.ttl"));
     }
 
     @Test
     public void testSupportThresholdWithPeople() {
         firstVersionName = "PeopleV2";
-        outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+        outputPath = System.getProperty("user.dir")+"\\Output\\"+firstVersionName+"\\";
         prepareTest();
         Main.setPruningThresholds("{(-1,2)}");
 
@@ -470,28 +478,26 @@ public class SparqlShapeCheckerUnitTests {
         var nodeShapes = qbParser.shapesExtractor.getNodeShapes();
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.support = 2;
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_-1.0_2_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_-1.0_2_SHACL_V3.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\PeopleV2\\PeopleV2_QSE_-1.0_2_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\PeopleV2\\PeopleV2_QSE_-1.0_2_SHACL_V3.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\PeopleV2_QSE_-1.0_2_SHACL.ttl"));
+                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\PeopleV2_QSE_-1.0_2_SHACL.ttl"));
     }
 
     @Test
     public void testConfidenceThresholdWithPeople() {
         firstVersionName = "PeopleV2";
-        outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+        outputPath = System.getProperty("user.dir")+"\\Output\\"+firstVersionName+"\\";
         prepareTest();
         Main.setPruningThresholds("{(0.7,0)}");
 
@@ -502,28 +508,26 @@ public class SparqlShapeCheckerUnitTests {
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.support = 0;
         extractedShapes.confidence = 0.7;
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_0.7_0_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_0.7_0_SHACL_V3.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\PeopleV2\\PeopleV2_QSE_0.7_0_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\PeopleV2\\PeopleV2_QSE_0.7_0_SHACL_V3.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
 
         assertTrue("Files are not equal", compareFiles(copiedFile,
-                "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\src\\test\\expected_test_results\\PeopleV2_QSE_-1.0_2_SHACL.ttl"));
+                System.getProperty("user.dir")+"\\src\\test\\expected_test_results\\PeopleV2_QSE_-1.0_2_SHACL.ttl"));
     }
 
     @Test
     public void testDeleteMinCountWithPeople() {
         firstVersionName = "PeopleV2";
-        outputPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/"+firstVersionName+"/";
+        outputPath = System.getProperty("user.dir")+"\\Output\\"+firstVersionName+"\\";
         prepareTest();
         Main.setPruningThresholds("{(-1,0)}");
 
@@ -534,19 +538,17 @@ public class SparqlShapeCheckerUnitTests {
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.support = 0;
         extractedShapes.confidence = 0.0;
-        extractedShapes.setNodeShapes(nodeShapes);
+        extractedShapes.setNodeShapes(nodeShapes, false);
 
-        GraphDbUtils graphDbUtils = new GraphDbUtils();
-        graphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
-        RegexUtils regexUtils = new RegexUtils();
+        GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "PeopleV3", extractedShapes.getNodeShapes());
 
-        var sourceFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_FULL_SHACL.ttl";
-        var copiedFile = "C:\\Users\\evapu\\Documents\\GitHub\\QseEvolvingKg\\QSEQueryBased\\Output\\PeopleV2\\PeopleV2_QSE_FULL_SHACL_V3.ttl";
-        regexUtils.copyFile(sourceFile, copiedFile);
+        var sourceFile = System.getProperty("user.dir")+"\\Output\\PeopleV2\\PeopleV2_QSE_FULL_SHACL.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\PeopleV2\\PeopleV2_QSE_FULL_SHACL_V3.ttl";
+        RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
-        var content = regexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
-        regexUtils.saveStringAsFile(content, copiedFile);
+        var content = RegexUtils.deleteFromFileWithPruning(extractedShapes, comparisonDiff);
+        RegexUtils.saveStringAsFile(content, copiedFile);
         var shape = RegexUtils.getShapeAsString("http://shaclshapes.org/colorCatShapeProperty", content);
         var expected = "\n" +
                 "<http://shaclshapes.org/colorCatShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +

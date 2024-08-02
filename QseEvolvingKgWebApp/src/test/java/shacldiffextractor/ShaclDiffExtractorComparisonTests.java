@@ -3,13 +3,13 @@ package shacldiffextractor;
 import org.junit.Test;
 import sparqlshapechecker.comparator.ComparatorUtils;
 import sparqlshapechecker.comparator.MetaComparator;
-import sparqlshapechecker.comparator.ShapeComparatorDiff;
-import sparqlshapechecker.comparator.ShapeComparatorQseFileBased;
+import shacldiffextractor.diff.comparator.ShapeComparatorDiff;
+import shacldiffextractor.diff.comparator.ShapeComparatorQseFileBased;
 
 import java.io.File;
 
 public class ShaclDiffExtractorComparisonTests {
-    public static final String logPath = "/Users/evapu/Documents/GitHub/QseEvolvingKg/QSEQueryBased/Output/compareLogsDiff/";
+    public static final String logPath = System.getProperty("user.dir")+"\\Output\\compareLogsDiff\\";
 
     @Test
     public void peopleTest() {

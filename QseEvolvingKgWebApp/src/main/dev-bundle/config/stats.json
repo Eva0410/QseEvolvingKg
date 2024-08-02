@@ -263,11 +263,11 @@
   "Frontend/generated/jar-resources/vaadin-map/mapConnector.js",
   "Frontend/generated/jar-resources/vaadin-time-picker/timepickerConnector.js",
   "Frontend/generated/jar-resources/virtualListConnector.js",
-  "Frontend/themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css"
+  "Frontend/themes/shape_comparator/components/treeGridCustomCellBackground.css"
  ],
  "frontendHashes": {
-  "themes/qseevolvingkgwebapp/components/vaadin-grid-tree-toggle.css": "9b6ec6b34a596a31086dd2612a1247d6840cefc223ab1108e4f79ea89ca7ce26",
-  "themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css": "a5e4b132cba245dbd995fe2dc7d50031fefcdc179b9ed4a8a5d83b8fe5163b6d",
+  "themes/shape_comparator/components/vaadin-grid-tree-toggle.css": "9b6ec6b34a596a31086dd2612a1247d6840cefc223ab1108e4f79ea89ca7ce26",
+  "themes/shape_comparator/components/treeGridCustomCellBackground.css": "a5e4b132cba245dbd995fe2dc7d50031fefcdc179b9ed4a8a5d83b8fe5163b6d",
   "buttonFunctions.js": "c852123f9b2c44eb75e555119d3e05a7dbe78b91d0ab616feb9df1654474707d",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "8960e00884b9a8b62e24be63e03fe7045dcb9b6844a8a238eb4619d5595e2cfc",
@@ -291,7 +291,7 @@
   "virtualListConnector.js": "e89f6bc6f5cd4765c863ae12721371ebff9079d163679e3989368fb7f74e5e61"
  },
  "themeJsonContents": {
-  "qseevolvingkgwebapp": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
+  "shape_comparator": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
   "VAADIN/build/indexhtml-875cccf4.js"

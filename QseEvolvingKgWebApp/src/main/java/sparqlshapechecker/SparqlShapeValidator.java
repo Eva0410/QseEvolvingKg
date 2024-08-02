@@ -11,19 +11,19 @@ import java.util.logging.SimpleFormatter;
 
 public class SparqlShapeValidator {
     private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
-
+    static String fileName = "ConfigSparqlShapeChecker.properties";
     public static void main(String[] args) {
         setupLogger();
 
         MetaComparator metaComparator = new MetaComparator();
-        String dataSetName1 = ConfigManager.getProperty("dataSetNameQSE");
-        String dataSets = ConfigManager.getProperty("dataSetsToCheck");
+        String dataSetName1 = ConfigManager.getProperty("dataSetNameQSE", fileName);
+        String dataSets = ConfigManager.getProperty("dataSetsToCheck", fileName);
         var dataSetsToCheck = dataSets.split(",");
-        String pruningThresholds = ConfigManager.getProperty("pruningThresholds");
-        String graphDbUrl = ConfigManager.getProperty("graphDbUrl");
+        String pruningThresholds = ConfigManager.getProperty("pruningThresholds", fileName);
+        String graphDbUrl = ConfigManager.getProperty("graphDbUrl", fileName);
         String parentDirectory = System.getProperty("user.dir")+ File.separator;
         String logPath = parentDirectory + "Output" + File.separator + "compareLogs" + File.separator;
-        var doMetaComparison = Boolean.parseBoolean(ConfigManager.getProperty("doMetaComparison"));
+        var doMetaComparison = Boolean.parseBoolean(ConfigManager.getProperty("doMetaComparison", fileName));
         if(doMetaComparison) {
             ShapeComparatorQSEQueryBased comparatorQSETwice = new ShapeComparatorQSEQueryBased(graphDbUrl, dataSetName1, "", logPath);
             ComparisonDiff comparisonDiff = comparatorQSETwice.runQseFirstTime(pruningThresholds);

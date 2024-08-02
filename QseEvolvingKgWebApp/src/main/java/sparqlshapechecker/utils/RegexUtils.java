@@ -1,29 +1,23 @@
 package sparqlshapechecker.utils;
 
-import de.atextor.turtle.formatter.FormattingStyle;
-import de.atextor.turtle.formatter.TurtleFormatter;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.jetbrains.annotations.NotNull;
+import shape_comparator.data.ExtractedShapes;
+import shape_comparator.data.NodeShape;
+import shape_comparator.data.PropertyShape;
 import sparqlshapechecker.SparqlShapeValidator;
 import sparqlshapechecker.comparator.ComparisonDiff;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
-import sparqlshapechecker.shapeobjects.NodeShape;
-import sparqlshapechecker.shapeobjects.PropertyShape;
-import sparqlshapechecker.shapeobjects.ShaclOrListItem;
+import shape_comparator.data.ShaclOrListItem;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static shape_comparator.services.Utils.getShapeAsStringFormatted;
 
 public class RegexUtils {
     private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
@@ -37,8 +31,8 @@ public class RegexUtils {
                 //special case for multiple nodeshapes (different targetclasses) -> don't delete nodeshape if other nodeshape object still exist
                 var otherNodeShapes = extractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().toString().equals(nodeShape.getIri().toString()) && !ns.targetClass.equals(nodeShape.targetClass));
                 if(otherNodeShapes.findAny().isEmpty()) { //special case for multiple node shapes with different target classes
-                    comparisonDiff.deletedNodeShapes.add(nodeShape.iri.toString());
-                    fileContent = deleteIriFromString(nodeShape.iri.toString(), fileContent, nodeShape.errorDuringGeneration);
+                    comparisonDiff.deletedNodeShapes.add(nodeShape.getIri().toString());
+                    fileContent = deleteIriFromString(nodeShape.getIri().toString(), fileContent, nodeShape.errorDuringGeneration);
                     for (var propertyShape : nodeShape.propertyShapes) {
                         comparisonDiff.deletedPropertyShapes.add(propertyShape.iri.toString());
                         fileContent = deleteIriFromString(propertyShape.iri.toString(), fileContent, propertyShape.errorDuringGeneration);
@@ -85,7 +79,6 @@ public class RegexUtils {
         }
         return fileContent;
     }
-
     private static String removeMinCount(NodeShape nodeShape, PropertyShape propertyShape, String fileContent) {
         if(propertyShape.support != nodeShape.support) {
             String shape = getShapeAsString(propertyShape.iri.toString(), fileContent);
@@ -205,102 +198,9 @@ public class RegexUtils {
         return matcher;
     }
 
-    //Copied from WebApp
-    public static String getShapeAsStringFormatted(String iri, String file, String prefixLines) {
+    public static String getShapeAsStringFormattedFromFile(String iri, String file, String prefixLines) {
         Matcher matcher = getIriWithEscapedCharacters(iri, file);
-        String match = matcher.group();
-        var model = org.apache.jena.rdf.model.ModelFactory.createDefaultModel();
-        model.read(new StringReader(prefixLines + match), null, "TURTLE");
-
-        org.apache.jena.rdf.model.Resource iriSupport = ResourceFactory.createResource("http://shaclshapes.org/support");
-        org.apache.jena.rdf.model.Resource iriConfidence = ResourceFactory.createResource("http://shaclshapes.org/confidence");
-
-        String queryString = String.format("CONSTRUCT {?s ?p ?o} WHERE { ?s ?p ?o. FILTER (?p != <%s> && ?p != <%s>)}", iriSupport, iriConfidence);
-
-        var query = QueryFactory.create(queryString);
-        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
-            org.apache.jena.rdf.model.Model jenaModel = qexec.execConstruct();
-            TurtleFormatter formatter = new TurtleFormatter(FormattingStyle.DEFAULT);
-            OutputStream outputStream = new ByteArrayOutputStream();
-            formatter.accept(jenaModel, outputStream);
-            String cleanedString = reorderShaclInItems(outputStream.toString());
-            String cleanedStringOrItems = reOrderOrItems(cleanedString);
-            return cleanedStringOrItems.replaceAll("\n+$", "");
-        }
-    }
-
-    //Copied from WebApp
-    public static String reOrderOrItems(String input) {
-        try {
-            String orItemString = "<http://www.w3.org/ns/shacl#or>"; //highly dependent on turtlePrettyFormatter
-            String patternString = orItemString + " \\([^\\)]*\\) ;"; //would not work for names with '('
-            Pattern patternOrParent = Pattern.compile(patternString, Pattern.DOTALL);
-            Matcher matcherOrParent = patternOrParent.matcher(input);
-            var inputCopy = input;
-            List<String> orObjects = new ArrayList<>();
-            while(matcherOrParent.find()) {
-                var firstResultParent = matcherOrParent.group();
-                var patternOrObjects = Pattern.compile("\\[[^\\]]*\\]", Pattern.DOTALL);
-                var matcherObjects = patternOrObjects.matcher(firstResultParent);
-                List<String> objects = new ArrayList<>();
-                while (matcherObjects.find()) {
-                    String object = matcherObjects.group().trim(); // Extract contents of brackets and trim whitespace
-                    objects.add(object);
-                }
-                objects.sort(Comparator.comparing(o -> o));
-                var newString = firstResultParent;
-                StringBuilder newOrItems = new StringBuilder();
-                for (var m : objects) {
-                    newString = newString.replace(m, "");
-                    newOrItems.append(m).append(" ");
-                }
-                var newOrItemString = insertAfter(newString, orItemString + " ( ", newOrItems.toString());
-                inputCopy = inputCopy.replace(firstResultParent, newOrItemString);
-                orObjects.add(newOrItemString);
-            }
-
-            //reorder or-objects in general (in case of multiple
-            orObjects.sort(Comparator.comparing(o -> o));
-            StringBuilder newOrItems = new StringBuilder();
-            for (var m : orObjects) {
-                inputCopy = inputCopy.replace(m, "");
-                newOrItems.append(m).append(" \n  ");
-            }
-            int index = input.indexOf(orItemString);
-            if (index == -1)
-                return input;
-            inputCopy = insertAfter(inputCopy, input.substring(0, index), newOrItems.toString());
-            return inputCopy;
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Exception occurred", ex);
-            return input;
-        }
-    }
-
-    //Copied from WebApp (unused, ShaclItems cannot appear in QueryBased version of QSE)
-    private static String reorderShaclInItems(String input) {
-        String searchString = "shacl#in";
-        if (input.contains(searchString) && input.indexOf(searchString) != input.lastIndexOf(searchString)) {
-            String[] lines = input.split("\n");
-            List<String> inLines = new ArrayList<>();
-            for (String line : lines) {
-                if (line.contains(searchString))
-                    inLines.add(line.trim());
-            }
-            Collections.sort(inLines);
-            List<String> orderedLines = new ArrayList<>();
-            int remainingIndex = 0;
-            for (String line : lines) {
-                if (line.contains(searchString)) {
-                    orderedLines.add(inLines.get(remainingIndex));
-                    remainingIndex++;
-                } else
-                    orderedLines.add(line);
-            }
-
-            return String.join("\n", orderedLines);
-        } else
-            return input;
+        return getShapeAsStringFormatted(prefixLines, matcher);
     }
 
     public static String insertAfter(String original, String searchString, String toInsert) {

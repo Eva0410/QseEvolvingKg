@@ -1,11 +1,13 @@
-package sparqlshapechecker.comparator;
+package shacldiffextractor.diff.comparator;
 
 import cs.Main;
 import cs.qse.common.structure.NS;
 import cs.qse.filebased.Parser;
 import org.jetbrains.annotations.NotNull;
-import sparqlshapechecker.diff.DiffManager;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
+import shape_comparator.data.ExtractedShapes;
+import shacldiffextractor.diff.DiffManager;
+import sparqlshapechecker.comparator.ComparatorUtils;
+import sparqlshapechecker.comparator.ComparisonDiff;
 import sparqlshapechecker.utils.ConfigManager;
 
 import java.io.File;
@@ -16,7 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-import static sparqlshapechecker.diff.DiffManager.clearOutputDirectory;
+import static shacldiffextractor.diff.DiffManager.clearOutputDirectory;
 
 public class ShapeComparatorQseFileBased {
 

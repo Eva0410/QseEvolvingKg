@@ -20,10 +20,10 @@ import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
+import shape_comparator.data.NodeShape;
+import shape_comparator.data.PropertyShape;
 import sparqlshapechecker.SparqlShapeValidator;
-import sparqlshapechecker.shapeobjects.NodeShape;
-import sparqlshapechecker.shapeobjects.PropertyShape;
-import sparqlshapechecker.shapeobjects.ShaclOrListItem;
+import shape_comparator.data.ShaclOrListItem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -92,24 +92,24 @@ public class GraphDbUtils {
             if (nodeShape.support != 0) { //performance
                 var targetClass = nodeShape.targetClass.toString();
                 for (var propertyShape : nodeShape.propertyShapes) {
-                    if (propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
-                        propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
+                    if (propertyShape.nodeKindAsIri != null && propertyShape.nodeKindAsIri.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
+                        propertyShape.support = getSupportForLiteralPropertyShape(propertyShape.pathAsIri, propertyShape.dataTypeOrClassAsIri, targetClass, conn);
                         setConfidence(nodeShape, propertyShape);
                     }
-                    else if(propertyShape.nodeKind != null && propertyShape.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
-                        propertyShape.support = getSupportForIriPropertyShape(propertyShape.path, propertyShape.dataTypeOrClass, targetClass, conn);
+                    else if(propertyShape.nodeKindAsIri != null && propertyShape.nodeKindAsIri.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
+                        propertyShape.support = getSupportForIriPropertyShape(propertyShape.pathAsIri, propertyShape.dataTypeOrClassAsIri, targetClass, conn);
                         setConfidence(nodeShape, propertyShape);
                     }
-                    else if (propertyShape.nodeKind == null) {
+                    else if (propertyShape.nodeKindAsIri == null) {
                         //Ignore special case when nodeKind is null, but there are also no nested items (QSE error)
                         if(propertyShape.orItems != null)  {
                             for(var orItem : propertyShape.orItems) {
                                 if (orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#Literal")) {
-                                    orItem.support = getSupportForLiteralPropertyShape(propertyShape.path, orItem.dataTypeOrClass, targetClass, conn);
+                                    orItem.support = getSupportForLiteralPropertyShape(propertyShape.pathAsIri, orItem.dataTypeOrClass, targetClass, conn);
                                     setConfidence(nodeShape, orItem);
                                 }
                                 else if(orItem.nodeKind.toString().equals("http://www.w3.org/ns/shacl#IRI")) {
-                                    orItem.support = getSupportForIriPropertyShape(propertyShape.path, orItem.dataTypeOrClass, targetClass, conn);
+                                    orItem.support = getSupportForIriPropertyShape(propertyShape.pathAsIri, orItem.dataTypeOrClass, targetClass, conn);
                                     setConfidence(nodeShape, orItem);
                                 }
                             }
@@ -321,7 +321,7 @@ public class GraphDbUtils {
 //        }
     }
 
-    public void constructDefaultShapes(String path) {
+    public static void constructDefaultShapes(String path) {
         Repository db = new SailRepository(new NativeStore(new File(path)));
         ShapesExtractor shapesExtractor = new ShapesExtractor();
         try (RepositoryConnection conn = db.getConnection()) {
@@ -360,7 +360,7 @@ public class GraphDbUtils {
     }
 
     //Unused, would be useful if only SHACL file would be available and no objects
-    public List<NodeShape> getNodeShapesWithTargetClassFromRepo(String localDbFilePath) {
+    public static List<NodeShape> getNodeShapesWithTargetClassFromRepo(String localDbFilePath) {
         Repository db = new SailRepository(new NativeStore(new File(localDbFilePath)));
         var nodeShapes = new ArrayList<NodeShape>();
 //        try (RepositoryConnection conn = db.getConnection()) {
@@ -407,7 +407,7 @@ public class GraphDbUtils {
                 "  ?el <http://www.w3.org/ns/shacl#NodeKind> ?nodeKindNested. " +
                 "   OPTIONAL { ?el <http://www.w3.org/ns/shacl#datatype> ?dataTypeNested. } " +
                 "   OPTIONAL {?el <http://www.w3.org/ns/shacl#class> ?classNested } } " +
-                " filter(?shape = <"+nodeShape.iri+">)}";
+                " filter(?shape = <"+nodeShape.getIri()+">)}";
 
         //todo get more infos for property shape with in lists
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
@@ -450,16 +450,16 @@ public class GraphDbUtils {
                 else {
                     PropertyShape propertyShape = new PropertyShape();
                     propertyShape.iri = shapeIri;
-                    propertyShape.nodeKind = nodeKind;
+                    propertyShape.nodeKindAsIri = nodeKind;
                     if(dataType != null && classIri != null)
                         throw new RuntimeException("Datatype and class are not null");
                     if(dataType == null)
-                        propertyShape.dataTypeOrClass = classIri;
+                        propertyShape.dataTypeOrClassAsIri = classIri;
                     else
-                        propertyShape.dataTypeOrClass = dataType;
-                    propertyShape.dataType = dataType;
+                        propertyShape.dataTypeOrClassAsIri = dataType;
+                    propertyShape.dataTypeAsIri = dataType;
                     propertyShape.classIri = classIri;
-                    propertyShape.path = path;
+                    propertyShape.pathAsIri = path;
                     if(nodeKindNested != null && classIriNested != null)
                         propertyShape.addOrListItem(nodeKindNested, classIriNested, dataTypeNested);
                     propertyShapes.add(propertyShape);

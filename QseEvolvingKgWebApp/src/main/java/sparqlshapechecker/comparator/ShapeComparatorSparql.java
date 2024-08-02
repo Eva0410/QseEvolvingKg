@@ -6,7 +6,7 @@ import cs.qse.common.structure.NS;
 import cs.qse.querybased.nonsampling.QbParser;
 import cs.utils.Constants;
 import org.jetbrains.annotations.NotNull;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
+import shape_comparator.data.ExtractedShapes;
 import sparqlshapechecker.utils.ConfigManager;
 import sparqlshapechecker.utils.GraphDbUtils;
 import sparqlshapechecker.utils.RegexUtils;
@@ -104,9 +104,9 @@ public class ShapeComparatorSparql {
     private void doComparisonSparql(List<NS> firstNodeShapes, String shapePath1, ComparisonDiff comparisonDiff) {
         Instant startSparql = Instant.now();
         ExtractedShapes extractedShapes1 = new ExtractedShapes();
-        extractedShapes1.setNodeShapes(firstNodeShapes);
+        extractedShapes1.setNodeShapes(firstNodeShapes,false);
         ExtractedShapes extractedShapes2 = new ExtractedShapes();
-        extractedShapes2.setNodeShapes(firstNodeShapes);
+        extractedShapes2.setNodeShapes(firstNodeShapes,false);
         HashMap<Double, List<Integer>> pruningThresholds = ExperimentsUtil.getSupportConfRange();
         extractedShapes2.support = pruningThresholds.entrySet().iterator().next().getValue().get(0);
         extractedShapes2.confidence = pruningThresholds.keySet().iterator().next();

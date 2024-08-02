@@ -36,7 +36,7 @@ import shape_comparator.views.comparisondetails.ComparisonDetailsView;
 @Uses(Icon.class)
 @CssImport(
         themeFor = "vaadin-grid",
-        value = "./themes/qseevolvingkgwebapp/components/treeGridCustomCellBackground.css"
+        value = "./themes/shape_comparator/components/treeGridCustomCellBackground.css"
 )
 public class CompareShapesView extends Composite<VerticalLayout> {
     @Autowired()
@@ -256,7 +256,7 @@ public class CompareShapesView extends Composite<VerticalLayout> {
                 if (nodeShape.isPresent()) {
                     var propertyShapesToShowMap = propertyShapesToShow
                             .stream().map(ComparisonTreeViewItem::getShapeName).toList();
-                    for (var ps : nodeShape.get().getPropertyShapeList()) {
+                    for (var ps : nodeShape.get().getPropertyShapes()) {
                         if (propertyShapesToShowMap.contains(ps.getIri().getLocalName())) {
                             var propertyShapeToShow = propertyShapesToShow.stream().filter(n -> n.getShapeName()
                                     .equals(ps.getIri().getLocalName())).findFirst().get();

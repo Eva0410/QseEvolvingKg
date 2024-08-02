@@ -1,7 +1,8 @@
-package sparqlshapechecker.shapeobjects;
+package shape_comparator.data;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.util.Values;
+import shape_comparator.data.PropertyShape;
 
 public class ShaclOrListItem {
     public IRI nodeKind;

@@ -1,8 +1,8 @@
 package sparqlshapechecker.comparator;
 
 import cs.qse.common.structure.NS;
+import shape_comparator.data.ExtractedShapes;
 import sparqlshapechecker.SparqlShapeValidator;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
 import sparqlshapechecker.utils.RegexUtils;
 
 import java.io.File;
@@ -33,8 +33,8 @@ public class ComparatorUtils {
         for(var shape : shapesToCheck) {
             EditedShapesComparisonObject editedShapesComparisonObject = new EditedShapesComparisonObject();
             editedShapesComparisonObject.shapeName = shape;
-            var shapeString1 = RegexUtils.getShapeAsStringFormatted(shape, extractedShapes1.fileAsString, extractedShapes1.prefixLines);
-            var shapeString2 = RegexUtils.getShapeAsStringFormatted(shape, extractedShapes2.fileAsString, extractedShapes2.prefixLines);
+            var shapeString1 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes1.getFileAsString(), extractedShapes1.prefixLines);
+            var shapeString2 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes2.getFileAsString(), extractedShapes2.prefixLines);
             if(!shapeString1.equals(shapeString2)) {
                 editedShapesComparisonObject.shapeAsTextNew = shapeString2;
                 editedShapesComparisonObject.shapeAsTextOld = shapeString1;

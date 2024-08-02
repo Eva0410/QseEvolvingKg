@@ -3,7 +3,14 @@ package shape_comparator.data;
 import cs.qse.common.structure.PS;
 import jakarta.persistence.*;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.util.Values;
 import shape_comparator.services.Utils;
+
+import java.util.Objects;
+
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class PropertyShape {
@@ -11,12 +18,33 @@ public class PropertyShape {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long propertyShapeId;
 
-    IRI iri;
+    public IRI iri;
     String path;
     String nodeKind;
     String dataTypeOrClass;
-    Integer support;
-    Double confidence;
+    public Integer support;
+    public Double confidence;
+
+    @Transient
+    public IRI nodeKindAsIri;
+
+    @Transient
+    public IRI pathAsIri;
+
+    @Transient
+    public IRI dataTypeAsIri;
+
+    @Transient
+    public IRI dataTypeOrClassAsIri;
+
+    @Transient
+    public IRI classIri;
+
+    @Transient
+    public List<ShaclOrListItem> orItems = new ArrayList<>();
+
+    @Transient
+    public boolean errorDuringGeneration = false;
 
     @Lob
     String generatedText;
@@ -33,12 +61,17 @@ public class PropertyShape {
         support = ps.getSupport();
         confidence = ps.getConfidence();
 
+        pathAsIri = Values.iri(ps.getPath());
+        nodeKindAsIri = getNodeKindFromQSE(ps.getNodeKind());
+        dataTypeOrClassAsIri = ps.getDataTypeOrClass() == null ? null : Values.iri(ps.getDataTypeOrClass());
+
         //set shaclOrItems (copied from Shactor)
         //Also resets support and confidence to the maximum confidence if ShaclOrItems are used (copied from Shactor)
         if(ps.getShaclOrListItems() != null && !ps.getShaclOrListItems().isEmpty()){
             cs.qse.common.structure.ShaclOrListItem maxConfidenceItem = null;
-            for (var item:
-                    ps.getShaclOrListItems()) {
+            var shaclOrListItems = new ArrayList<ShaclOrListItem>();
+            for (var item : ps.getShaclOrListItems()) {
+                shaclOrListItems.add(new ShaclOrListItem(item.getNodeKind(),item.getDataTypeOrClass(), item.getSupport(), item.getConfidence(), this));
                 if (maxConfidenceItem == null) {
                     maxConfidenceItem = item;
                 }
@@ -48,6 +81,7 @@ public class PropertyShape {
             }
             support = maxConfidenceItem.getSupport();
             confidence = maxConfidenceItem.getConfidence();
+            this.orItems = shaclOrListItems;
         }
     }
 
@@ -64,6 +98,25 @@ public class PropertyShape {
     }
 
     public PropertyShape() {}
+
+    public static IRI getNodeKindFromQSE(String nodeKind) {
+        if(nodeKind != null && nodeKind.equals("Literal"))
+            return Values.iri("http://www.w3.org/ns/shacl#Literal");
+        if(nodeKind != null && nodeKind.equals("IRI"))
+            return  Values.iri("http://www.w3.org/ns/shacl#IRI");
+        return null;
+    }
+
+    public static int getValueFromQse(Integer value) {
+        return Objects.requireNonNullElse(value, 0);
+    }
+
+    public static double getValueFromQse(Double value) {
+        if(value == null)
+            return 0;
+        else
+            return value;
+    }
 
     public NodeShape getNodeShape() {
         return nodeShape;
@@ -141,5 +194,11 @@ public class PropertyShape {
         if(this.nodeShape.shouldGenerateText) {
             this.generatedText = Utils.generateTTLFromRegex(iri, this.nodeShape.extractedShapes.getFileAsString(), this.nodeShape.extractedShapes.prefixLines);
         }
+    }
+
+    public void addOrListItem(IRI nodeKind, IRI classIri, IRI dataType) {
+        if(this.orItems == null)
+            this.orItems = new ArrayList<>();
+        this.orItems.add(new ShaclOrListItem(nodeKind, classIri, dataType));
     }
 }

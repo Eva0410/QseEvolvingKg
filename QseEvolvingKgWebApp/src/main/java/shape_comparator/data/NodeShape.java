@@ -16,14 +16,17 @@ public class NodeShape {
     private Long nodeShapeId;
 
     IRI iri;
-    IRI targetClass;
-    Integer support;
+    public IRI targetClass;
+    public Integer support;
     String iriLocalName;
     @Lob
     String generatedText;
 
+    @Transient
+    public boolean errorDuringGeneration = false;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "nodeShape")
-    List<PropertyShape> propertyShapeList;
+    public List<PropertyShape> propertyShapes;
 
     @ManyToOne
     ExtractedShapes extractedShapes;
@@ -36,7 +39,7 @@ public class NodeShape {
         this.iri = ns.getIri();
         this.targetClass = ns.getTargetClass();
         this.support = ns.getSupport();
-        this.propertyShapeList = new ArrayList<>();
+        this.propertyShapes = new ArrayList<>();
         this.extractedShapes = es;
         this.shouldGenerateText = shouldGenerateText;
         for (var ps : ns.getPropertyShapes()) {
@@ -45,13 +48,13 @@ public class NodeShape {
             var propertyShape = new PropertyShape(ps, this);
             //Bug in Shactor again: list of Propertyshapes contain objects which are not in the .SHACL file
             if(propertyShape.willPSbeAdded() && propertyShape.getGeneratedText() != null && !propertyShape.getGeneratedText().isEmpty())
-                propertyShapeList.add(propertyShape);
+                propertyShapes.add(propertyShape);
 //            else
 //                System.out.println(ps.getIri() + " dropped"); //Uncomment for debugging
 
             //special case for default shapes: should be added anyways
             if(!this.shouldGenerateText)
-                propertyShapeList.add(propertyShape);
+                propertyShapes.add(propertyShape);
 
         }
         this.generateText();
@@ -90,12 +93,12 @@ public class NodeShape {
         this.support = support;
     }
 
-    public List<PropertyShape> getPropertyShapeList() {
-        return propertyShapeList;
+    public List<PropertyShape> getPropertyShapes() {
+        return propertyShapes;
     }
 
-    public void setPropertyShapeList(List<PropertyShape> propertyShapeList) {
-        this.propertyShapeList = propertyShapeList;
+    public void setPropertyShapes(List<PropertyShape> propertyShapeList) {
+        this.propertyShapes = propertyShapeList;
     }
 
     public Long getNodeShapeId() {

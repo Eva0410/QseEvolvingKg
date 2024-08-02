@@ -1,9 +1,11 @@
-package sparqlshapechecker.comparator;
+package shacldiffextractor.diff.comparator;
 
 import cs.qse.common.ExperimentsUtil;
 import cs.qse.common.structure.NS;
-import sparqlshapechecker.diff.DiffManager;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
+import shape_comparator.data.ExtractedShapes;
+import shacldiffextractor.diff.DiffManager;
+import sparqlshapechecker.comparator.ComparatorUtils;
+import sparqlshapechecker.comparator.ComparisonDiff;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -96,7 +98,7 @@ public class ShapeComparatorDiff {
 
         ExtractedShapes extractedShapes1 = new ExtractedShapes();
         extractedShapes1.fileContentPath = shapePath1;
-        extractedShapes1.setNodeShapes(firstNodeShapes);
+        extractedShapes1.setNodeShapes(firstNodeShapes,false);
         comparisonDiff.deletedNodeShapes = new ArrayList<>(diffManager.diffShapeGenerator.deletedNodeShapeNames.stream().distinct().toList());
         comparisonDiff.deletedPropertyShapes = new ArrayList<>(diffManager.diffShapeGenerator.deletedPropertyShapeNames.stream().distinct().toList());
         comparisonDiff.addedNodeShapes = new ArrayList<>(diffManager.diffShapeGenerator.addedNodeShapeNames.stream().distinct().toList());

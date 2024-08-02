@@ -1,4 +1,4 @@
-package sparqlshapechecker.diff;
+package shacldiffextractor.diff;
 
 import cs.Main;
 import cs.qse.common.EntityData;
@@ -10,7 +10,7 @@ import cs.utils.Tuple3;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 import org.semanticweb.yars.nx.parser.ParseException;
-import sparqlshapechecker.shapeobjects.ExtractedShapes;
+import shape_comparator.data.ExtractedShapes;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,7 +35,7 @@ public class DiffExtractor {
         originalExtractedShapes = new ExtractedShapes();
         originalClassToPropWithObjTypes = deepClone(parser.classToPropWithObjTypes);
         originalExtractedShapes.fileContentPath = parser.shapesExtractor.getOutputFileAddress();
-        originalExtractedShapes.setNodeShapes(parser.shapesExtractor.getNodeShapes());
+        originalExtractedShapes.setNodeShapes(parser.shapesExtractor.getNodeShapes(),false);
         this.parser = parser;
         this.supportThreshold = support;
         this.confidenceThreshold = confidence;

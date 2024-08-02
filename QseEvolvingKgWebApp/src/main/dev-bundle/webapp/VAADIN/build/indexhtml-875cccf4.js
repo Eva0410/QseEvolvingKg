@@ -1927,7 +1927,7 @@ This is probably caused by illegal octal escape sequences.`),{_$litType$:t,strin
  */const tl=(t,...e)=>{const o=document.createElement("style");o.id=t,o.textContent=e.map(i=>i.toString()).join(`
 `).replace(":host","html"),document.head.insertAdjacentElement("afterbegin",o)},ol=w`:host{pointer-events:none}[part=toggle]{pointer-events:auto}
 `,il=w`.warn{background-color:#ffe6e6}
-`;document._vaadintheme_qseevolvingkgwebapp_componentCss||(Be("vaadin-grid-tree-toggle",Tt(ol.toString())),Be("treeGridCustomCellBackground",Tt(il.toString())),document._vaadintheme_qseevolvingkgwebapp_componentCss=!0);/**
+`;document._vaadintheme_shape_comparator_componentCss||(Be("vaadin-grid-tree-toggle",Tt(ol.toString())),Be("treeGridCustomCellBackground",Tt(il.toString())),document._vaadintheme_shape_comparator_componentCss=!0);/**
  * @license
  * Copyright (c) 2021 - 2023 Vaadin Ltd.
  * This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
