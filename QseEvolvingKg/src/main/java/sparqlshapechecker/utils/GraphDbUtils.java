@@ -22,7 +22,7 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
 import shape_comparator.data.NodeShape;
 import shape_comparator.data.PropertyShape;
-import sparqlshapechecker.SparqlShapeValidator;
+import sparqlshapechecker.SparqlShapeChecker;
 import shape_comparator.data.ShaclOrListItem;
 
 import java.io.ByteArrayOutputStream;
@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class GraphDbUtils {
-    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeChecker.class.getName());
 
     public static void checkShapesInNewGraph(String url, String repositoryName, List<NodeShape> nodeShapes) {
         RepositoryManager repositoryManager = new RemoteRepositoryManager(url);

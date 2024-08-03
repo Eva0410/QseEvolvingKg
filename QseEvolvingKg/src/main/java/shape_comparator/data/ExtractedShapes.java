@@ -9,7 +9,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import shape_comparator.services.Utils;
-import sparqlshapechecker.SparqlShapeValidator;
+import sparqlshapechecker.SparqlShapeChecker;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class ExtractedShapes {
 
     @Transient
-    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeChecker.class.getName());
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idgenerator")
@@ -114,8 +114,8 @@ public class ExtractedShapes {
         return this.jenaModel;
     }
 
-    public String getFileAsString() {
-        if(fileAsString == null) {
+    public String getFileAsString(boolean reload) {
+        if(fileAsString == null || reload) {
             StringBuilder fileContent = new StringBuilder();
             StringBuilder prefixLines = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new FileReader(fileContentPath))) {

@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import shape_comparator.data.ExtractedShapes;
 import shape_comparator.data.Graph;
 import shape_comparator.data.Version;
-import sparqlshapechecker.SparqlShapeValidator;
 
 import java.io.*;
 import java.nio.file.Files;

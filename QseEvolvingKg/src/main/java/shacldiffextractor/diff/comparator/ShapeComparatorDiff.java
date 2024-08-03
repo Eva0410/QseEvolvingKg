@@ -106,8 +106,8 @@ public class ShapeComparatorDiff {
         comparisonDiff.editedNodeShapes = new ArrayList<>(diffManager.diffShapeGenerator.editedNodeShapes.stream().distinct().toList());
         comparisonDiff.editedPropertyShapes = new ArrayList<>(diffManager.diffShapeGenerator.editPropertyShpaes.stream().distinct().toList());
 
-        extractedShapes1.getFileAsString();
-        extractedShapes2.getFileAsString();
+        extractedShapes1.getFileAsString(true);
+        extractedShapes2.getFileAsString(true);
         Instant endComparison = Instant.now();
         comparisonDiff.durationComparison = Duration.between(startComparison, endComparison);
 

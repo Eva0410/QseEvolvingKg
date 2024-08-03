@@ -343,7 +343,7 @@ public class ShaclDiffExtractorUnitTests {
         DiffShapeGenerator diffShapeGenerator = new DiffShapeGenerator(diffExtractor);
         diffShapeGenerator.generateDiffMap();
         ExtractedShapes extractedShapes = diffShapeGenerator.generateDiffShapesWithQse();
-        String file = extractedShapes.getFileAsString();
+        String file = extractedShapes.getFileAsString(true);
         var catShapeString = RegexUtils.getShapeAsString("http://shaclshapes.org/CatShape", file);
         assertFalse(catShapeString.isEmpty());
         var ageShapeString = RegexUtils.getShapeAsString("http://shaclshapes.org/ageCatShapeProperty", file);
@@ -659,8 +659,8 @@ public class ShaclDiffExtractorUnitTests {
 
         DiffManager diffManager = new DiffManager();
         var extractedShapes = diffManager.run("People", filePath, addedPath, deletedPath);
-        assertTrue(extractedShapes.getFileAsString().contains("<http://shaclshapes.org/PersonShape>"));
-        assertTrue(extractedShapes.getFileAsString().contains("<http://shaclshapes.org/instanceTypePersonShapeProperty>"));
+        assertTrue(extractedShapes.getFileAsString(true).contains("<http://shaclshapes.org/PersonShape>"));
+        assertTrue(extractedShapes.getFileAsString(true).contains("<http://shaclshapes.org/instanceTypePersonShapeProperty>"));
         var nodeShapes = extractedShapes.getNodeShapes();
         assertEquals(1, nodeShapes.size());
         assertTrue(nodeShapes.get(0).getIri().toString().contains("http://shaclshapes.org/PersonShape"));

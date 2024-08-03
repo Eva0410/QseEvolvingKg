@@ -48,7 +48,7 @@ public class DiffShapeGenerator {
         diffExtractedShapes = new ExtractedShapes();
         diffExtractedShapes.setNodeShapes(parser.shapesExtractor.getNodeShapes(),false);
         diffExtractedShapes.fileContentPath = parser.shapesExtractor.getOutputFileAddress();
-        diffExtractedShapes.getFileAsString();
+        diffExtractedShapes.getFileAsString(true);
         Main.datasetName = oldDataSetName;
         Main.outputFilePath = oldOutputPath;
         return diffExtractedShapes;
@@ -140,14 +140,14 @@ public class DiffShapeGenerator {
     }
 
     public String mergeAddedShapesToOrginialFileAsString() {
-        var originalFile = resultExtractedShapes.getFileAsString();
+        var originalFile = resultExtractedShapes.getFileAsString(true);
         originalFile += diffExtractedShapes.prefixLines;
 
         for(var addedNodeShape : diffExtractedShapes.getNodeShapes()) {
             var existingNodeShape = resultExtractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().equals(addedNodeShape.getIri())).findFirst();
             if(existingNodeShape.isPresent()) {
                 var nodeShape = existingNodeShape.get();
-                var nodeShapeAsText = RegexUtils.getShapeAsString(nodeShape.getIri().toString(), resultExtractedShapes.getFileAsString());
+                var nodeShapeAsText = RegexUtils.getShapeAsString(nodeShape.getIri().toString(), resultExtractedShapes.getFileAsString(true));
                 var nodeShapeAsTextUpdated = nodeShapeAsText;
 
                 for(var newPropertyShape : addedNodeShape.propertyShapes) {
@@ -157,14 +157,14 @@ public class DiffShapeGenerator {
                         nodeShape.propertyShapes.add(newPropertyShape);
                         var oldPropertyShapeText = RegexUtils.getShapeAsString(existingPropertyShape.get().iri.toString(), originalFile);
                         originalFile = RegexUtils.deleteIriFromString(existingPropertyShape.get().iri.toString(), originalFile, false);
-                        var newPropertyShapeText = RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString());
+                        var newPropertyShapeText = RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString(true));
                         originalFile += newPropertyShapeText;
                         editPropertyShpaes.add(new EditedShapesComparisonObject(newPropertyShape.iri.toString(), newPropertyShapeText, oldPropertyShapeText));
                     }
                     else {
                         nodeShape.propertyShapes.add(newPropertyShape);
                         addedPropertyShapeNames.add(newPropertyShape.iri.toString());
-                        originalFile+=RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString());
+                        originalFile+=RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString(true));
                         nodeShapeAsTextUpdated = RegexUtils.insertAfter(nodeShapeAsText, ";", "<http://www.w3.org/ns/shacl#property> <"+newPropertyShape.iri.toString()+"> ;");
                     }
                 }
@@ -176,9 +176,9 @@ public class DiffShapeGenerator {
             else {
                 resultExtractedShapes.nodeShapes.add(addedNodeShape);
                 addedNodeShapeNames.add(addedNodeShape.getIri().toString());
-                originalFile+=RegexUtils.getShapeAsString(addedNodeShape.getIri().toString(), diffExtractedShapes.getFileAsString());
+                originalFile+=RegexUtils.getShapeAsString(addedNodeShape.getIri().toString(), diffExtractedShapes.getFileAsString(true));
                 for (var ps : addedNodeShape.propertyShapes) {
-                    originalFile+=RegexUtils.getShapeAsString(ps.iri.toString(), diffExtractedShapes.getFileAsString());
+                    originalFile+=RegexUtils.getShapeAsString(ps.iri.toString(), diffExtractedShapes.getFileAsString(true));
                     addedPropertyShapeNames.add(ps.iri.toString());
                 }
             }

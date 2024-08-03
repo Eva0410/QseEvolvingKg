@@ -9,8 +9,8 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-public class SparqlShapeValidator {
-    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
+public class SparqlShapeChecker {
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeChecker.class.getName());
     static String fileName = "ConfigSparqlShapeChecker.properties";
     public static void main(String[] args) {
         setupLogger();

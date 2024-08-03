@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import shape_comparator.data.ExtractedShapes;
 import shape_comparator.data.NodeShape;
 import shape_comparator.data.PropertyShape;
-import sparqlshapechecker.SparqlShapeValidator;
+import sparqlshapechecker.SparqlShapeChecker;
 import sparqlshapechecker.comparator.ComparisonDiff;
 import shape_comparator.data.ShaclOrListItem;
 
@@ -20,10 +20,10 @@ import java.util.regex.Pattern;
 import static shape_comparator.services.Utils.getShapeAsStringFormatted;
 
 public class RegexUtils {
-    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeChecker.class.getName());
 
     public static String deleteFromFileWithPruning(ExtractedShapes extractedShapes, ComparisonDiff comparisonDiff) {
-        String fileContent = extractedShapes.getFileAsString();
+        String fileContent = extractedShapes.getFileAsString(true);
         int supportThreshold = extractedShapes.support;
         double confidenceThreshold = extractedShapes.confidence;
         for (var nodeShape : extractedShapes.getNodeShapes()) {

@@ -2,7 +2,7 @@ package sparqlshapechecker.comparator;
 
 import cs.qse.common.structure.NS;
 import shape_comparator.data.ExtractedShapes;
-import sparqlshapechecker.SparqlShapeValidator;
+import sparqlshapechecker.SparqlShapeChecker;
 import sparqlshapechecker.utils.RegexUtils;
 
 import java.io.File;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class ComparatorUtils {
-    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeChecker.class.getName());
 
     public static void getEditedPropertyShapes(ComparisonDiff comparisonDiff, ExtractedShapes extractedShapes1, ExtractedShapes extractedShapes2, List<NS> firstNodeShapes) {
         var propertyShapesToCheck = firstNodeShapes.stream().flatMap(ns -> ns.getPropertyShapes().stream().map(ps -> ps.getIri().toString()))
@@ -33,8 +33,8 @@ public class ComparatorUtils {
         for(var shape : shapesToCheck) {
             EditedShapesComparisonObject editedShapesComparisonObject = new EditedShapesComparisonObject();
             editedShapesComparisonObject.shapeName = shape;
-            var shapeString1 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes1.getFileAsString(), extractedShapes1.prefixLines);
-            var shapeString2 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes2.getFileAsString(), extractedShapes2.prefixLines);
+            var shapeString1 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes1.getFileAsString(true), extractedShapes1.prefixLines);
+            var shapeString2 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes2.getFileAsString(true), extractedShapes2.prefixLines);
             if(!shapeString1.equals(shapeString2)) {
                 editedShapesComparisonObject.shapeAsTextNew = shapeString2;
                 editedShapesComparisonObject.shapeAsTextOld = shapeString1;

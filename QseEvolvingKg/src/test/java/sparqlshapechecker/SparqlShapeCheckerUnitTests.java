@@ -46,7 +46,7 @@ public class SparqlShapeCheckerUnitTests {
         }
         catch(Exception ex) {}
         try {
-            Files.createDirectory(Paths.get("Output","QSEQueryBased_Results"));
+            Files.createDirectory(Paths.get("Output","SparqlShapeChecker_Results"));
         }
         catch(Exception ex) {}
     }
@@ -198,7 +198,7 @@ public class SparqlShapeCheckerUnitTests {
         var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.fileContentPath = sourceFile;
-        String shape = RegexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", extractedShapes.getFileAsString());
+        String shape = RegexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", extractedShapes.getFileAsString(true));
         ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
         String deletedShape = RegexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
         var expected = "\n<http://shaclshapes.org/labelGenreShapeProperty> rdf:type <http://www.w3.org/ns/shacl#PropertyShape> ;\n" +
@@ -251,7 +251,7 @@ public class SparqlShapeCheckerUnitTests {
         var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
         ExtractedShapes extractedShapes = new ExtractedShapes();
         extractedShapes.fileContentPath = sourceFile;
-        extractedShapes.getFileAsString(); //read prefix lines todo maybe optimization
+        extractedShapes.getFileAsString(true); //read prefix lines todo maybe optimization
         String shape = RegexUtils.getShapeAsString("http://shaclshapes.org/labelGenreShapeProperty", RegexUtils.getFileAsString(sourceFile));
         ShaclOrListItem orListItem = new ShaclOrListItem(SimpleValueFactory.getInstance().createIRI("http://www.w3.org/ns/shacl#Literal"),null,SimpleValueFactory.getInstance().createIRI("xsd:string"));
         String deletedShape = RegexUtils.deleteShaclOrItemWithIriFromString(orListItem, shape, false);
@@ -285,7 +285,7 @@ public class SparqlShapeCheckerUnitTests {
         GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film-v4labelgenreoneoritem", extractedShapes.getNodeShapes());
 
         var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = System.getProperty("user.dir")+"\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\SparqlShapeChecker_Results\\film_QSE_FULL_SHACL_v4labelgenreoneoritem.ttl";
         RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
@@ -377,7 +377,7 @@ public class SparqlShapeCheckerUnitTests {
         GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "Film-NoGender", extractedShapes.getNodeShapes());
 
         var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = System.getProperty("user.dir")+"\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_noGender.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\SparqlShapeChecker_Results\\film_QSE_FULL_SHACL_noGender.ttl";
         RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();
@@ -401,7 +401,7 @@ public class SparqlShapeCheckerUnitTests {
         GraphDbUtils.checkShapesInNewGraph(graphDbUrl, "film3", extractedShapes.getNodeShapes());
 
         var sourceFile = System.getProperty("user.dir")+"\\Output\\film\\film_QSE_FULL_SHACL.ttl";
-        var copiedFile = System.getProperty("user.dir")+"\\Output\\QSEQueryBased_Results\\film_QSE_FULL_SHACL_NoFilmStudio.ttl";
+        var copiedFile = System.getProperty("user.dir")+"\\Output\\SparqlShapeChecker_Results\\film_QSE_FULL_SHACL_NoFilmStudio.ttl";
         RegexUtils.copyFile(sourceFile, copiedFile);
         extractedShapes.fileContentPath = copiedFile;
         ComparisonDiff comparisonDiff = new ComparisonDiff();

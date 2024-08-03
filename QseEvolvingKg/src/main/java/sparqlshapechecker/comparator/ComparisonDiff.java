@@ -63,7 +63,7 @@ public class ComparisonDiff {
             }
         }
         sb.append("\nExecution Time QSE 1: ").append(durationQse1.getSeconds()).append(" seconds");
-        sb.append("\nExecution Time Second Step (QSE or Sparql-Script): ").append(durationSecondStep.getSeconds()).append(" seconds");
+        sb.append("\nExecution Time Second Step (QSE or Sparql-ShapeChecker): ").append(durationSecondStep.getSeconds()).append(" seconds");
         sb.append("\nExecution Time Comparison: ").append(durationComparison.getSeconds()).append(" seconds");
         sb.append("\nExecution Time Total: ").append(durationTotal.getSeconds()).append(" seconds");
 

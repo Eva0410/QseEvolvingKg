@@ -1,12 +1,6 @@
-Aug. 02, 2024 6:47:39 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
-INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\People_PeopleV2\QSEComparison.txt
-Aug. 02, 2024 6:47:39 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
-INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\People_PeopleV2\SparqlComparison.txt
-Aug. 02, 2024 6:47:39 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
-INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\People_PeopleV2\MetaComparison.txt
-Aug. 02, 2024 6:47:45 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
-INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\People_PeopleV3\QSEComparison.txt
-Aug. 02, 2024 6:47:45 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
-INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\People_PeopleV3\SparqlComparison.txt
-Aug. 02, 2024 6:47:45 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
-INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\People_PeopleV3\MetaComparison.txt
+Aug. 03, 2024 10:46:48 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
+INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\PeopleV2_PeopleV3\QSEComparison.txt
+Aug. 03, 2024 10:46:48 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
+INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\PeopleV2_PeopleV3\SparqlShapeCheckerComparison.txt
+Aug. 03, 2024 10:46:48 PM sparqlshapechecker.comparator.ComparatorUtils exportComparisonToFile
+INFORMATION: Saved file C:\Users\evapu\Documents\GitHub\QseEvolvingKg\QseEvolvingKg\Output\compareLogs\PeopleV2_PeopleV3\MetaComparison.txt

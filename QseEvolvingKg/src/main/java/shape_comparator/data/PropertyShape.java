@@ -192,7 +192,7 @@ public class PropertyShape {
 
     public void generateText() {
         if(this.nodeShape.shouldGenerateText) {
-            this.generatedText = Utils.generateTTLFromRegex(iri, this.nodeShape.extractedShapes.getFileAsString(), this.nodeShape.extractedShapes.prefixLines);
+            this.generatedText = Utils.generateTTLFromRegex(iri, this.nodeShape.extractedShapes.getFileAsString(false), this.nodeShape.extractedShapes.prefixLines);
         }
     }
 

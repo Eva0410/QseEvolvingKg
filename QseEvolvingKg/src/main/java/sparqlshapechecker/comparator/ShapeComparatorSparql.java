@@ -116,7 +116,7 @@ public class ShapeComparatorSparql {
         GraphDbUtils.checkShapesInNewGraph(graphDbUrl, this.dataSetName2, extractedShapes2.getNodeShapes());
 
         Path parentDir = Paths.get(extractedShapes1.fileContentPath).getParent().getParent();
-        String newFolderName = "QSEQueryBased_Results";
+        String newFolderName = "SparqlShapeChecker_Results";
         try {
             Files.createDirectories(parentDir.resolve(newFolderName));
         } catch (IOException e) {
@@ -134,14 +134,14 @@ public class ShapeComparatorSparql {
         comparisonDiff.durationSecondStep = Duration.between(startSparql, endSparql);
 
         Instant startComparison = Instant.now();
-        extractedShapes1.getFileAsString();
-        extractedShapes2.getFileAsString();
+        extractedShapes1.getFileAsString(true);
+        extractedShapes2.getFileAsString(true);
         ComparatorUtils.getEditedNodeShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
         ComparatorUtils.getEditedPropertyShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
         Instant endComparison = Instant.now();
         comparisonDiff.durationComparison = Duration.between(startComparison, endComparison);
 
         comparisonDiff.durationTotal = comparisonDiff.durationQse1.plus(comparisonDiff.durationSecondStep).plus(comparisonDiff.durationComparison);
-        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"Sparql", comparisonDiff.toStringEditedAndDeleted());
+        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"SparqlShapeChecker", comparisonDiff.toStringEditedAndDeleted());
     }
 }

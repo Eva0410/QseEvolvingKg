@@ -1,6 +1,6 @@
 package sparqlshapechecker.utils;
 
-import sparqlshapechecker.SparqlShapeValidator;
+import sparqlshapechecker.SparqlShapeChecker;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 //Copied from QSE
 public class ConfigManager {
-    private static final Logger LOGGER = Logger.getLogger(SparqlShapeValidator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SparqlShapeChecker.class.getName());
 
     public static String getProperty(String property, String fileName) {
         try {

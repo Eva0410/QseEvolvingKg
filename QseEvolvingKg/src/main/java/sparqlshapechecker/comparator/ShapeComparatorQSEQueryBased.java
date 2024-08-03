@@ -72,8 +72,8 @@ public class ShapeComparatorQSEQueryBased {
         ExtractedShapes extractedShapes2 = new ExtractedShapes();
         extractedShapes1.fileContentPath = shapePath1;
         extractedShapes2.fileContentPath = shapePath2;
-        extractedShapes1.getFileAsString();
-        extractedShapes2.getFileAsString();
+        extractedShapes1.getFileAsString(true);
+        extractedShapes2.getFileAsString(true);
         ComparatorUtils.getEditedNodeShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
         ComparatorUtils.getEditedPropertyShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
         Instant endComparison = Instant.now();

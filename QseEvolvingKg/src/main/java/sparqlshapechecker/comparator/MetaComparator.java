@@ -59,7 +59,7 @@ public class MetaComparator {
             var uniqueToSecondListObjects = getDifferenceBetweenObjectLists(diffAlgorithm.editedPropertyShapes, diffQse.editedPropertyShapes);
             appendUniqueNamesToStringBuilderObjects(uniqueToFirstListObjects, sb, uniqueToSecondListObjects);
         }
-        sb.append("Execution Time QSE Total: ").append(diffQse.durationTotal.getSeconds()).append(" seconds, Execution Time Algorithm Total: ").append(diffAlgorithm.durationTotal.getSeconds()).append(" seconds");
+        sb.append("Execution Time QSE Total: ").append(diffQse.durationTotal.getSeconds()).append(" seconds\nExecution Time Sparql_ShapeChecker Total: ").append(diffAlgorithm.durationTotal.getSeconds()).append(" seconds");
         return sb.toString();
     }
 
