@@ -12,6 +12,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -80,7 +81,7 @@ public class RegexUtils {
         return fileContent;
     }
     private static String removeMinCount(NodeShape nodeShape, PropertyShape propertyShape, String fileContent) {
-        if(propertyShape.support != nodeShape.support) {
+        if(!Objects.equals(propertyShape.support, nodeShape.support)) {
             String shape = getShapeAsString(propertyShape.iri.toString(), fileContent);
             String minCountString = "<http://www.w3.org/ns/shacl#minCount>";
             if(shape.contains(minCountString)) {
