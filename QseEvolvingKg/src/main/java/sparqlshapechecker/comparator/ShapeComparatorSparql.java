@@ -142,6 +142,6 @@ public class ShapeComparatorSparql {
         comparisonDiff.durationComparison = Duration.between(startComparison, endComparison);
 
         comparisonDiff.durationTotal = comparisonDiff.durationQse1.plus(comparisonDiff.durationSecondStep).plus(comparisonDiff.durationComparison);
-        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"SparqlShapeChecker", comparisonDiff.toStringEditedAndDeleted());
+        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"SparqlShapeChecker", comparisonDiff.toStringAll());
     }
 }

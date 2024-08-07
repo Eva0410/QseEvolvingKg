@@ -51,8 +51,8 @@ public class SparqlShapeCheckerComparisonTests {
         metaComparator.diffQse = comparatorQSETwice.doComparisonSparql(pruningThresholdsDefault);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffAlgorithm = comparatorSparql.doFullComparison(pruningThresholdsDefault);
-        System.out.println(metaComparator.compareEditedAndDeleted());
-        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareEditedAndDeleted());
+        System.out.println(metaComparator.compareAll());
+        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareAll());
     }
 
     @Test
@@ -65,8 +65,8 @@ public class SparqlShapeCheckerComparisonTests {
 //        metaComparator.diffQse = comparatorQSETwice.doComparison(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffAlgorithm = comparatorSparql.doFullComparison(pruningThresholds);
-        System.out.println(metaComparator.compareEditedAndDeleted());
-        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareEditedAndDeleted());
+        System.out.println(metaComparator.compareAll());
+        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareAll());
     }
 
     @Test
@@ -79,8 +79,8 @@ public class SparqlShapeCheckerComparisonTests {
 //        metaComparator.diffQse = comparatorQSETwice.doComparisonSparql(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffAlgorithm = comparatorSparql.doFullComparison(pruningThresholds);
-        System.out.println(metaComparator.compareEditedAndDeleted());
-        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareEditedAndDeleted());
+        System.out.println(metaComparator.compareAll());
+        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareAll());
     }
     @Test
     public void peopleTest() {
@@ -92,8 +92,8 @@ public class SparqlShapeCheckerComparisonTests {
         metaComparator.diffQse = comparatorQSETwice.doComparisonSparql(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffAlgorithm = comparatorSparql.doFullComparison(pruningThresholds);
-        System.out.println(metaComparator.compareEditedAndDeleted());
-        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareEditedAndDeleted());
+        System.out.println(metaComparator.compareAll());
+        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareAll());
     }
 
     @Test
@@ -121,8 +121,8 @@ public class SparqlShapeCheckerComparisonTests {
         metaComparator.diffQse = comparatorQSETwice.doComparisonSparql(pruningThresholds);
         ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
         metaComparator.diffAlgorithm = comparatorSparql.doFullComparison(pruningThresholds);
-        System.out.println(metaComparator.compareEditedAndDeleted());
-        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareEditedAndDeleted());
+        System.out.println(metaComparator.compareAll());
+        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareAll());
 
     }
 }

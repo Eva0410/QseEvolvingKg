@@ -76,12 +76,15 @@ public class ShapeComparatorQSEQueryBased {
         extractedShapes2.getFileAsString(true);
         ComparatorUtils.getEditedNodeShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
         ComparatorUtils.getEditedPropertyShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
+        ComparatorUtils.getAddedNodeShapes(comparisonDiff, firstNodeShapes, secondNodeShapes);
+        ComparatorUtils.getAddedPropertyShapes(comparisonDiff, firstNodeShapes, secondNodeShapes);
+
         Instant endComparison = Instant.now();
         Duration durationComparison = Duration.between(startComparison, endComparison);
         comparisonDiff.durationComparison = durationComparison;
 
         comparisonDiff.durationTotal = comparisonDiff.durationQse1.plus(durationQSE2).plus(durationComparison);
-        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"QSE", comparisonDiff.toStringEditedAndDeleted());
+        ComparatorUtils.exportComparisonToFile(logFilePath+dataSetName1+"_"+dataSetName2+ File.separator+"QSE", comparisonDiff.toStringAll());
         this.comparisonDiff = comparisonDiff;
         return comparisonDiff;
     }

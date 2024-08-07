@@ -34,7 +34,7 @@ public class SparqlShapeChecker {
 
                 metaComparator.diffQse = comparatorQSETwice.doComparisonForFollowingVersion(pruningThresholds, comparisonDiff);
                 metaComparator.diffAlgorithm = comparatorSparql.doComparison(pruningThresholds, comparatorQSETwice);
-                ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareEditedAndDeleted());
+                ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareAll());
             }
         }
         else {
