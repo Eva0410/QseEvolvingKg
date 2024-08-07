@@ -1,4 +1,4 @@
-package shacldiffextractor;
+package shacldiffextractor.test;
 
 import org.junit.Test;
 import sparqlshapechecker.comparator.ComparatorUtils;

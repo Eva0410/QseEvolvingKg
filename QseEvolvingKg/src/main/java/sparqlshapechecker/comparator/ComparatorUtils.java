@@ -33,8 +33,8 @@ public class ComparatorUtils {
         for(var shape : shapesToCheck) {
             EditedShapesComparisonObject editedShapesComparisonObject = new EditedShapesComparisonObject();
             editedShapesComparisonObject.shapeName = shape;
-            var shapeString1 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes1.getFileAsString(true), extractedShapes1.prefixLines);
-            var shapeString2 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes2.getFileAsString(true), extractedShapes2.prefixLines);
+            var shapeString1 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes1.getFileAsString(false), extractedShapes1.prefixLines);
+            var shapeString2 = RegexUtils.getShapeAsStringFormattedFromFile(shape, extractedShapes2.getFileAsString(false), extractedShapes2.prefixLines);
             if(!shapeString1.equals(shapeString2)) {
                 editedShapesComparisonObject.shapeAsTextNew = shapeString2;
                 editedShapesComparisonObject.shapeAsTextOld = shapeString1;

@@ -1,4 +1,4 @@
-package shapecomparator;
+package shapecomparator.test;
 
 import cs.Main;
 import cs.qse.filebased.Parser;

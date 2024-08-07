@@ -59,7 +59,9 @@ drivers/
 error-screenshots/
 webpack.generated.js
 
+application.log
+
 /graphs/
 
 #dont save db
-/QseEvolvingKg/localdb/
+localdb/

@@ -1,4 +1,4 @@
-package sparqlshapechecker;
+package sparqldiffchecker.test;
 
 import cs.Main;
 import cs.qse.querybased.nonsampling.QbParser;

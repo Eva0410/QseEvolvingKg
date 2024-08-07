@@ -1,4 +1,4 @@
-package shacldiffextractor;
+package shacldiffextractor.test;
 
 import cs.Main;
 import cs.qse.common.EntityData;
@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import static org.junit.Assert.*;
 
+//failed tests need to be rerun, there are some issues with file locks todo
 public class ShaclDiffExtractorUnitTests {
     String instanceTypeProperty = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 

@@ -140,14 +140,14 @@ public class DiffShapeGenerator {
     }
 
     public String mergeAddedShapesToOrginialFileAsString() {
-        var originalFile = resultExtractedShapes.getFileAsString(true);
+        var originalFile = resultExtractedShapes.getFileAsString(false);
         originalFile += diffExtractedShapes.prefixLines;
 
         for(var addedNodeShape : diffExtractedShapes.getNodeShapes()) {
             var existingNodeShape = resultExtractedShapes.getNodeShapes().stream().filter(ns -> ns.getIri().equals(addedNodeShape.getIri())).findFirst();
             if(existingNodeShape.isPresent()) {
                 var nodeShape = existingNodeShape.get();
-                var nodeShapeAsText = RegexUtils.getShapeAsString(nodeShape.getIri().toString(), resultExtractedShapes.getFileAsString(true));
+                var nodeShapeAsText = RegexUtils.getShapeAsString(nodeShape.getIri().toString(), resultExtractedShapes.getFileAsString(false));
                 var nodeShapeAsTextUpdated = nodeShapeAsText;
 
                 for(var newPropertyShape : addedNodeShape.propertyShapes) {
@@ -157,14 +157,14 @@ public class DiffShapeGenerator {
                         nodeShape.propertyShapes.add(newPropertyShape);
                         var oldPropertyShapeText = RegexUtils.getShapeAsString(existingPropertyShape.get().iri.toString(), originalFile);
                         originalFile = RegexUtils.deleteIriFromString(existingPropertyShape.get().iri.toString(), originalFile, false);
-                        var newPropertyShapeText = RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString(true));
+                        var newPropertyShapeText = RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString(false));
                         originalFile += newPropertyShapeText;
                         editPropertyShpaes.add(new EditedShapesComparisonObject(newPropertyShape.iri.toString(), newPropertyShapeText, oldPropertyShapeText));
                     }
                     else {
                         nodeShape.propertyShapes.add(newPropertyShape);
                         addedPropertyShapeNames.add(newPropertyShape.iri.toString());
-                        originalFile+=RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString(true));
+                        originalFile+=RegexUtils.getShapeAsString(newPropertyShape.iri.toString(), diffExtractedShapes.getFileAsString(false));
                         nodeShapeAsTextUpdated = RegexUtils.insertAfter(nodeShapeAsText, ";", "<http://www.w3.org/ns/shacl#property> <"+newPropertyShape.iri.toString()+"> ;");
                     }
                 }
@@ -176,9 +176,9 @@ public class DiffShapeGenerator {
             else {
                 resultExtractedShapes.nodeShapes.add(addedNodeShape);
                 addedNodeShapeNames.add(addedNodeShape.getIri().toString());
-                originalFile+=RegexUtils.getShapeAsString(addedNodeShape.getIri().toString(), diffExtractedShapes.getFileAsString(true));
+                originalFile+=RegexUtils.getShapeAsString(addedNodeShape.getIri().toString(), diffExtractedShapes.getFileAsString(false));
                 for (var ps : addedNodeShape.propertyShapes) {
-                    originalFile+=RegexUtils.getShapeAsString(ps.iri.toString(), diffExtractedShapes.getFileAsString(true));
+                    originalFile+=RegexUtils.getShapeAsString(ps.iri.toString(), diffExtractedShapes.getFileAsString(false));
                     addedPropertyShapeNames.add(ps.iri.toString());
                 }
             }

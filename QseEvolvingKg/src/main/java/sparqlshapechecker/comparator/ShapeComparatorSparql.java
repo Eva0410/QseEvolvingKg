@@ -134,7 +134,7 @@ public class ShapeComparatorSparql {
         comparisonDiff.durationSecondStep = Duration.between(startSparql, endSparql);
 
         Instant startComparison = Instant.now();
-        extractedShapes1.getFileAsString(true);
+        extractedShapes1.getFileAsString(false);
         extractedShapes2.getFileAsString(true);
         ComparatorUtils.getEditedNodeShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);
         ComparatorUtils.getEditedPropertyShapes(comparisonDiff, extractedShapes1, extractedShapes2, firstNodeShapes);

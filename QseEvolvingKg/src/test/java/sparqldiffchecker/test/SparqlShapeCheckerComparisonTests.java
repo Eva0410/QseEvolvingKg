@@ -1,4 +1,4 @@
-package sparqlshapechecker;
+package sparqldiffchecker.test;
 
 import cs.Main;
 import cs.qse.querybased.nonsampling.QbParser;
@@ -96,5 +96,20 @@ public class SparqlShapeCheckerComparisonTests {
 
         QbParser qbParser = new QbParser(100, Constants.RDF_TYPE, graphDbUrl, Main.datasetName);
         qbParser.run();
+    }
+
+    @Test
+    public void peopleDemonstration() {
+        MetaComparator metaComparator = new MetaComparator();
+        String dataSetName1 = "PeopleV4";
+        String dataSetName2 = "PeopleV5";
+        String pruningThresholds =  "{(0,0)}";
+        ShapeComparatorQSEQueryBased comparatorQSETwice = new ShapeComparatorQSEQueryBased(graphDbUrl, dataSetName1, dataSetName2, logPath);
+        metaComparator.diffQse = comparatorQSETwice.doComparisonSparql(pruningThresholds);
+        ShapeComparatorSparql comparatorSparql = new ShapeComparatorSparql(graphDbUrl, dataSetName1, dataSetName2, logPath);
+        metaComparator.diffAlgorithm = comparatorSparql.doFullComparison(pruningThresholds);
+        System.out.println(metaComparator.compareEditedAndDeleted());
+        ComparatorUtils.exportComparisonToFile(logPath+dataSetName1+"_"+dataSetName2+ File.separator + "Meta", metaComparator.compareEditedAndDeleted());
+
     }
 }

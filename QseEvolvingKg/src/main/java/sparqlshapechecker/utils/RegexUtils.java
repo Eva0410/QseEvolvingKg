@@ -23,7 +23,7 @@ public class RegexUtils {
     private static final Logger LOGGER = Logger.getLogger(SparqlShapeChecker.class.getName());
 
     public static String deleteFromFileWithPruning(ExtractedShapes extractedShapes, ComparisonDiff comparisonDiff) {
-        String fileContent = extractedShapes.getFileAsString(true);
+        String fileContent = extractedShapes.getFileAsString(false);
         int supportThreshold = extractedShapes.support;
         double confidenceThreshold = extractedShapes.confidence;
         for (var nodeShape : extractedShapes.getNodeShapes()) {
